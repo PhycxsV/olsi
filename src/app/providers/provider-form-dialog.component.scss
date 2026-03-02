@@ -1,0 +1,46 @@
+.provider-form-dialog {
+  width: min(720px, 92vw);
+
+  h2[mat-dialog-title] {
+    margin-bottom: 0;
+    padding-bottom: 8px;
+  }
+
+  mat-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 24px 8px;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  mat-form-field:first-of-type {
+    margin-top: 0;
+  }
+
+  .full-width {
+    margin: 0;
+  }
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+
+  &.two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid.two-col {
+    grid-template-columns: 1fr;
+  }
+}

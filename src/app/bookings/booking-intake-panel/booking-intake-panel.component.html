@@ -1,0 +1,45 @@
+<section class="intake-panel" *ngIf="intake">
+  <h3 class="panel-title">Booking Intake</h3>
+  <p class="panel-hint">POST /bookings with Account ID – account mapping and rider availability.</p>
+
+  <div class="intake-block account-mapping">
+    <h4 class="block-label">Account mapping</h4>
+    <div class="mapping-row">
+      <span class="label">Account</span>
+      <span class="value">{{ intake.accountMapping.accountName }} ({{ intake.accountMapping.accountId }})</span>
+    </div>
+    <div class="mapping-row" *ngIf="intake.accountMapping.preferredSupplierName">
+      <span class="label">Preferred supplier</span>
+      <span class="value preferred">{{ intake.accountMapping.preferredSupplierName }}</span>
+    </div>
+    <div class="mapping-row" *ngIf="!intake.accountMapping.preferredSupplierId">
+      <span class="label">Preferred supplier</span>
+      <span class="value none">None</span>
+    </div>
+  </div>
+
+  <div class="intake-block geofence">
+    <h4 class="block-label">Geofence status</h4>
+    <div class="geofence-row" [class.in]="intake.geofence.inGeofence" [class.out]="!intake.geofence.inGeofence">
+      <mat-icon class="geofence-icon">{{ intake.geofence.inGeofence ? 'location_on' : 'location_off' }}</mat-icon>
+      <span class="geofence-msg">{{ intake.geofence.message }}</span>
+      <span class="geofence-zone" *ngIf="intake.geofence.zoneName">{{ intake.geofence.zoneName }}</span>
+    </div>
+  </div>
+
+  <div class="intake-block active-riders" *ngIf="intake.activeRidersFromPreferred?.length">
+    <h4 class="block-label">Active riders (preferred supplier)</h4>
+    <ul class="rider-list">
+      <li *ngFor="let r of intake.activeRidersFromPreferred" class="rider-item" [class.available]="r.status === 'available'">
+        <mat-icon class="rider-status-icon">{{ r.status === 'available' ? 'check_circle' : r.status === 'busy' ? 'schedule' : 'cancel' }}</mat-icon>
+        <span class="rider-name">{{ r.riderName }}</span>
+        <span class="rider-status">{{ r.status }}</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<div class="intake-empty" *ngIf="!intake">
+  <mat-icon>inbox</mat-icon>
+  <p>No intake data. Submit a booking to see account mapping and rider availability.</p>
+</div>

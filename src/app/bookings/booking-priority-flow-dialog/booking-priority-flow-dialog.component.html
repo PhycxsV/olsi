@@ -1,0 +1,39 @@
+<div class="priority-flow-dialog">
+  <div class="dialog-header">
+    <div class="header-copy">
+      <h2 class="dialog-title">Rider Booking Priority Flow</h2>
+      <p class="dialog-subtitle">Demo UI for Intake, Tier 1 exclusive push, and Tier 2 broadcast fallback.</p>
+    </div>
+    <span class="state-chip" *ngIf="state as currentState">{{ currentState }}</span>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="progress-indicator">
+    <div class="progress-step" [class.active]="progressStep >= 1" [class.done]="progressStep > 1">
+      <span class="step-num">1</span>
+      <span class="step-label">Intake</span>
+    </div>
+    <div class="progress-line" [class.done]="progressStep > 1"></div>
+    <div class="progress-step" [class.active]="progressStep >= 2" [class.done]="progressStep > 2">
+      <span class="step-num">2</span>
+      <span class="step-label">Tier 1</span>
+    </div>
+    <div class="progress-line" [class.done]="progressStep > 2"></div>
+    <div class="progress-step" [class.active]="progressStep >= 3" [class.done]="progressStep >= 3">
+      <span class="step-num">3</span>
+      <span class="step-label">Tier 2</span>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <app-booking-intake-panel [intake]="intake"></app-booking-intake-panel>
+    <app-tier1-priority-push *ngIf="tier1 || state === 'PENDING_PRIORITY_ACCEPTANCE' || state === 'ASSIGNED' || state === 'TIMEOUT'"></app-tier1-priority-push>
+    <app-tier2-general-broadcast [tier2]="tier2" *ngIf="tier2 || state === 'BROADCAST' || state === 'ASSIGNED_BROADCAST'"></app-tier2-general-broadcast>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-button (click)="close()">Close</button>
+  </div>
+</div>

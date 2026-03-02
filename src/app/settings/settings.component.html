@@ -1,0 +1,155 @@
+<div class="settings-container">
+  <div class="page-header">
+    <mat-icon class="page-icon">settings</mat-icon>
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Manage your aggregator platform settings.</p>
+    </div>
+  </div>
+
+  <form [formGroup]="settingsForm" (ngSubmit)="save()">
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">bolt</mat-icon>
+        <div class="section-header-text">
+          <mat-card-title>Auto-Distribution</mat-card-title>
+          <mat-card-subtitle>Configure automatic booking distribution rules</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="setting-row">
+          <div class="setting-label-block">
+            <span class="setting-label">Enable Auto-Distribution</span>
+            <span class="setting-desc">Automatically assign bookings to available providers</span>
+          </div>
+          <mat-slide-toggle formControlName="enableAutoDistribution" color="primary"></mat-slide-toggle>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-block">
+            <span class="setting-label">First-Come-First-Served</span>
+            <span class="setting-desc">Assign to the first provider who accepts</span>
+          </div>
+          <mat-slide-toggle formControlName="firstComeFirstServed" color="primary"></mat-slide-toggle>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-block">
+            <span class="setting-label">Performance-Based Routing</span>
+            <span class="setting-desc">Prioritize providers with higher SLA compliance</span>
+          </div>
+          <mat-slide-toggle formControlName="performanceBasedRouting" color="primary"></mat-slide-toggle>
+        </div>
+        <div class="setting-inputs">
+          <mat-form-field appearance="outline" class="setting-input">
+            <mat-label>Offer Timeout (seconds)</mat-label>
+            <input matInput type="number" formControlName="offerTimeoutSeconds" min="1" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="setting-input">
+            <mat-label>Max Retry Attempts</mat-label>
+            <input matInput type="number" formControlName="maxRetryAttempts" min="1" />
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">notifications</mat-icon>
+        <div class="section-header-text">
+          <mat-card-title>Notifications</mat-card-title>
+          <mat-card-subtitle>Configure alert thresholds and notification preferences</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="setting-row">
+          <div class="setting-label-block">
+            <span class="setting-label">Unassigned Booking Alerts</span>
+            <span class="setting-desc">Alert when bookings remain unassigned</span>
+          </div>
+          <mat-slide-toggle formControlName="unassignedBookingAlerts" color="primary"></mat-slide-toggle>
+        </div>
+        <div class="setting-inputs">
+          <mat-form-field appearance="outline" class="setting-input">
+            <mat-label>Alert After (minutes)</mat-label>
+            <input matInput type="number" formControlName="alertAfterMinutes" min="1" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="setting-input">
+            <mat-label>SLA Warning (minutes before)</mat-label>
+            <input matInput type="number" formControlName="slaWarningMinutes" min="0" />
+          </mat-form-field>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label-block">
+            <span class="setting-label">Email Notifications</span>
+            <span class="setting-desc">Receive critical alerts via email</span>
+          </div>
+          <mat-slide-toggle formControlName="emailNotifications" color="primary"></mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">receipt_long</mat-icon>
+        <div class="section-header-text">
+          <mat-card-title>Charging Rules (Phase 1)</mat-card-title>
+          <mat-card-subtitle>How OLSI charges clients. Sourced from Charging DB (mock). Formulas TBD.</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="charging-block">
+          <h4 class="charging-type-name">1) Per Distance</h4>
+          <p class="charging-desc">Fixed rate for first 5km + multiplier for excess km.</p>
+          <div class="charging-inputs">
+            <mat-form-field appearance="outline" class="setting-input">
+              <mat-label>Base distance (km)</mat-label>
+              <input matInput type="number" formControlName="perDistanceBaseKm" min="1" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="setting-input">
+              <mat-label>Base rate (₱)</mat-label>
+              <input matInput type="number" formControlName="perDistanceBaseRate" min="0" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="setting-input">
+              <mat-label>Excess (₱/km)</mat-label>
+              <input matInput type="number" formControlName="perDistanceExcessMultiplier" min="0" />
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="charging-block">
+          <h4 class="charging-type-name">2) Ad Valorem</h4>
+          <p class="charging-desc">Sales Invoice × multiplier (e.g. 0.02 = 2%).</p>
+          <mat-form-field appearance="outline" class="setting-input">
+            <mat-label>Multiplier</mat-label>
+            <input matInput type="number" formControlName="adValoremMultiplier" min="0" step="0.01" />
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-icon class="section-icon">security</mat-icon>
+        <div class="section-header-text">
+          <mat-card-title>API Configuration</mat-card-title>
+          <mat-card-subtitle>Manage API keys and webhook endpoints</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>API Key</mat-label>
+          <input matInput type="password" formControlName="apiKey" placeholder="••••••••••••" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Webhook URL</mat-label>
+          <input matInput formControlName="webhookUrl" placeholder="https://your-system.com/webhooks" />
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="save-actions">
+      <button mat-flat-button color="primary" type="submit">
+        <mat-icon>save</mat-icon>
+        Save Changes
+      </button>
+    </div>
+  </form>
+</div>

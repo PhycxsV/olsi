@@ -1,0 +1,158 @@
+.intake-panel {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.panel-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.panel-hint {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.intake-block {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  .block-label {
+    margin: 0 0 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6b7280;
+  }
+}
+
+.mapping-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+
+  .label {
+    color: #6b7280;
+    min-width: 120px;
+  }
+  .value {
+    color: #1f2937;
+    &.preferred {
+      font-weight: 600;
+      color: #059669;
+    }
+    &.none {
+      color: #9ca3af;
+    }
+  }
+}
+
+.geofence-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.875rem;
+
+  .geofence-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  &.in .geofence-icon {
+    color: #059669;
+  }
+  &.out .geofence-icon {
+    color: #dc2626;
+  }
+  .geofence-zone {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.rider-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rider-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .rider-status-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+  &.available .rider-status-icon {
+    color: #059669;
+  }
+  .rider-name {
+    flex: 1;
+    color: #1f2937;
+  }
+  .rider-status {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: capitalize;
+  }
+}
+
+.intake-empty {
+  text-align: center;
+  padding: 24px;
+  color: #6b7280;
+  font-size: 0.875rem;
+  background: #fff;
+  border: 1px dashed #d1d5db;
+  border-radius: 12px;
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 768px) {
+  .intake-panel {
+    padding: 12px;
+  }
+
+  .mapping-row .label {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .geofence-row .geofence-zone {
+    margin-left: 0;
+    width: 100%;
+  }
+}

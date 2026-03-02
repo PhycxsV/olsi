@@ -1,0 +1,147 @@
+<div class="providers-container">
+  <div class="page-header">
+    <div class="title-block">
+      <mat-icon class="page-icon">local_shipping</mat-icon>
+      <div>
+        <h1 class="page-title">Providers Management</h1>
+        <p class="page-subtitle">{{ summaryText }}</p>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" class="add-btn" (click)="onAddProvider()">
+      <mat-icon>add</mat-icon>
+      Add Provider
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search</mat-label>
+      <input matInput [(ngModel)]="searchText" placeholder="Search providers..." />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+    <button mat-stroked-button>
+      <mat-icon>filter_list</mat-icon>
+      Filters
+    </button>
+  </div>
+
+  <div class="provider-cards">
+    <mat-card *ngFor="let p of filteredProviders" class="provider-card">
+      <mat-card-content>
+        <div class="card-header">
+          <div class="provider-info">
+            <div class="avatar">{{ getInitial(p.name) }}</div>
+            <div class="name-location">
+              <span class="provider-name">{{ p.name }}</span>
+              <span class="provider-location">
+                <mat-icon class="pin">place</mat-icon>
+                {{ p.location }}
+              </span>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="status-tag" [class.paused]="p.status === 'Paused'">{{ p.status }}</span>
+            <button mat-icon-button [matMenuTriggerFor]="providerMenu" aria-label="More actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #providerMenu="matMenu">
+              <button mat-menu-item (click)="onProviderMenuAction(p, 'Edit')">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="onProviderMenuAction(p, 'View details')">
+                <mat-icon>visibility</mat-icon>
+                <span>View details</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <mat-icon class="kpi-icon">people</mat-icon>
+            <div>
+              <span class="kpi-label">Active Riders</span>
+              <span class="kpi-value">{{ p.activeRiders }}/{{ p.totalRiders }}</span>
+            </div>
+          </div>
+          <div class="kpi">
+            <mat-icon class="kpi-icon">schedule</mat-icon>
+            <div>
+              <span class="kpi-label">Avg. Time</span>
+              <span class="kpi-value">{{ p.avgTimeMin }}min</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics-row">
+          <div class="metric-block">
+            <span class="metric-value" [ngClass]="getAcceptanceClass(p.acceptancePercent)">{{ p.acceptancePercent }}%</span>
+            <span class="metric-label">Acceptance</span>
+          </div>
+          <div class="metric-block">
+            <span class="metric-value" [ngClass]="getSlaClass(p.slaPercent)">{{ p.slaPercent }}%</span>
+            <span class="metric-label">SLA Compliance</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span class="deliveries-text">{{ p.deliveriesToday }} deliveries completed today</span>
+          <mat-slide-toggle
+            [checked]="p.status === 'Active'"
+            (change)="toggleActive(p)"
+            color="primary">
+            Active
+          </mat-slide-toggle>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="empty-state" *ngIf="filteredProviders.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <p>No providers match your search.</p>
+  </div>
+</div>
+
+<div class="overlay-backdrop" *ngIf="detailDrawerOpen" (click)="closeDetailDrawer()"></div>
+
+<aside class="provider-detail-drawer" *ngIf="detailDrawerOpen && selectedProvider">
+  <header class="drawer-header">
+    <h2>{{ selectedProvider.name }}</h2>
+    <button mat-icon-button (click)="closeDetailDrawer()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="drawer-body">
+    <div class="detail-row">
+      <span>Status</span>
+      <strong>{{ selectedProvider.status }}</strong>
+    </div>
+    <div class="detail-row">
+      <span>Service Area</span>
+      <strong>{{ selectedProvider.location }}</strong>
+    </div>
+    <div class="detail-row">
+      <span>Riders</span>
+      <strong>{{ selectedProvider.activeRiders }}/{{ selectedProvider.totalRiders }}</strong>
+    </div>
+    <div class="detail-row">
+      <span>Avg. Time</span>
+      <strong>{{ selectedProvider.avgTimeMin }} min</strong>
+    </div>
+    <div class="detail-row">
+      <span>Acceptance</span>
+      <strong>{{ selectedProvider.acceptancePercent }}%</strong>
+    </div>
+    <div class="detail-row">
+      <span>SLA</span>
+      <strong>{{ selectedProvider.slaPercent }}%</strong>
+    </div>
+    <div class="detail-row">
+      <span>Deliveries Today</span>
+      <strong>{{ selectedProvider.deliveriesToday }}</strong>
+    </div>
+  </div>
+</aside>

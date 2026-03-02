@@ -1,0 +1,172 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title-block">
+      <h2 class="dialog-title">{{ provider.name }}</h2>
+      <span class="registration-id">{{ provider.registrationId }}</span>
+      <span class="status-badge" [ngClass]="getStatusClass(provider.status)">{{ provider.status }}</span>
+    </div>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="progress-section">
+    <span class="progress-label">Accreditation Progress</span>
+    <mat-progress-bar mode="determinate" [value]="progressPercent" class="progress-bar"></mat-progress-bar>
+    <span class="progress-text">{{ progressPercent }}% complete</span>
+    <span class="progress-detail">{{ provider.documentsVerified }} of {{ provider.documentsTotal }} documents verified.</span>
+  </div>
+
+  <button mat-stroked-button class="edit-btn" (click)="onEdit()">Edit Provider</button>
+
+  <mat-tab-group [(selectedIndex)]="activeTabIndex" class="detail-tabs">
+    <mat-tab label="Company Info">
+      <div class="tab-content">
+        <section class="info-section">
+          <h3 class="section-title">Company Information</h3>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Company Name</span>
+              <span class="info-value">{{ provider.name }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Registration Number</span>
+              <span class="info-value">{{ provider.registrationId }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Office Address</span>
+              <span class="info-value">{{ provider.officeAddress }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Garage Address</span>
+              <span class="info-value">{{ provider.garageAddress }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Charging Type</span>
+              <span class="info-value">{{ provider.rateType }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Rider App</span>
+              <span class="info-value">{{ provider.appUsage }}</span>
+            </div>
+          </div>
+        </section>
+        <section class="info-section" *ngIf="provider.bank">
+          <h3 class="section-title">Bank Information</h3>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Bank Name</span>
+              <span class="info-value">{{ provider.bank.bankName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Account Name</span>
+              <span class="info-value">{{ provider.bank.accountName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Account Number</span>
+              <span class="info-value">{{ provider.bank.accountNumber }}</span>
+            </div>
+            <div class="info-row" *ngIf="provider.bank.bankBranch">
+              <span class="info-label">Branch</span>
+              <span class="info-value">{{ provider.bank.bankBranch }}</span>
+            </div>
+          </div>
+        </section>
+        <section class="info-section">
+          <h3 class="section-title">Contact Information</h3>
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Contact Person</span>
+              <span class="info-value">{{ provider.contactPerson }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Phone</span>
+              <span class="info-value">{{ provider.phone }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ provider.email }}</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </mat-tab>
+    <mat-tab label="Documents">
+      <div class="tab-content documents-tab">
+        <p class="doc-tab-note">Requirements are image files. Screening actions (Accept, Reject, Re-upload) will be confirmed with backend.</p>
+        <div class="document-card" *ngFor="let doc of (provider.documents || [])">
+          <div class="doc-main">
+            <span class="doc-title">{{ doc.title }}</span>
+            <span class="doc-filename">{{ doc.filename }}</span>
+            <span class="doc-uploaded">Uploaded: {{ doc.uploadedAt }} by {{ doc.uploadedBy }}</span>
+            <span class="doc-note error-note" *ngIf="doc.note">{{ doc.note }}</span>
+          </div>
+          <div class="doc-actions">
+            <span class="doc-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-submitted'">
+              <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
+              {{ doc.status }}
+            </span>
+            <button mat-stroked-button (click)="viewDocument(doc)" class="view-doc-btn">
+              <mat-icon>visibility</mat-icon>
+              View
+            </button>
+            <span class="screening-actions" *ngIf="doc.status === 'Submitted'">
+              <button mat-button (click)="onDocAction(doc, 'accept')">Accept</button>
+              <button mat-button (click)="onDocAction(doc, 'reject')">Reject</button>
+              <button mat-button (click)="onDocAction(doc, 'reupload')">Re-upload</button>
+            </span>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="Integration">
+      <div class="tab-content">
+        <section class="info-section">
+          <h3 class="section-title">API Configuration</h3>
+          <div class="info-grid">
+            <div class="info-row api-row" *ngIf="provider.apiUrl">
+              <span class="info-label">API URL</span>
+              <span class="info-value-with-action">
+                <span class="info-value">{{ provider.apiUrl }}</span>
+                <button mat-icon-button (click)="copyToClipboard(provider.apiUrl)" matTooltip="Copy" aria-label="Copy">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </span>
+            </div>
+            <div class="info-row api-row" *ngIf="provider.apiTokenMasked">
+              <span class="info-label">API Token</span>
+              <span class="info-value-with-action">
+                <span class="info-value mono">{{ provider.apiTokenMasked }}</span>
+                <button mat-icon-button (click)="copyToClipboard(provider.apiTokenMasked)" matTooltip="Copy" aria-label="Copy">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </span>
+            </div>
+          </div>
+        </section>
+        <section class="info-section" *ngIf="provider.accreditedOn || provider.status === 'Accredited'">
+          <h3 class="section-title">Accreditation Status</h3>
+          <span class="status-badge" [ngClass]="getStatusClass(provider.status)">{{ provider.status }}</span>
+          <span class="accredited-on" *ngIf="provider.accreditedOn">Accredited on {{ provider.accreditedOn }}</span>
+        </section>
+        <section class="info-section">
+          <h3 class="section-title">Capacity & Service Areas</h3>
+          <div class="capacity-cards">
+            <div class="capacity-card">
+              <span class="capacity-value">{{ provider.capacity }}</span>
+              <span class="capacity-label">Total Capacity</span>
+            </div>
+            <div class="capacity-card" *ngIf="provider.activeRiders !== undefined">
+              <span class="capacity-value">{{ provider.activeRiders }}</span>
+              <span class="capacity-label">Active Riders</span>
+            </div>
+          </div>
+          <mat-chip-set class="service-chips">
+            <mat-chip *ngFor="let area of provider.serviceAreas">{{ area }}</mat-chip>
+          </mat-chip-set>
+        </section>
+        <p class="registered-on" *ngIf="provider.registeredOn">Registered on {{ provider.registeredOn }}</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

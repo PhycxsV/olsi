@@ -1,0 +1,49 @@
+<section class="tier2-panel" *ngIf="tier2">
+  <div class="tier-badge tier2-badge">Tier 2 – General Broadcast</div>
+  <h3 class="panel-title">Unlocked – broadcast to all accredited providers</h3>
+  <p class="transition-msg">
+    <mat-icon>lock_open</mat-icon>
+    Transition from exclusive (Tier 1) to open market. All suppliers in the area can now accept.
+  </p>
+
+  <div class="status-row">
+    <span class="status-label">Status</span>
+    <span class="status-value" [class.assigned]="tier2.status === 'ASSIGNED_BROADCAST'">
+      {{ tier2.status }}
+    </span>
+  </div>
+
+  <div class="broadcast-time" *ngIf="tier2.broadcastSentAt">
+    <mat-icon>schedule</mat-icon>
+    <span>Broadcast sent at {{ tier2.broadcastSentAt }}</span>
+  </div>
+
+  <div class="suppliers-block">
+    <h4 class="suppliers-title">Available suppliers in area</h4>
+    <div class="supplier-cards">
+      <div
+        *ngFor="let s of tier2.availableSuppliers"
+        class="supplier-card"
+        [class.assigned]="tier2.status === 'ASSIGNED_BROADCAST'"
+      >
+        <div class="supplier-info">
+          <span class="supplier-name">{{ s.name }}</span>
+          <span class="supplier-meta">{{ s.ridersInArea }} riders in area</span>
+        </div>
+        <button
+          *ngIf="tier2.status === 'BROADCAST'"
+          mat-flat-button
+          color="primary"
+          (click)="assignSupplier(s.id, s.name)"
+        >
+          Assign
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tier2-outcome" *ngIf="tier2.status === 'ASSIGNED_BROADCAST'">
+    <mat-icon>check_circle</mat-icon>
+    <span>Booking assigned from broadcast.</span>
+  </div>
+</section>

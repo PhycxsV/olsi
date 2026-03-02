@@ -1,0 +1,133 @@
+<div class="clients-container">
+  <div class="page-header">
+    <div class="title-block">
+      <mat-icon class="page-icon">people</mat-icon>
+      <div>
+        <h1 class="page-title">Client Registry</h1>
+        <p class="page-subtitle">{{ summaryText }}</p>
+        <p class="page-hint">Delivery addresses require lat/lon when creating bookings.</p>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" class="add-btn" (click)="onAddClient()">
+      <mat-icon>add</mat-icon>
+      Add Client
+    </button>
+  </div>
+
+  <div class="status-cards">
+    <mat-card *ngFor="let card of statusCards" class="status-card" [ngClass]="'status-card--' + card.type">
+      <mat-card-content>
+        <mat-icon class="card-icon">description</mat-icon>
+        <div class="card-text">
+          <span class="card-value">{{ card.value }}</span>
+          <span class="card-label">{{ card.label }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="table-section">
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input matInput [(ngModel)]="searchText" placeholder="Search clients..." />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter">
+          <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-card class="table-card">
+      <table mat-table [dataSource]="filteredClients" class="clients-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Client Name</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="client-name">{{ row.name }} ({{ row.clientId }})</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="vehicle">
+          <th mat-header-cell *matHeaderCellDef>Vehicle</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="primary-line">{{ getPrimaryVehicleLabel(row) }}</span>
+            <span class="secondary-line" *ngIf="row.vehicleCharging.length > 1">
+              +{{ row.vehicleCharging.length - 1 }} more
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="charging">
+          <th mat-header-cell *matHeaderCellDef>Charging</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="primary-line">{{ getPrimaryChargingLabel(row) }}</span>
+            <span class="secondary-line" *ngIf="row.vehicleCharging.length > 1">
+              Multiple charging setups
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="paymentTerms">
+          <th mat-header-cell *matHeaderCellDef>Payment Terms</th>
+          <td mat-cell *matCellDef="let row">{{ row.paymentTermsDays }} days</td>
+        </ng-container>
+        <ng-container matColumnDef="totalBookings">
+          <th mat-header-cell *matHeaderCellDef>Total Bookings</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="bookings-count">{{ row.totalBookings | number }}</span>
+            <span class="last-booking">Last: {{ row.lastBookingAt }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="apiKey">
+          <th mat-header-cell *matHeaderCellDef>API Key</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="api-key-row">
+              <span class="api-key-box">{{ getApiKeyDisplay(row.apiKeyMasked) }}</span>
+              <button mat-icon-button (click)="copyApiKey(row)" matTooltip="Copy API key" aria-label="Copy" class="api-key-copy">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button [matMenuTriggerFor]="clientMenu" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #clientMenu="matMenu">
+              <button mat-menu-item (click)="onClientAction(row, 'Edit')">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="onClientAction(row, 'View details')">
+                <mat-icon>visibility</mat-icon>
+                <span>View details</span>
+              </button>
+              <button mat-menu-item (click)="onClientAction(row, 'Suspend')" *ngIf="row.status === 'Active'">
+                <mat-icon>block</mat-icon>
+                <span>Suspend</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+        <tr class="mat-row empty-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="empty-state">
+              <mat-icon>person_search</mat-icon>
+              <p>No clients found</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </mat-card>
+  </div>
+</div>

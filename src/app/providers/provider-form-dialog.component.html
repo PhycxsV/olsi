@@ -1,0 +1,52 @@
+<div class="provider-form-dialog">
+  <h2 mat-dialog-title>{{ data.mode === 'create' ? 'Add Provider' : 'Edit Provider' }}</h2>
+
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Provider Name</mat-label>
+      <input matInput [(ngModel)]="draft.name" placeholder="Enter provider name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Service Location</mat-label>
+      <input matInput [(ngModel)]="draft.location" placeholder="e.g. Metro Manila, Cavite" />
+    </mat-form-field>
+
+    <div class="grid two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="draft.status">
+          <mat-option value="Active">Active</mat-option>
+          <mat-option value="Paused">Paused</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Total Riders</mat-label>
+        <input matInput type="number" min="1" [(ngModel)]="draft.totalRiders" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Active Riders</mat-label>
+        <input matInput type="number" min="0" [(ngModel)]="draft.activeRiders" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Avg. Time (min)</mat-label>
+        <input matInput type="number" min="1" [(ngModel)]="draft.avgTimeMin" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Acceptance (%)</mat-label>
+        <input matInput type="number" min="0" max="100" [(ngModel)]="draft.acceptancePercent" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>SLA (%)</mat-label>
+        <input matInput type="number" min="0" max="100" [(ngModel)]="draft.slaPercent" />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="save()">
+      {{ data.mode === 'create' ? 'Add Provider' : 'Save' }}
+    </button>
+  </mat-dialog-actions>
+</div>

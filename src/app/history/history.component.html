@@ -1,0 +1,181 @@
+<div class="history-container">
+  <mat-drawer-container class="drawer-container" [hasBackdrop]="true">
+    <mat-drawer-content>
+      <div class="page-header">
+        <div class="title-block">
+          <mat-icon class="page-icon">history</mat-icon>
+          <div>
+            <h1 class="page-title">Delivery History & Reports</h1>
+            <p class="page-subtitle">View completed deliveries and generate reports.</p>
+          </div>
+        </div>
+        <button mat-flat-button color="primary" class="export-btn" (click)="exportCsv()">
+          <mat-icon>download</mat-icon>
+          Export CSV
+        </button>
+      </div>
+
+      <div class="summary-cards">
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <span class="card-value">{{ totalDeliveries }}</span>
+            <span class="card-label">Total Deliveries</span>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <span class="card-value">{{ totalRevenue }}</span>
+            <span class="card-label">Total Revenue</span>
+            <span class="card-note">Before provider costs</span>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="summary-card">
+          <mat-card-content>
+            <span class="card-value">{{ avgDeliveryTime }}</span>
+            <span class="card-label">Avg. Delivery Time</span>
+            <span class="card-delta">{{ avgTimeDelta }}</span>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="searchText" (ngModelChange)="applyFilters()" placeholder="Search by ID, client..." />
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Date</mat-label>
+          <mat-select [(ngModel)]="dateFilter">
+            <mat-option *ngFor="let o of dateOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Client</mat-label>
+          <mat-select [(ngModel)]="clientFilter" (ngModelChange)="applyFilters()">
+            <mat-option *ngFor="let o of clientOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Provider</mat-label>
+          <mat-select [(ngModel)]="providerFilter" (ngModelChange)="applyFilters()">
+            <mat-option *ngFor="let o of providerOptions" [value]="o.value">{{ o.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-card class="table-card">
+        <div class="table-wrapper">
+          <table mat-table [dataSource]="filteredRecords" class="history-table">
+            <ng-container matColumnDef="bookingId">
+              <th mat-header-cell *matHeaderCellDef>Booking ID</th>
+              <td mat-cell *matCellDef="let row">{{ row.bookingId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="client">
+              <th mat-header-cell *matHeaderCellDef>Client</th>
+              <td mat-cell *matCellDef="let row">{{ row.client }}</td>
+            </ng-container>
+            <ng-container matColumnDef="provider">
+              <th mat-header-cell *matHeaderCellDef>Provider</th>
+              <td mat-cell *matCellDef="let row">{{ row.provider }}</td>
+            </ng-container>
+            <ng-container matColumnDef="pickup">
+              <th mat-header-cell *matHeaderCellDef>Pickup</th>
+              <td mat-cell *matCellDef="let row">{{ row.pickup }}</td>
+            </ng-container>
+            <ng-container matColumnDef="dropoff">
+              <th mat-header-cell *matHeaderCellDef>Dropoff</th>
+              <td mat-cell *matCellDef="let row">{{ row.dropoff }}</td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Amount</th>
+              <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetail(row)" class="clickable-row"></tr>
+            <tr class="mat-row empty-row" *matNoDataRow>
+              <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                <div class="empty-state">
+                  <mat-icon>inbox</mat-icon>
+                  <p>No records found</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="mobile-cards">
+          <mat-card *ngFor="let row of filteredRecords" class="record-card" (click)="openDetail(row)">
+            <mat-card-content>
+              <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+              <span class="order-no">{{ row.bookingId }}</span>
+              <p class="dest">{{ row.client }} · {{ row.dropoff }}</p>
+              <p class="meta">{{ row.amount }} · {{ row.provider }}</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-card>
+    </mat-drawer-content>
+    <mat-drawer #detailDrawer mode="over" [(opened)]="drawerOpen" position="end" class="detail-drawer">
+      <div class="drawer-header">
+        <h2>Booking detail</h2>
+        <button mat-icon-button (click)="closeDrawer()" aria-label="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="drawer-body" *ngIf="selectedRow">
+        <mat-tab-group [(selectedIndex)]="detailTabIndex" class="detail-tabs">
+          <mat-tab label="Details">
+            <div class="detail-content">
+              <div class="detail-row">
+                <span class="label">Booking ID</span>
+                <span class="value">{{ selectedRow.bookingId }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Status</span>
+                <span class="value"><span class="status-badge" [ngClass]="getStatusClass(selectedRow.status)">{{ selectedRow.status }}</span></span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Client</span>
+                <span class="value">{{ selectedRow.client }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Provider</span>
+                <span class="value">{{ selectedRow.provider }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Pickup</span>
+                <span class="value">{{ selectedRow.pickup }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Dropoff</span>
+                <span class="value">{{ selectedRow.dropoff }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Amount</span>
+                <span class="value">{{ selectedRow.amount }}</span>
+              </div>
+            </div>
+          </mat-tab>
+          <mat-tab label="Messages">
+            <div class="detail-content placeholder">
+              <mat-icon>chat</mat-icon>
+              <p>Chat with rider (mock). No messages yet.</p>
+            </div>
+          </mat-tab>
+          <mat-tab label="Track">
+            <div class="detail-content placeholder">
+              <mat-icon>map</mat-icon>
+              <p>Live delivery tracking (mock). Map placeholder.</p>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </div>
+    </mat-drawer>
+  </mat-drawer-container>
+</div>

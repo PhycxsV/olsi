@@ -1,0 +1,110 @@
+.dialog-create-booking {
+  min-width: 400px;
+  max-width: 520px;
+
+  mat-dialog-content {
+    padding: 0 24px 8px;
+    min-height: 0;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+  margin: 0;
+}
+
+.subsection {
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #1f2937;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.latlon {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.half {
+  width: 100%;
+  max-width: 200px;
+  display: block;
+  margin: 0;
+}
+
+.cost-preview {
+  margin: 0;
+  padding: 16px 20px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cost-label {
+  font-size: 0.875rem;
+  color: #166534;
+  font-weight: 500;
+}
+
+.cost-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.walkin-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+}
+
+.walkin-note {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+mat-dialog-actions {
+  padding: 16px 0 0;
+}
+
+@media (max-width: 768px) {
+  .dialog-create-booking {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .latlon {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .half {
+    max-width: none;
+  }
+}

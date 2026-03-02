@@ -1,0 +1,306 @@
+:host {
+  display: block;
+}
+
+.history-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.drawer-container {
+  min-height: 400px;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.title-block {
+  .page-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #6b7280;
+  }
+
+  .page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .page-subtitle {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    max-width: 640px;
+  }
+}
+
+.export-btn mat-icon {
+  margin-right: 4px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  .mat-mdc-card-content {
+    padding: 20px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .card-label {
+    font-size: 0.8125rem;
+    color: #6b7280;
+  }
+
+  .card-note,
+  .card-delta {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 2px;
+  }
+
+  .card-delta {
+    color: #059669;
+  }
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .search-field {
+    width: 220px;
+  }
+
+  .filter-field,
+  .date-field {
+    width: 140px;
+  }
+}
+
+.table-card {
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+
+  .clickable-row {
+    cursor: pointer;
+    &:hover {
+      background: #f9fafb;
+    }
+  }
+}
+
+.mobile-cards {
+  display: none;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &.badge-pending {
+    background: rgba(251, 191, 36, 0.2);
+    color: #b45309;
+  }
+  &.badge-unassigned {
+    background: rgba(249, 115, 22, 0.2);
+    color: #c2410c;
+  }
+  &.badge-offered {
+    background: rgba(99, 102, 241, 0.2);
+    color: #4f46e5;
+  }
+  &.badge-assigned {
+    background: rgba(139, 92, 246, 0.2);
+    color: #6d28d9;
+  }
+  &.badge-in-progress {
+    background: rgba(16, 185, 129, 0.2);
+    color: #059669;
+  }
+  &.badge-completed {
+    background: rgba(5, 150, 105, 0.2);
+    color: #047857;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  color: #6b7280;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+}
+
+.detail-drawer {
+  width: 420px;
+  max-width: 100vw;
+  padding: 24px;
+  background: #fff;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.detail-tabs {
+  margin-top: 8px;
+}
+
+.detail-content {
+  padding: 16px 0;
+
+  .detail-row {
+    margin-bottom: 16px;
+
+    .label {
+      display: block;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      font-size: 0.9375rem;
+      color: #1f2937;
+    }
+  }
+
+  &.placeholder {
+    text-align: center;
+    color: #6b7280;
+    padding: 32px 16px;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters-row {
+    .search-field,
+    .filter-field,
+    .date-field {
+      width: 100%;
+    }
+  }
+
+  .detail-drawer {
+    width: 100vw;
+    max-width: 100vw;
+    padding: 14px;
+  }
+
+  .history-table {
+    display: none;
+  }
+
+  .mobile-cards {
+    display: block;
+
+    .record-card {
+      margin-bottom: 12px;
+      cursor: pointer;
+
+      .order-no {
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .dest, .meta {
+        margin: 4px 0 0;
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+    }
+  }
+}

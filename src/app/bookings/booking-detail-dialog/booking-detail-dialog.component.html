@@ -1,0 +1,144 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title-block">
+      <h2 class="dialog-title">Booking {{ booking.id }}</h2>
+      <span class="status-badge" [ngClass]="getStatusClass(booking.status)">{{ booking.status }}</span>
+    </div>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="scroll-content">
+    <section class="info-section">
+      <h3 class="section-title">CLIENT INFORMATION</h3>
+      <div class="client-row">
+        <mat-icon class="section-icon">person</mat-icon>
+        <div class="client-block">
+          <span class="client-name">{{ booking.clientName }}</span>
+          <span class="client-source">{{ booking.clientSource }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <h3 class="section-title">ROUTE DETAILS</h3>
+      <div class="route-row pickup">
+        <span class="route-dot pickup-dot"></span>
+        <div class="route-info">
+          <span class="route-label">Pickup</span>
+          <span class="route-address">{{ booking.pickupAddress }}</span>
+          <span class="route-time">Scheduled: {{ booking.pickupTime }}</span>
+        </div>
+      </div>
+      <div class="route-connector"></div>
+      <div class="route-row dropoff">
+        <span class="route-dot dropoff-dot"></span>
+        <div class="route-info">
+          <span class="route-label">Dropoff</span>
+          <span class="route-address">{{ booking.dropoffAddress }}</span>
+          <span class="route-time">Scheduled: {{ booking.dropoffTime }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section summary-grid">
+      <h3 class="section-title">BOOKING SUMMARY</h3>
+      <div class="summary-item">
+        <mat-icon class="summary-icon">inventory_2</mat-icon>
+        <div class="summary-block">
+          <span class="summary-label">Package Type</span>
+          <span class="summary-value">{{ booking.packageType }}</span>
+        </div>
+      </div>
+      <div class="summary-item">
+        <mat-icon class="summary-icon">schedule</mat-icon>
+        <div class="summary-block">
+          <span class="summary-label">SLA</span>
+          <span class="summary-value">{{ booking.slaMinutes }} minutes</span>
+        </div>
+      </div>
+      <div class="summary-item">
+        <mat-icon class="summary-icon">payments</mat-icon>
+        <div class="summary-block">
+          <span class="summary-label">Amount</span>
+          <span class="summary-value amount-value">{{ booking.amount }}</span>
+        </div>
+      </div>
+      <div class="summary-item">
+        <mat-icon class="summary-icon">calendar_today</mat-icon>
+        <div class="summary-block">
+          <span class="summary-label">Created</span>
+          <span class="summary-value">{{ booking.createdTime }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-section">
+      <h3 class="section-title">ELIGIBLE PROVIDERS</h3>
+      <div class="provider-list" *ngIf="booking.eligibleProviders?.length; else noProviders">
+        <div
+          *ngFor="let p of booking.eligibleProviders"
+          class="provider-row"
+          [class.assigned]="p.isAssigned"
+        >
+          <div class="provider-info">
+            <span class="provider-initial" [attr.data-initial]="p.initial">{{ p.initial }}</span>
+            <div class="provider-text">
+              <span class="provider-name">{{ p.name }}</span>
+              <span class="provider-meta">{{ p.riders }} riders · {{ p.slaPercent }}% SLA</span>
+            </div>
+          </div>
+          <button
+            *ngIf="!p.isAssigned"
+            mat-flat-button
+            color="primary"
+            class="assign-btn"
+            (click)="onAssignProvider(p)"
+          >
+            Assign
+          </button>
+          <button
+            *ngIf="p.isAssigned"
+            mat-flat-button
+            class="assigned-btn"
+            disabled
+          >
+            Assigned
+          </button>
+        </div>
+      </div>
+      <ng-template #noProviders>
+        <p class="empty-message">No eligible providers for this booking yet.</p>
+      </ng-template>
+    </section>
+
+    <section class="info-section">
+      <h3 class="section-title">ASSIGNMENT HISTORY</h3>
+      <div class="history-list" *ngIf="booking.assignmentHistory?.length; else noHistory">
+        <div
+          *ngFor="let h of booking.assignmentHistory"
+          class="history-row"
+        >
+          <span class="history-dot" [ngClass]="'dot-' + h.dotColor"></span>
+          <div class="history-content">
+            <span class="history-event">{{ h.event }}</span>
+            <span class="history-time">{{ h.time }}</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noHistory>
+        <p class="empty-message">No assignment history yet.</p>
+      </ng-template>
+    </section>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-flat-button color="primary" class="reassign-btn" (click)="onReassign()">
+      Reassign Provider
+    </button>
+    <button mat-stroked-button class="cancel-booking-btn" (click)="onCancelBooking()">
+      Cancel Booking
+    </button>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="assign-sheet">
+  <header class="modal-header">
+    <div class="title-group">
+      <h2 class="modal-title">Assign Provider</h2>
+      <p class="modal-subtitle">Booking {{ data.bookingId }}</p>
+    </div>
+    <button mat-icon-button (click)="close()" class="close-btn" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <div class="modal-body">
+    <div class="modal-content">
+      <ul class="provider-list" role="list">
+        <li *ngFor="let p of data.providers">
+          <button
+            type="button"
+            class="provider-item"
+            [class.is-selected]="isSelected(p)"
+            (click)="selectProvider(p)"
+          >
+            <span class="provider-avatar">{{ p.initial }}</span>
+            <div class="provider-info">
+              <span class="provider-name">{{ p.name }}</span>
+              <span class="provider-area">{{ p.serviceArea }}</span>
+              <div class="provider-metrics">
+                <span class="metric-chip">Capacity {{ p.capacityCurrent }}/{{ p.capacityTotal }}</span>
+                <span class="metric-chip success">{{ p.slaPercent }}% SLA</span>
+              </div>
+            </div>
+            <mat-icon class="check" *ngIf="isSelected(p)">check</mat-icon>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="modal-footer">
+    <span class="selection-hint" [class.selected]="selectedProviderId">
+      {{ selectedProviderId ? '1 provider selected' : 'Select one provider to continue' }}
+    </span>
+    <button mat-button (click)="close()">Cancel</button>
+    <button
+      mat-flat-button
+      color="primary"
+      [disabled]="!selectedProviderId"
+      (click)="assign()"
+    >
+      Assign
+    </button>
+  </footer>
+</div>

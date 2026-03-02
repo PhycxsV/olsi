@@ -1,0 +1,94 @@
+<div class="client-form-dialog">
+  <h2 mat-dialog-title>{{ data.mode === 'create' ? 'Add New Client' : 'Edit Client' }}</h2>
+
+  <mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Client ID</mat-label>
+      <input matInput [ngModel]="draft.clientId" disabled />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Client Name</mat-label>
+      <input matInput [(ngModel)]="draft.name" placeholder="Enter client name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Business Address</mat-label>
+      <input matInput [(ngModel)]="draft.businessAddress" placeholder="Enter business address" />
+    </mat-form-field>
+
+    <div class="grid two-col">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="draft.status">
+          <mat-option *ngFor="let opt of data.statusOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Payment Terms (days)</mat-label>
+        <input matInput type="number" min="0" [(ngModel)]="draft.paymentTermsDays" />
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>API Key (masked)</mat-label>
+      <input matInput [(ngModel)]="draft.apiKeyMasked" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Webhook URL</mat-label>
+      <input matInput [(ngModel)]="draft.webhookUrl" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Registered On</mat-label>
+      <input matInput [(ngModel)]="draft.registeredOn" placeholder="June 15, 2023" />
+    </mat-form-field>
+
+    <div class="vehicle-header">
+      <h3>Vehicle Charging Setup</h3>
+      <button mat-stroked-button type="button" (click)="addVehicleCharging()">
+        <mat-icon>add</mat-icon>
+        Add Vehicle Type
+      </button>
+    </div>
+
+    <div class="vehicle-row" *ngFor="let row of draft.vehicleCharging; let i = index">
+      <mat-form-field appearance="outline">
+        <mat-label>Vehicle Type</mat-label>
+        <mat-select [(ngModel)]="row.vehicleTypeId">
+          <mat-option *ngFor="let vehicle of data.vehicleTypes" [value]="vehicle.id">
+            {{ vehicle.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Charging Type</mat-label>
+        <mat-select [(ngModel)]="row.chargingTypeId">
+          <mat-option *ngFor="let charging of data.chargingTypes" [value]="charging.id">
+            {{ charging.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-icon-button
+        type="button"
+        color="warn"
+        aria-label="Remove vehicle charging row"
+        (click)="removeVehicleCharging(i)"
+        [disabled]="draft.vehicleCharging.length === 1"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="save()">
+      {{ data.mode === 'create' ? 'Add Client' : 'Save Client' }}
+    </button>
+  </mat-dialog-actions>
+</div>

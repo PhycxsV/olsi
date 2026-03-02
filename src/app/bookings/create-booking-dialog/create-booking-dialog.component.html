@@ -1,0 +1,90 @@
+<div class="dialog-create-booking">
+  <h2 mat-dialog-title>Create Booking</h2>
+  <mat-dialog-content>
+    <p class="hint">Addresses require lat/lon for delivery. Cost is calculated from client charging type (Phase 1).</p>
+
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Client</mat-label>
+        <mat-select formControlName="clientId" (selectionChange)="onClientChange()">
+          <mat-option *ngFor="let c of clientOptions" [value]="c.id">{{ c.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Vehicle type</mat-label>
+        <mat-select formControlName="vehicleTypeId">
+          <mat-option *ngFor="let v of vehicleTypes" [value]="v.id">{{ v.label }}</mat-option>
+        </mat-select>
+        <mat-hint>Filters providers; only those who cater this vehicle receive the booking.</mat-hint>
+      </mat-form-field>
+
+      <h3 class="subsection">Pickup</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="pickupAddress" placeholder="Pickup address" />
+      </mat-form-field>
+      <div class="latlon">
+        <mat-form-field appearance="outline">
+          <mat-label>Latitude</mat-label>
+          <input matInput type="number" formControlName="pickupLat" placeholder="e.g. 14.5995" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Longitude</mat-label>
+          <input matInput type="number" formControlName="pickupLon" placeholder="e.g. 120.9842" />
+        </mat-form-field>
+      </div>
+
+      <h3 class="subsection">Dropoff</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Address</mat-label>
+        <input matInput formControlName="dropoffAddress" placeholder="Dropoff address" />
+      </mat-form-field>
+      <div class="latlon">
+        <mat-form-field appearance="outline">
+          <mat-label>Latitude</mat-label>
+          <input matInput type="number" formControlName="dropoffLat" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Longitude</mat-label>
+          <input matInput type="number" formControlName="dropoffLon" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Charging type</mat-label>
+        <mat-select formControlName="chargingTypeId">
+          <mat-option *ngFor="let ct of chargingTypes" [value]="ct.id">{{ ct.label }}</mat-option>
+        </mat-select>
+        <mat-hint>From client. Used to calculate cost.</mat-hint>
+      </mat-form-field>
+
+      <ng-container *ngIf="selectedChargingTypeId === 'per_distance'">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Distance (km)</mat-label>
+          <input matInput type="number" formControlName="distanceKm" min="0" step="0.1" />
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngIf="selectedChargingTypeId === 'ad_valorem'">
+        <mat-form-field appearance="outline" class="half">
+          <mat-label>Sales Invoice value (₱)</mat-label>
+          <input matInput type="number" formControlName="salesInvoiceValue" min="0" />
+        </mat-form-field>
+      </ng-container>
+
+      <div class="cost-preview">
+        <span class="cost-label">Calculated cost</span>
+        <span class="cost-value">{{ costDisplay }}</span>
+      </div>
+
+      <div class="walkin-row">
+        <mat-checkbox formControlName="isWalkin">Walk-in / manual booking</mat-checkbox>
+        <span class="walkin-note">Fixed charging; will be set manually.</span>
+      </div>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid">Create</button>
+  </mat-dialog-actions>
+</div>

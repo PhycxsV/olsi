@@ -1,0 +1,52 @@
+<section class="tier1-panel" *ngIf="tier1">
+  <div class="tier-badge tier1-badge">Tier 1 – Priority Push</div>
+  <h3 class="panel-title">Exclusive window (preferred supplier only)</h3>
+
+  <div class="status-row">
+    <span class="status-label">Status</span>
+    <span class="status-value" [class.assigned]="tier1.status === 'ASSIGNED'" [class.timeout]="tier1.status === 'TIMEOUT'">
+      {{ tier1.status }}
+    </span>
+  </div>
+
+  <div class="supplier-notified" *ngIf="tier1.status === 'PENDING_PRIORITY_ACCEPTANCE' || tier1.status === 'ASSIGNED' || tier1.status === 'TIMEOUT'">
+    <mat-icon class="notified-icon">notifications_active</mat-icon>
+    <span>Riders notified: <strong>{{ tier1.preferredSupplierName }}</strong></span>
+    <span class="window-minutes">(exclusive window: {{ tier1.windowMinutes }} min)</span>
+  </div>
+
+  <div class="countdown-block" *ngIf="tier1.status === 'PENDING_PRIORITY_ACCEPTANCE' && countdownSeconds > 0">
+    <span class="countdown-label">Time remaining</span>
+    <span class="countdown-value" [class.warning]="countdownSeconds <= 60">{{ formatCountdown(countdownSeconds) }}</span>
+  </div>
+  <div class="countdown-expired" *ngIf="tier1.status === 'PENDING_PRIORITY_ACCEPTANCE' && countdownSeconds === 0">
+    <mat-icon>timer_off</mat-icon>
+    <span>Window expired. Proceeding to Tier 2…</span>
+  </div>
+
+  <div class="supplier-responses" *ngIf="supplierResponses.length">
+    <h4 class="responses-title">Supplier responses</h4>
+    <div *ngFor="let r of supplierResponses" class="response-row" [ngClass]="getResponseClass(r.response)">
+      <mat-icon class="response-icon">
+        {{ r.response === 'accept' ? 'check_circle' : r.response === 'decline' ? 'cancel' : 'schedule' }}
+      </mat-icon>
+      <span class="response-text">{{ r.riderName }} – {{ r.response }}</span>
+      <span class="response-time">{{ r.at }}</span>
+    </div>
+  </div>
+
+  <div class="tier1-actions" *ngIf="tier1.status === 'PENDING_PRIORITY_ACCEPTANCE'">
+    <button mat-stroked-button (click)="simulateDecline()">Simulate decline</button>
+    <button mat-flat-button color="primary" (click)="simulateAccept()">Simulate accept → Assigned</button>
+    <button mat-button color="warn" (click)="triggerTier2()">Timeout / All reject → Tier 2</button>
+  </div>
+
+  <div class="tier1-outcome assigned" *ngIf="tier1.status === 'ASSIGNED'">
+    <mat-icon>check_circle</mat-icon>
+    <span>Booking <strong>ASSIGNED</strong> to preferred supplier.</span>
+  </div>
+  <div class="tier1-outcome timeout" *ngIf="tier1.status === 'TIMEOUT'">
+    <mat-icon>timer_off</mat-icon>
+    <span>Exclusive window ended. See Tier 2 for broadcast.</span>
+  </div>
+</section>

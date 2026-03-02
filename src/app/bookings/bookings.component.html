@@ -1,0 +1,162 @@
+<div class="bookings-container">
+  <div class="page-header">
+    <div class="title-block">
+      <mat-icon class="page-icon">collections_bookmark</mat-icon>
+      <div>
+        <h1 class="page-title">Bookings</h1>
+        <p class="page-subtitle">View and manage delivery bookings.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="openPriorityFlow('1', 4)">
+        <mat-icon>priority_high</mat-icon>
+        Priority flow (demo)
+      </button>
+      <button mat-flat-button color="primary" class="add-btn" (click)="onAddBooking()">
+        <mat-icon>add</mat-icon>
+        Add booking
+      </button>
+    </div>
+  </div>
+
+  <div class="list-section">
+    <div class="list-header">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search Bookings</mat-label>
+        <input matInput placeholder="Search Reference ID" [(ngModel)]="searchText" (ngModelChange)="applyListFilters()" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyListFilters()">
+          <mat-option [value]="opt" *ngFor="let opt of statusOptions">{{ opt || 'All' }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Payment</mat-label>
+        <mat-select [(ngModel)]="paymentFilter">
+          <mat-option value="">All</mat-option>
+          <mat-option value="COD">COD</mat-option>
+          <mat-option value="Prepaid">Prepaid</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Branch</mat-label>
+        <mat-select [(ngModel)]="branchFilter">
+          <mat-option *ngFor="let b of branches" [value]="b.value">{{ b.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Start</mat-label>
+        <input matInput [matDatepicker]="dpStart" [(ngModel)]="dateStart" />
+        <mat-datepicker-toggle matSuffix [for]="dpStart"></mat-datepicker-toggle>
+        <mat-datepicker #dpStart></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>End</mat-label>
+        <input matInput [matDatepicker]="dpEnd" [(ngModel)]="dateEnd" />
+        <mat-datepicker-toggle matSuffix [for]="dpEnd"></mat-datepicker-toggle>
+        <mat-datepicker #dpEnd></mat-datepicker>
+      </mat-form-field>
+      <div class="view-toggle">
+        <button mat-icon-button [class.active]="viewMode === 'table'" (click)="setViewMode('table')" matTooltip="Table view" aria-label="Table view">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+        <button mat-icon-button [class.active]="viewMode === 'cards'" (click)="setViewMode('cards')" matTooltip="Card view" aria-label="Card view">
+          <mat-icon>view_module</mat-icon>
+        </button>
+      </div>
+      <button mat-stroked-button (click)="exportCsv()">Export CSV</button>
+    </div>
+
+    <!-- Table view -->
+    <div class="table-wrapper" *ngIf="viewMode === 'table'">
+      <table mat-table [dataSource]="filteredList" class="bookings-table">
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="orderNo">
+          <th mat-header-cell *matHeaderCellDef>Order No</th>
+          <td mat-cell *matCellDef="let row">{{ row.orderNo }}</td>
+        </ng-container>
+        <ng-container matColumnDef="createdDate">
+          <th mat-header-cell *matHeaderCellDef>Created Date</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdDate }}</td>
+        </ng-container>
+        <ng-container matColumnDef="destination">
+          <th mat-header-cell *matHeaderCellDef>Destination</th>
+          <td mat-cell *matCellDef="let row">{{ row.destination }}</td>
+        </ng-container>
+        <ng-container matColumnDef="rider">
+          <th mat-header-cell *matHeaderCellDef>Rider</th>
+          <td mat-cell *matCellDef="let row">{{ row.rider }}</td>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Amount</th>
+          <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openDetail(row)" class="clickable-row"></tr>
+        <tr class="mat-row empty-row" *matNoDataRow>
+          <td class="mat-cell" colspan="6">
+            <div class="empty-state">
+              <mat-icon>inbox</mat-icon>
+              <p>No bookings found</p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Card view with 3-dot menu -->
+    <div class="booking-cards" *ngIf="viewMode === 'cards'">
+      <mat-card *ngFor="let row of filteredList" class="booking-card">
+        <mat-card-content>
+          <div class="card-top">
+            <h3 class="booking-id">{{ row.bookingId || row.orderNo }}</h3>
+            <button mat-icon-button [matMenuTriggerFor]="cardMenu" class="card-menu-btn" (click)="setMenuRow(row)" aria-label="Booking actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+          <p class="created-date">{{ row.createdDate }}</p>
+          <p class="destination">
+            <mat-icon class="inline-icon">place</mat-icon>
+            {{ row.destination }}
+          </p>
+          <p class="rider">
+            <mat-icon class="inline-icon">two_wheeler</mat-icon>
+            {{ row.rider }}
+          </p>
+          <p class="amount">{{ row.amount }}</p>
+          <button mat-stroked-button class="view-details-btn" (click)="openDetail(row)">
+            <mat-icon>visibility</mat-icon>
+            View Details
+          </button>
+        </mat-card-content>
+      </mat-card>
+      <mat-menu #cardMenu="matMenu" xPosition="before" class="booking-card-menu">
+        <button mat-menu-item (click)="runMenuAction('view')">
+          <mat-icon>visibility</mat-icon>
+          <span>View Details</span>
+        </button>
+        <button mat-menu-item (click)="runMenuAction('assign')">
+          <mat-icon>person_add</mat-icon>
+          <span>Assign Provider</span>
+        </button>
+        <button mat-menu-item (click)="runMenuAction('cancel')" class="menu-item-cancel">
+          <mat-icon>cancel</mat-icon>
+          <span>Cancel Booking</span>
+        </button>
+      </mat-menu>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredList.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <p>No bookings found</p>
+    </div>
+  </div>
+</div>

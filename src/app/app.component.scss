@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.app-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fa;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  min-height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.menu-btn {
+  display: none;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-right: 24px;
+  white-space: nowrap;
+
+  .logo-blue {
+    color: #1e40af;
+  }
+
+  .logo-red {
+    color: #dc2626;
+  }
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  a {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.875rem;
+
+    &.active {
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+
+    .nav-label {
+      vertical-align: middle;
+    }
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.drawer-container {
+  flex: 1;
+  background: #f5f7fa;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.content-area {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+}
+
+.mobile-drawer {
+  width: 280px;
+}
+
+.drawer-nav {
+  padding: 16px 0;
+
+  a {
+    text-decoration: none;
+    color: #1f2937;
+  }
+}
+
+@media (max-width: 960px) {
+  .menu-btn {
+    display: block;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .content-area {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-header {
+    padding: 0 10px;
+  }
+
+  .logo {
+    margin-right: 8px;
+    font-size: 1rem;
+  }
+
+  .content-area {
+    padding: 12px;
+  }
+
+  .mobile-drawer {
+    width: min(280px, 88vw);
+  }
+}

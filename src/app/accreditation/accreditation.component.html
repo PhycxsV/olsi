@@ -1,0 +1,83 @@
+<div class="accreditation-container">
+  <div class="page-header">
+    <div class="title-block">
+      <mat-icon class="page-icon">verified</mat-icon>
+      <div>
+        <h1 class="page-title">Provider Accreditation</h1>
+        <p class="page-subtitle">{{ summaryText }}</p>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" class="add-btn" (click)="onAddProvider()">
+      <mat-icon>add</mat-icon>
+      Add Provider
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search</mat-label>
+      <input matInput [(ngModel)]="searchText" placeholder="Search providers..." />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="statusFilter">
+        <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="status-cards">
+    <mat-card *ngFor="let card of statusCards" class="status-card" [ngClass]="'status-card--' + card.type">
+      <mat-card-content>
+        <mat-icon class="card-icon">{{ card.type === 'total' ? 'business' : card.type === 'accredited' ? 'check_circle' : card.type === 'in_review' ? 'schedule' : card.type === 'pending' ? 'schedule' : 'cancel' }}</mat-icon>
+        <div class="card-text">
+          <span class="card-value">{{ card.value }}</span>
+          <span class="card-label">{{ card.label }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="provider-cards">
+    <mat-card *ngFor="let p of filteredProviders" class="provider-card">
+      <mat-card-content>
+        <div class="card-top">
+          <h3 class="provider-name">{{ p.name }}</h3>
+          <span class="status-badge" [ngClass]="getStatusClass(p.status)">{{ p.status }}</span>
+        </div>
+        <p class="registration-id">{{ p.registrationId }}</p>
+        <p class="address">
+          <mat-icon class="inline-icon">place</mat-icon>
+          {{ p.address }}
+        </p>
+        <p class="capacity">
+          <mat-icon class="inline-icon">people</mat-icon>
+          {{ p.capacity }} capacity
+        </p>
+        <p class="rate-type">{{ p.rateType }}</p>
+        <div class="service-areas">
+          <mat-chip-set>
+            <mat-chip *ngFor="let area of getServiceAreasDisplay(p.serviceAreas).visible">{{ area }}</mat-chip>
+            <mat-chip *ngIf="getServiceAreasDisplay(p.serviceAreas).more > 0">+{{ getServiceAreasDisplay(p.serviceAreas).more }} more</mat-chip>
+          </mat-chip-set>
+        </div>
+        <div class="documents-row">
+          <span class="documents-label">Documents</span>
+          <mat-progress-bar mode="determinate" [value]="(p.documentsVerified / p.documentsTotal) * 100" class="doc-progress"></mat-progress-bar>
+          <span class="documents-count">{{ p.documentsVerified }}/{{ p.documentsTotal }} verified</span>
+        </div>
+        <p class="app-usage">{{ p.appUsage }}</p>
+        <button mat-stroked-button class="view-details-btn" (click)="openDetail(p)">
+          <mat-icon>visibility</mat-icon>
+          View Details
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="empty-state" *ngIf="filteredProviders.length === 0">
+    <mat-icon>search_off</mat-icon>
+    <p>No providers match your search.</p>
+  </div>
+</div>

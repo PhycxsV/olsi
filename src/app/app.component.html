@@ -1,0 +1,41 @@
+<div class="app-shell">
+  <header class="app-header">
+    <button mat-icon-button class="menu-btn" (click)="mobileDrawerOpen = true" aria-label="Menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="logo"><span class="logo-blue">One</span> <span class="logo-red">Stop</span> <span class="logo-blue">Logistics Solutions</span></div>
+    <nav class="main-nav">
+      <a *ngFor="let item of navItems" mat-button [routerLink]="item.path" routerLinkActive="active">
+        <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+    <span class="spacer"></span>
+    <button mat-icon-button aria-label="Notifications">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item disabled>Profile</button>
+      <button mat-menu-item disabled>Log out</button>
+    </mat-menu>
+  </header>
+
+  <mat-drawer-container class="drawer-container" [hasBackdrop]="true">
+    <mat-drawer #drawer mode="over" [(opened)]="mobileDrawerOpen" class="mobile-drawer">
+      <div class="drawer-nav">
+        <a *ngFor="let item of navItems" mat-list-item [routerLink]="item.path" (click)="mobileDrawerOpen = false">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      </div>
+    </mat-drawer>
+    <mat-drawer-content class="main-content">
+      <main class="content-area">
+        <router-outlet></router-outlet>
+      </main>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</div>
