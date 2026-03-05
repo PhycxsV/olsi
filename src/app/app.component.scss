@@ -7,18 +7,19 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #f5f7fa;
+  background: linear-gradient(180deg, #f7f9fc 0%, #f2f5fa 100%);
 }
 
 .app-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 16px;
-  min-height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #d1d5db;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  padding: 0 18px;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -31,8 +32,9 @@
 .logo {
   font-weight: 700;
   font-size: 1.125rem;
-  margin-right: 24px;
+  margin-right: 20px;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 
   .logo-blue {
     color: #1e40af;
@@ -46,16 +48,27 @@
 .main-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 
   a {
-    color: #6b7280;
+    color: #4b5563;
     text-decoration: none;
     font-size: 0.875rem;
+    border-radius: 10px;
+    padding: 0 10px;
+    min-height: 38px;
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+
+    &:hover {
+      background: #eef2ff;
+      color: #1f2937;
+    }
 
     &.active {
-      color: #dc2626;
-      font-weight: 500;
+      color: #9c1f22;
+      font-weight: 600;
+      background: #fff1f2;
+      box-shadow: inset 0 0 0 1px #fecdd3;
     }
 
     .nav-icon {
@@ -76,9 +89,19 @@
   flex: 1;
 }
 
+.header-action {
+  color: #4b5563;
+  transition: background-color 140ms ease, color 140ms ease;
+
+  &:hover {
+    color: #1f2937;
+    background: #f3f4f6;
+  }
+}
+
 .drawer-container {
   flex: 1;
-  background: #f5f7fa;
+  background: transparent;
 }
 
 .main-content {
@@ -94,15 +117,51 @@
 }
 
 .mobile-drawer {
-  width: 280px;
+  width: 300px;
+  border-top-right-radius: 14px;
+  border-bottom-right-radius: 14px;
+  overflow: hidden;
+}
+
+.drawer-head {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #1e40af 0%, #9c1f22 100%);
+}
+
+.drawer-title {
+  margin: 0 0 2px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #dbeafe;
+}
+
+.drawer-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .drawer-nav {
-  padding: 16px 0;
+  padding: 10px 8px;
 
   a {
     text-decoration: none;
     color: #1f2937;
+    border-radius: 10px;
+    margin: 2px 0;
+    transition: background-color 140ms ease;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+
+    &.active {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
   }
 }
 
@@ -135,6 +194,6 @@
   }
 
   .mobile-drawer {
-    width: min(280px, 88vw);
+    width: min(300px, 90vw);
   }
 }

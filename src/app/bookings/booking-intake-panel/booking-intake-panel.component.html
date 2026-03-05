@@ -23,19 +23,26 @@
     <div class="geofence-row" [class.in]="intake.geofence.inGeofence" [class.out]="!intake.geofence.inGeofence">
       <mat-icon class="geofence-icon">{{ intake.geofence.inGeofence ? 'location_on' : 'location_off' }}</mat-icon>
       <span class="geofence-msg">{{ intake.geofence.message }}</span>
-      <span class="geofence-zone" *ngIf="intake.geofence.zoneName">{{ intake.geofence.zoneName }}</span>
+      <span class="geofence-zone" *ngIf="intake.geofence.zoneName">
+        {{ intake.geofence.zoneName }} • Radius: {{ intake.geofence.radiusKm }}km
+      </span>
     </div>
   </div>
 
   <div class="intake-block active-riders" *ngIf="intake.activeRidersFromPreferred?.length">
-    <h4 class="block-label">Active riders (preferred supplier)</h4>
+    <h4 class="block-label">Available riders (preferred supplier)</h4>
+    <p class="validation-note">
+      Validation applied: preferred supplier + available status + within {{ intake.geofence.radiusKm }}km from booker.
+    </p>
     <ul class="rider-list">
-      <li *ngFor="let r of intake.activeRidersFromPreferred" class="rider-item" [class.available]="r.status === 'available'">
-        <mat-icon class="rider-status-icon">{{ r.status === 'available' ? 'check_circle' : r.status === 'busy' ? 'schedule' : 'cancel' }}</mat-icon>
+      <li *ngFor="let r of availableRidersFromPreferred" class="rider-item available">
+        <mat-icon class="rider-status-icon">check_circle</mat-icon>
         <span class="rider-name">{{ r.riderName }}</span>
-        <span class="rider-status">{{ r.status }}</span>
+        <span class="rider-distance">{{ r.distanceToBookerKm }}km</span>
+        <span class="rider-status">available</span>
       </li>
     </ul>
+    <p class="no-riders" *ngIf="availableRidersFromPreferred.length === 0">No available riders right now.</p>
   </div>
 </section>
 

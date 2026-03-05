@@ -87,13 +87,39 @@
           <p class="registered-text">Registered on {{ client.registeredOn }}</p>
         </section>
 
+      </div>
+    </mat-tab>
+    <mat-tab label="Accounts">
+      <div class="tab-content">
         <section class="detail-section">
-          <h3 class="section-title">Whitelisted Riders</h3>
-          <p class="section-hint">Riders allowed to serve this client.</p>
-          <table mat-table [dataSource]="whitelistedRiders" class="data-table">
+          <h3 class="section-title">Supplier Riders</h3>
+          <p class="section-hint">Riders from accredited supplier accounts assigned to this client.</p>
+
+          <div class="account-stats">
+            <div class="account-stat-card">
+              <span class="account-stat-label">Total Riders</span>
+              <strong class="account-stat-value">{{ whitelistedRiders.length }}</strong>
+            </div>
+            <div class="account-stat-card">
+              <span class="account-stat-label">Linked Suppliers</span>
+              <strong class="account-stat-value">{{ uniqueSupplierCount }}</strong>
+            </div>
+          </div>
+
+          <div class="supplier-chip-list" *ngIf="supplierRiderGroups.length">
+            <div class="supplier-chip" *ngFor="let group of supplierRiderGroups">
+              <span class="supplier-chip-name">{{ group.supplierName }}</span>
+              <span class="supplier-chip-count">{{ group.riderCount }}</span>
+            </div>
+          </div>
+
+          <table mat-table [dataSource]="whitelistedRiders" class="data-table rider-table">
             <ng-container matColumnDef="riderName">
               <th mat-header-cell *matHeaderCellDef>Rider Name</th>
-              <td mat-cell *matCellDef="let row">{{ row.riderName }}</td>
+              <td mat-cell *matCellDef="let row">
+                <div class="rider-name-cell">{{ row.riderName }}</div>
+                <div class="rider-id-cell">{{ row.riderId }}</div>
+              </td>
             </ng-container>
             <ng-container matColumnDef="supplierName">
               <th mat-header-cell *matHeaderCellDef>Supplier</th>
@@ -106,15 +132,23 @@
             <tr mat-header-row *matHeaderRowDef="['riderName', 'supplierName', 'addedAt']"></tr>
             <tr mat-row *matRowDef="let row; columns: ['riderName', 'supplierName', 'addedAt']"></tr>
             <tr class="mat-row empty-row" *matNoDataRow>
-              <td class="mat-cell" colspan="3">No whitelisted riders.</td>
+              <td class="mat-cell" colspan="3">No supplier riders linked to this client.</td>
             </tr>
           </table>
+
+          <div class="rider-mobile-list" *ngIf="whitelistedRiders.length">
+            <article class="rider-mobile-card" *ngFor="let row of whitelistedRiders">
+              <div class="rider-mobile-head">
+                <h4>{{ row.riderName }}</h4>
+                <span>{{ row.riderId }}</span>
+              </div>
+              <div class="rider-mobile-meta">
+                <p><span>Supplier</span>{{ row.supplierName }}</p>
+                <p><span>Added</span>{{ row.addedAt }}</p>
+              </div>
+            </article>
+          </div>
         </section>
-      </div>
-    </mat-tab>
-    <mat-tab label="Accounts">
-      <div class="tab-content">
-        <p class="placeholder-msg">Account settings and linked accounts (placeholder).</p>
       </div>
     </mat-tab>
     <mat-tab label="Transactions">
