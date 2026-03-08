@@ -1,0 +1,162 @@
+<div class="dialog-container">
+  <div class="drawer-header">
+    <div class="drawer-header-main">
+      <span class="drawer-kicker">Booking detail</span>
+      <h2>{{ booking.bookingId }}</h2>
+      <span class="status-badge" [ngClass]="getStatusClass(booking.status)">{{ booking.status }}</span>
+    </div>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="drawer-body">
+    <mat-tab-group [(selectedIndex)]="detailTabIndex" class="detail-tabs">
+      <mat-tab label="Details">
+        <div class="detail-content modern-detail-tab">
+          <section class="detail-card summary-card-modern">
+            <div class="summary-item">
+              <span class="summary-label">Amount</span>
+              <span class="summary-value">{{ booking.amount }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Client</span>
+              <span class="summary-value">{{ booking.client }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Provider</span>
+              <span class="summary-value">{{ booking.provider }}</span>
+            </div>
+          </section>
+
+          <section class="detail-card">
+            <h3 class="detail-card-title">
+              <mat-icon>location_on</mat-icon>
+              Route information
+            </h3>
+            <div class="location-block">
+              <div class="location-node pickup-node"></div>
+              <div class="location-content">
+                <span class="location-label">Pickup</span>
+                <span class="location-value">{{ booking.pickup }}</span>
+              </div>
+            </div>
+            <div class="location-divider"></div>
+            <div class="location-block">
+              <div class="location-node dropoff-node"></div>
+              <div class="location-content">
+                <span class="location-label">Dropoff</span>
+                <span class="location-value">{{ booking.dropoff }}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-card">
+            <h3 class="detail-card-title">
+              <mat-icon>info</mat-icon>
+              Booking information
+            </h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Booking ID</span>
+                <span class="value">{{ booking.bookingId }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Status</span>
+                <span class="value">{{ booking.status }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Reference</span>
+                <span class="value">{{ booking.bookingId }}-REF</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Payment</span>
+                <span class="value">Cash on delivery</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+      <mat-tab label="Messages">
+        <div class="detail-content modern-messages-tab">
+          <section class="detail-card messages-card">
+            <div class="messages-header">
+              <div class="messages-user">
+                <span class="avatar">R</span>
+                <div>
+                  <span class="messages-name">Rider support chat</span>
+                  <span class="messages-sub">Latest updates between dispatcher and rider</span>
+                </div>
+              </div>
+            </div>
+            <div class="chat-thread">
+              <div class="chat-bubble incoming">
+                <span class="bubble-text">Picked up the parcel from {{ booking.pickup }}.</span>
+                <span class="bubble-time">10:12 AM</span>
+              </div>
+              <div class="chat-bubble outgoing">
+                <span class="bubble-text">Received. Proceed to dropoff at {{ booking.dropoff }}.</span>
+                <span class="bubble-time">10:14 AM</span>
+              </div>
+              <div class="chat-bubble incoming">
+                <span class="bubble-text">On the way. ETA is around 18 minutes.</span>
+                <span class="bubble-time">10:15 AM</span>
+              </div>
+            </div>
+            <div class="chat-composer">
+              <mat-icon>lock</mat-icon>
+              <span>Read-only preview in history view</span>
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+      <mat-tab label="Track">
+        <div class="detail-content modern-track-tab">
+          <section class="detail-card track-card">
+            <h3 class="detail-card-title">
+              <mat-icon>timeline</mat-icon>
+              Delivery timeline
+            </h3>
+            <div class="timeline-list">
+              <div class="timeline-item done">
+                <span class="timeline-dot"></span>
+                <div class="timeline-content">
+                  <span class="timeline-title">Booking confirmed</span>
+                  <span class="timeline-meta">09:54 AM</span>
+                </div>
+              </div>
+              <div class="timeline-item done">
+                <span class="timeline-dot"></span>
+                <div class="timeline-content">
+                  <span class="timeline-title">Rider assigned</span>
+                  <span class="timeline-meta">10:02 AM</span>
+                </div>
+              </div>
+              <div class="timeline-item active">
+                <span class="timeline-dot"></span>
+                <div class="timeline-content">
+                  <span class="timeline-title">In transit to dropoff</span>
+                  <span class="timeline-meta">Live now</span>
+                </div>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-dot"></span>
+                <div class="timeline-content">
+                  <span class="timeline-title">Delivered</span>
+                  <span class="timeline-meta">Pending</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-card track-map-card">
+            <div class="map-placeholder">
+              <mat-icon>map</mat-icon>
+              <p>Live map preview unavailable in history mode</p>
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
