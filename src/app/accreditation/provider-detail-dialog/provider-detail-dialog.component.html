@@ -119,30 +119,84 @@
     </mat-tab>
     <mat-tab label="Documents">
       <div class="tab-content documents-tab">
-        <p class="doc-tab-note">Requirements are image files. Screening actions (Accept, Reject, Re-upload) will be confirmed with backend.</p>
-        <div class="document-card" *ngFor="let doc of (provider.documents || [])">
-          <div class="doc-main">
-            <span class="doc-title">{{ doc.title }}</span>
-            <span class="doc-filename">{{ doc.filename }}</span>
-            <span class="doc-uploaded">Uploaded: {{ doc.uploadedAt }} by {{ doc.uploadedBy }}</span>
-            <span class="doc-note error-note" *ngIf="doc.note">{{ doc.note }}</span>
+        <div class="documents-tab-header">
+          <div class="documents-summary">
+            <span class="documents-summary-count">{{ provider.documentsTotal }} document{{ provider.documentsTotal !== 1 ? 's' : '' }}</span>
+            <span class="documents-summary-divider">·</span>
+            <span class="documents-summary-verified">{{ provider.documentsVerified }} verified</span>
           </div>
-          <div class="doc-actions">
-            <span class="doc-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-submitted'">
-              <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
-              {{ doc.status }}
-            </span>
-            <button mat-stroked-button (click)="viewDocument(doc)" class="view-doc-btn">
-              <mat-icon>visibility</mat-icon>
-              View
-            </button>
-            <span class="screening-actions" *ngIf="doc.status === 'Submitted'">
-              <button mat-button (click)="onDocAction(doc, 'accept')">Accept</button>
-              <button mat-button (click)="onDocAction(doc, 'reject')">Reject</button>
-              <button mat-button (click)="onDocAction(doc, 'reupload')">Re-upload</button>
-            </span>
+          <div class="documents-intro">
+            <mat-icon class="documents-intro-icon">info</mat-icon>
+            <p class="documents-intro-text">Upload a file or image for each document. Set an expiry date per document; expiring soon will show alerts on the dashboard.</p>
           </div>
         </div>
+
+        <div class="documents-list" *ngIf="(provider.documents || []).length; else noDocuments">
+          <article class="document-card" *ngFor="let doc of (provider.documents || [])">
+            <header class="document-card-header">
+              <h4 class="document-card-title">{{ doc.title }}</h4>
+              <span class="document-card-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-submitted'">
+                <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
+                {{ doc.status }}
+              </span>
+            </header>
+            <div class="document-card-body">
+              <div class="document-meta-grid">
+                <section class="document-meta-item" *ngIf="doc.filename">
+                  <span class="document-meta-item-label">File name</span>
+                  <span class="document-meta-item-value document-filename">{{ doc.filename }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Uploaded by</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedBy }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Uploaded date</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedAt }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Expiry date</span>
+                  <span class="document-meta-item-value document-expiry-display">{{ formatExpiryDisplay(doc) }}</span>
+                </section>
+              </div>
+              <div class="document-note-banner" *ngIf="doc.note">
+                <mat-icon class="document-note-icon">warning</mat-icon>
+                <span class="document-note error-note">{{ doc.note }}</span>
+              </div>
+              <div class="document-expiry-row">
+                <button mat-button type="button" (click)="openExpiryDialog(doc)" class="document-btn-small set-date-btn-small" matTooltip="Set expiry date">
+                  <mat-icon>event</mat-icon>
+                  Set date
+                </button>
+              </div>
+            </div>
+            <footer class="document-card-actions">
+              <div class="document-primary-actions">
+                <input #fileInput type="file" accept="image/*,.pdf,application/pdf" (change)="onFileSelectedForDoc($event, doc)" class="file-input-hidden" />
+                <button mat-button type="button" (click)="fileInput.click()" class="document-btn-small" [attr.aria-label]="'Upload file for ' + doc.title">
+                  <mat-icon>upload_file</mat-icon>
+                  Upload
+                </button>
+                <button mat-button (click)="viewDocument(doc)" class="document-btn-small">
+                  <mat-icon>visibility</mat-icon>
+                  View
+                </button>
+              </div>
+              <div class="document-screening-actions" *ngIf="doc.status === 'Submitted'">
+                <span class="screening-label">Review</span>
+                <button mat-button color="primary" (click)="onDocAction(doc, 'accept')" class="document-btn-small">Accept</button>
+                <button mat-button (click)="onDocAction(doc, 'reject')" class="document-btn-small">Reject</button>
+                <button mat-button (click)="onDocAction(doc, 'reupload')" class="document-btn-small">Re-upload</button>
+              </div>
+            </footer>
+          </article>
+        </div>
+        <ng-template #noDocuments>
+          <div class="documents-empty">
+            <mat-icon class="documents-empty-icon">folder_off</mat-icon>
+            <p class="documents-empty-text">No documents listed for this provider.</p>
+          </div>
+        </ng-template>
       </div>
     </mat-tab>
     <mat-tab label="Integration">

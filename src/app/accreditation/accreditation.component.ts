@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
+import { AccreditationService } from '../core/services/accreditation.service';
 
 export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
 
@@ -12,6 +13,8 @@ export interface ProviderDocument {
   uploadedBy: string;
   status: 'Verified' | 'Submitted';
   note?: string;
+  /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
+  expiryDate?: string;
 }
 
 export interface BankInfo {
@@ -60,7 +63,7 @@ export interface StatusCardItem {
   templateUrl: './accreditation.component.html',
   styleUrls: ['./accreditation.component.scss'],
 })
-export class AccreditationComponent {
+export class AccreditationComponent implements OnInit {
   searchText = '';
   statusFilter: AccreditationStatus | '' = '';
 
@@ -85,6 +88,7 @@ export class AccreditationComponent {
         uploadedBy: 'Admin',
         status,
         note: isMarine && marineSubmitted ? 'Note: Awaiting renewal confirmation' : undefined,
+        expiryDate: undefined,
       };
     });
   }
@@ -106,7 +110,16 @@ export class AccreditationComponent {
     { value: 'Rejected', label: 'Rejected' },
   ];
 
-  constructor(private dialog: MatDialog) {}
+  constructor(
+    private dialog: MatDialog,
+    private accreditationService: AccreditationService,
+  ) {}
+
+  ngOnInit(): void {
+    if (this.accreditationService.getProviders().length === 0) {
+      this.accreditationService.setProviders(this.providers);
+    }
+  }
 
   get filteredProviders(): AccreditationProvider[] {
     let list = [...this.providers];
@@ -171,6 +184,7 @@ export class AccreditationComponent {
       if (!result) return;
       const newProvider = this.buildProviderFromDraft(result);
       this.providers = [...this.providers, newProvider];
+      this.accreditationService.setProviders(this.providers);
     });
   }
 
