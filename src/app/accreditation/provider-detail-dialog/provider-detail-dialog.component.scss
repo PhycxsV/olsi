@@ -5,6 +5,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #f8fafc;
 }
 
 .detail-tabs {
@@ -12,8 +13,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin-top: 16px;
-  padding: 0 24px 24px;
+  margin-top: 24px;
+  padding: 0 20px 20px;
+
+  .mat-mdc-tab-header {
+    margin-bottom: 4px;
+  }
 
   .mat-mdc-tab-body-wrapper {
     flex: 1;
@@ -21,17 +26,45 @@
   }
 
   .mat-mdc-tab-body-content {
-    padding: 16px 0 0;
+    padding: 20px 0 0;
   }
 }
 
 .dialog-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 24px 24px 16px;
+  padding: 18px 20px 14px;
   border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.provider-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: #9c1f22;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-title-block {
@@ -44,10 +77,10 @@
 
 .dialog-title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1f2937;
-  width: 100%;
+  width: auto;
 }
 
 .registration-id {
@@ -84,17 +117,26 @@
 }
 
 .progress-section {
-  padding: 20px 24px;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  margin: 16px 20px 0;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .progress-label {
-  display: block;
+  display: inline-block;
   font-size: 0.8125rem;
   font-weight: 500;
   color: #374151;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .progress-bar {
@@ -108,8 +150,8 @@
 }
 
 .progress-text {
-  display: block;
-  font-size: 0.875rem;
+  display: inline-block;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: #1f2937;
 }
@@ -121,16 +163,226 @@
   margin-top: 2px;
 }
 
-.edit-btn {
-  margin: 16px 24px 0;
-}
-
 .tab-content {
   padding: 0;
 }
 
+/* Company Info tab redesign */
+.company-info-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.company-hero {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  color: #1e293b;
+}
+
+.company-hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.company-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.company-reg-id {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
+}
+
+.company-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 20px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.company-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.company-meta-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  color: #9c1f22;
+}
+
+.company-block {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.company-block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.company-block-title .block-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: #9c1f22;
+}
+
+.address-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.address-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.address-card-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.address-card-value {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+.company-bank .bank-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bank-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.bank-row:last-child {
+  border-bottom: 0;
+}
+
+.bank-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.bank-value {
+  font-size: 0.9rem;
+  color: #0f172a;
+  text-align: right;
+  font-weight: 500;
+}
+
+.bank-value.mono {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+
+.contact-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.contact-card-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: #9c1f22;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.contact-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.contact-card-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.contact-card-value {
+  font-size: 0.9rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.contact-link {
+  color: #9c1f22;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .address-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 .info-section {
   margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
 
   &:last-child {
     margin-bottom: 0;
@@ -139,7 +391,7 @@
 
 .section-title {
   margin: 0 0 12px;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -194,7 +446,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 16px;
-  background: #f9fafb;
+  background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
 }
@@ -315,7 +567,7 @@
 .capacity-card {
   flex: 1;
   padding: 16px;
-  background: #f9fafb;
+  background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   text-align: center;
@@ -359,10 +611,14 @@
   }
 
   .progress-section,
-  .edit-btn,
   .detail-tabs {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .progress-section {
+    margin-left: 14px;
+    margin-right: 14px;
   }
 
   .detail-tabs {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService, ClientSupplierRider } from '../clients/client.service';
+import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { ProviderFormDialogComponent, ProviderFormDraft } from './provider-form-dialog.component';
 
 export interface ProviderCard {
@@ -24,8 +25,6 @@ export interface ProviderCard {
 })
 export class ProvidersComponent implements OnInit {
   searchText = '';
-  detailDrawerOpen = false;
-  selectedProvider: ProviderCard | null = null;
 
   constructor(
     private dialog: MatDialog,
@@ -58,11 +57,6 @@ export class ProvidersComponent implements OnInit {
     const active = this.providers.filter(p => p.status === 'Active').length;
     const ridersOnline = this.providers.reduce((sum, p) => sum + p.activeRiders, 0);
     return `${active} active providers • ${ridersOnline} riders online`;
-  }
-
-  get providerRiders(): ClientSupplierRider[] {
-    if (!this.selectedProvider) return [];
-    return this.clientService.getRidersByProviderName(this.selectedProvider.name);
   }
 
   getInitial(name: string): string {
@@ -116,14 +110,31 @@ export class ProvidersComponent implements OnInit {
     }
   }
 
-  closeDetailDrawer(): void {
-    this.detailDrawerOpen = false;
-    this.selectedProvider = null;
-  }
-
   private openProviderDetail(provider: ProviderCard): void {
-    this.selectedProvider = provider;
-    this.detailDrawerOpen = true;
+    const riders = this.clientService.getRidersByProviderName(provider.name);
+    this.dialog.open(ProviderDetailDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      height: '100%',
+      maxHeight: '100vh',
+      position: { right: '0', top: '0' },
+      data: { provider, riders },
+      panelClass: 'provider-detail-dialog-right',
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '250ms',
+    }).afterClosed().subscribe((result: { action?: string } | undefined) => {
+      if (result?.action !== 'edit') return;
+      this.openProviderFormDialog('edit', {
+        name: provider.name,
+        location: provider.location,
+        status: provider.status,
+        activeRiders: provider.activeRiders,
+        totalRiders: provider.totalRiders,
+        avgTimeMin: provider.avgTimeMin,
+        acceptancePercent: provider.acceptancePercent,
+        slaPercent: provider.slaPercent,
+      }, provider.id);
+    });
   }
 
   private openProviderFromQueryParam(): void {

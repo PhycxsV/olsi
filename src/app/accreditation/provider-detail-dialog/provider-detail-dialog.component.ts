@@ -35,10 +35,6 @@ export class ProviderDetailDialogComponent {
     this.dialogRef.close();
   }
 
-  onEdit(): void {
-    console.log('Edit provider', this.provider);
-  }
-
   viewDocument(doc: ProviderDocument): void {
     console.log('View document', doc);
   }

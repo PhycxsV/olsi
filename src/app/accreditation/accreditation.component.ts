@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
-import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog.component';
 
 export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
 
@@ -160,58 +159,4 @@ export class AccreditationComponent {
     });
   }
 
-  onAddProvider(): void {
-    this.dialog.open(AddProviderDialogComponent, {
-      width: '860px',
-      maxWidth: '95vw',
-      maxHeight: '95vh',
-      data: { draft: this.createEmptyDraft() },
-    }).afterClosed().subscribe((draft: AddProviderDraft | undefined) => {
-      if (!draft) return;
-      const newProvider: AccreditationProvider = {
-        id: Date.now().toString(),
-        name: draft.name.trim(),
-        status: draft.status,
-        registrationId: draft.registrationId.trim(),
-        address: draft.address.trim(),
-        capacity: draft.capacity,
-        rateType: draft.rateType,
-        serviceAreas: draft.serviceAreas.split(',').map(s => s.trim()).filter(Boolean),
-        documentsVerified: draft.status === 'Accredited' ? 7 : 3,
-        documentsTotal: 7,
-        appUsage: draft.appUsage,
-        officeAddress: draft.address.trim(),
-        garageAddress: draft.address.trim(),
-        contactPerson: draft.contactPerson.trim() || 'TBD',
-        phone: draft.phone.trim() || 'TBD',
-        email: draft.email.trim() || 'TBD',
-        documents: AccreditationComponent.defaultDocuments(draft.status === 'Accredited' ? 7 : 3, true),
-        activeRiders: Math.floor(draft.capacity * 0.6),
-        accreditedOn: draft.status === 'Accredited' ? 'Today' : undefined,
-        registeredOn: 'Today',
-        apiUrl: draft.apiUrl.trim() || '',
-        apiTokenMasked: draft.apiTokenMasked.trim() || 'new_live_toke........',
-        vehicleTypeIds: ['motorcycle'],
-      };
-      this.providers.unshift(newProvider);
-    });
-  }
-
-  private createEmptyDraft(): AddProviderDraft {
-    return {
-      name: '',
-      status: 'Pending',
-      registrationId: '',
-      address: '',
-      capacity: 20,
-      rateType: 'Calculated Per Distance',
-      serviceAreas: 'Metro Manila',
-      appUsage: 'Uses Provider Rider App',
-      contactPerson: '',
-      phone: '',
-      email: '',
-      apiUrl: '',
-      apiTokenMasked: '',
-    };
-  }
 }
