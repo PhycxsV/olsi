@@ -98,10 +98,10 @@
           <div class="preferred-provider-card" *ngIf="client?.preferredProviderName; else noPreferredProvider">
             <div class="provider-card-header">
               <div class="provider-avatar">
-                {{ (client?.preferredProviderName || 'P').charAt(0) }}
+                {{ (client.preferredProviderName || 'P').charAt(0) }}
               </div>
               <div class="provider-title-group">
-                <h4 class="provider-name">{{ client?.preferredProviderName }}</h4>
+                <h4 class="provider-name">{{ client.preferredProviderName }}</h4>
                 <p class="provider-subtitle">Primary account for client priority dispatch</p>
               </div>
             </div>
@@ -109,7 +109,7 @@
             <div class="provider-meta-grid">
               <div class="provider-meta-item">
                 <span class="meta-label">Provider ID</span>
-                <span class="meta-value">{{ client?.preferredProviderId || '—' }}</span>
+                <span class="meta-value">{{ client.preferredProviderId || '—' }}</span>
               </div>
               <div class="provider-meta-item">
                 <span class="meta-label">Priority Flow Role</span>

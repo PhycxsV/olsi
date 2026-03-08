@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
+import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
 
 export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
 
@@ -159,4 +160,67 @@ export class AccreditationComponent {
     });
   }
 
+  openAddProvider(): void {
+    const draft = this.createEmptyAddProviderDraft();
+    this.dialog.open(AddProviderDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      data: { draft },
+    }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
+      if (!result) return;
+      const newProvider = this.buildProviderFromDraft(result);
+      this.providers = [...this.providers, newProvider];
+    });
+  }
+
+  private createEmptyAddProviderDraft(): AddProviderDraft {
+    return {
+      name: '',
+      registrationId: '',
+      status: 'Pending',
+      capacity: 0,
+      officeAddress: '',
+      garageAddress: '',
+      rateType: 'Fixed Rate',
+      serviceAreas: [],
+      appUsage: 'Uses Provider Rider App',
+      contactPerson: '',
+      phone: '',
+      email: '',
+      apiUrl: '',
+      apiToken: '',
+    };
+  }
+
+  private buildProviderFromDraft(draft: AddProviderDraft): AccreditationProvider {
+    const address = draft.officeAddress?.trim() || draft.garageAddress?.trim() || '—';
+    const id = String(Date.now());
+    const token = draft.apiToken?.trim();
+    const apiTokenMasked = token ? (token.slice(0, 8) + '........') : undefined;
+    return {
+      id,
+      name: draft.name.trim(),
+      status: draft.status,
+      registrationId: draft.registrationId.trim(),
+      address,
+      capacity: draft.capacity ?? 0,
+      rateType: draft.rateType,
+      serviceAreas: draft.serviceAreas?.length ? draft.serviceAreas : [],
+      documentsVerified: 0,
+      documentsTotal: 7,
+      appUsage: draft.appUsage,
+      officeAddress: draft.officeAddress?.trim() || '—',
+      garageAddress: draft.garageAddress?.trim() || '—',
+      contactPerson: draft.contactPerson.trim(),
+      phone: draft.phone.trim(),
+      email: draft.email.trim(),
+      bank: draft.bank && draft.bank.bankName ? draft.bank : undefined,
+      documents: AccreditationComponent.defaultDocuments(0),
+      activeRiders: 0,
+      registeredOn: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+      apiUrl: draft.apiUrl?.trim() || undefined,
+      apiTokenMasked: apiTokenMasked || undefined,
+    };
+  }
 }

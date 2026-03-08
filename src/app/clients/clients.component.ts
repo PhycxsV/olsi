@@ -136,7 +136,6 @@ export class ClientsComponent {
 
   onAddClient(): void {
     const draft = this.createEmptyDraft();
-    draft.clientId = this.getNextClientCode();
     this.openClientFormDialog('create', draft);
   }
 

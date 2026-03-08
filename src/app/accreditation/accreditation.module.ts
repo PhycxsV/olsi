@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AccreditationRoutingModule } from './accreditation-routing.module';
 import { AccreditationComponent } from './accreditation.component';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
+import { AddProviderDialogComponent } from './add-provider-dialog/add-provider-dialog.component';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,7 +20,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
-  declarations: [AccreditationComponent, ProviderDetailDialogComponent],
+  declarations: [AccreditationComponent, ProviderDetailDialogComponent, AddProviderDialogComponent],
   imports: [
     CommonModule,
     FormsModule,

@@ -1,0 +1,133 @@
+<div class="add-provider-dialog">
+  <h2 mat-dialog-title>Add Provider</h2>
+
+  <mat-dialog-content>
+    <section class="form-section">
+      <h3 class="form-section-title">Company</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Company Name</mat-label>
+        <input matInput [(ngModel)]="draft.name" placeholder="Enter company name" />
+      </mat-form-field>
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="draft.status">
+            <mat-option value="Pending">Pending</mat-option>
+            <mat-option value="In Review">In Review</mat-option>
+            <mat-option value="Accredited">Accredited</mat-option>
+            <mat-option value="Rejected">Rejected</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Capacity</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="draft.capacity" placeholder="0" />
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Registration Number</mat-label>
+        <input matInput [(ngModel)]="draft.registrationId" placeholder="e.g. SEC-2024-00123456" />
+      </mat-form-field>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section-title">Address</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Office Address</mat-label>
+        <input matInput [(ngModel)]="draft.officeAddress" placeholder="Enter office address" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Garage Address</mat-label>
+        <input matInput [(ngModel)]="draft.garageAddress" placeholder="Enter garage address" />
+      </mat-form-field>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section-title">Rate &amp; App</h3>
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Rate Type</mat-label>
+          <mat-select [(ngModel)]="draft.rateType">
+            <mat-option *ngFor="let opt of rateTypeOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>App Usage</mat-label>
+          <mat-select [(ngModel)]="draft.appUsage">
+            <mat-option *ngFor="let opt of appUsageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Service Areas</mat-label>
+        <input matInput [(ngModel)]="serviceAreasText" placeholder="e.g. Metro Manila, Cavite, Laguna (comma-separated)" />
+      </mat-form-field>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section-title">Contact</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contact Person</mat-label>
+        <input matInput [(ngModel)]="draft.contactPerson" placeholder="Full name" />
+      </mat-form-field>
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Phone</mat-label>
+          <input matInput [(ngModel)]="draft.phone" placeholder="+63 912 345 6789" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [(ngModel)]="draft.email" placeholder="email@company.ph" />
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <h3 class="form-section-title">API</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>API URL</mat-label>
+        <input matInput [(ngModel)]="draft.apiUrl" placeholder="https://api.example.com" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>API Token</mat-label>
+        <input matInput type="password" [(ngModel)]="draft.apiToken" placeholder="API token (stored securely)" />
+      </mat-form-field>
+    </section>
+
+    <section class="form-section" *ngIf="showBank">
+      <div class="section-header">
+        <h3 class="form-section-title">Bank Information</h3>
+        <button mat-button type="button" color="warn" (click)="removeBank()">Remove</button>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Bank Name</mat-label>
+        <input matInput [(ngModel)]="draft.bank!.bankName" placeholder="e.g. BDO" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Account Name</mat-label>
+        <input matInput [(ngModel)]="draft.bank!.accountName" placeholder="Account name" />
+      </mat-form-field>
+      <div class="form-row two-col">
+        <mat-form-field appearance="outline">
+          <mat-label>Account Number</mat-label>
+          <input matInput [(ngModel)]="draft.bank!.accountNumber" placeholder="Account number" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Branch (optional)</mat-label>
+          <input matInput [(ngModel)]="draft.bank!.bankBranch" placeholder="Branch" />
+        </mat-form-field>
+      </div>
+    </section>
+
+    <div class="add-bank-row" *ngIf="!showBank">
+      <button mat-stroked-button type="button" (click)="addBank()">
+        <mat-icon>add</mat-icon>
+        Add bank information
+      </button>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button type="button" (click)="close()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="save()">Add Provider</button>
+  </mat-dialog-actions>
+</div>
