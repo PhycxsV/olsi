@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChargingTypeId, CHARGING_TYPES } from '../../core/charging.model';
 import { VEHICLE_TYPES } from '../../core/vehicle.model';
 import { ClientRow, ClientStatus } from '../clients.component';
-import { ClientService } from '../client.service';
+import { ClientService, ClientSupplierRider } from '../client.service';
 
 export interface ClientBookingRow {
   orderNo: string;
@@ -13,11 +13,9 @@ export interface ClientBookingRow {
   amount: string;
 }
 
-export interface WhitelistedRiderRow {
-  riderId: string;
-  riderName: string;
+export interface SupplierRiderGroup {
   supplierName: string;
-  addedAt: string;
+  riderCount: number;
 }
 
 @Component({
@@ -36,11 +34,8 @@ export class ClientDetailComponent implements OnInit {
     { orderNo: 'ORD-503', date: '2025-02-20 11:00', status: 'Cancelled', destination: 'Makati', amount: '—' },
   ];
 
-  /** Mock: whitelisted riders for this client */
-  whitelistedRiders: WhitelistedRiderRow[] = [
-    { riderId: 'R-001', riderName: 'Juan Dela Cruz', supplierName: 'MetroFleet', addedAt: 'Jan 10, 2024' },
-    { riderId: 'R-002', riderName: 'Maria Santos', supplierName: 'SwiftDeliver', addedAt: 'Jan 05, 2024' },
-  ];
+  /** Per-client designated supplier riders */
+  whitelistedRiders: ClientSupplierRider[] = [];
 
   /** Mock: transactions */
   transactions: { id: string; date: string; type: string; amount: string }[] = [
@@ -63,6 +58,7 @@ export class ClientDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.client = this.clientService.getClientById(id) ?? null;
+      this.whitelistedRiders = this.clientService.getSupplierRidersByClientId(id);
     }
   }
 
@@ -97,6 +93,20 @@ export class ClientDetailComponent implements OnInit {
   getPrimaryChargingLabel(): string {
     if (!this.client?.vehicleCharging?.length) return '—';
     return this.getChargingLabel(this.client.vehicleCharging[0].chargingTypeId);
+  }
+
+  get uniqueSupplierCount(): number {
+    return this.supplierRiderGroups.length;
+  }
+
+  get supplierRiderGroups(): SupplierRiderGroup[] {
+    const grouped = new Map<string, number>();
+    for (const row of this.whitelistedRiders) {
+      grouped.set(row.supplierName, (grouped.get(row.supplierName) ?? 0) + 1);
+    }
+    return [...grouped.entries()]
+      .map(([supplierName, riderCount]) => ({ supplierName, riderCount }))
+      .sort((a, b) => b.riderCount - a.riderCount || a.supplierName.localeCompare(b.supplierName));
   }
 
   /** Display-only: show prefix + dots (e.g. sk_live_.........) so the full key is never shown. */

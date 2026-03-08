@@ -259,6 +259,130 @@
   }
 }
 
+.account-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.account-stat-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  padding: 12px 14px;
+}
+
+.account-stat-label {
+  display: block;
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.account-stat-value {
+  display: block;
+  color: #1f2937;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.supplier-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.supplier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+}
+
+.supplier-chip-name {
+  font-size: 0.8125rem;
+  color: #374151;
+}
+
+.supplier-chip-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #9c1f22;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rider-name-cell {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.rider-id-cell {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.rider-mobile-list {
+  display: none;
+}
+
+.rider-mobile-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+}
+
+.rider-mobile-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #1f2937;
+  }
+
+  span {
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+}
+
+.rider-mobile-meta {
+  display: grid;
+  gap: 8px;
+
+  p {
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #1f2937;
+    font-size: 0.8125rem;
+  }
+
+  span {
+    color: #6b7280;
+  }
+}
+
 .placeholder-msg {
   margin: 0;
   color: #6b7280;
@@ -305,5 +429,18 @@
   .api-key-box {
     font-size: 0.75rem;
     padding: 6px 12px;
+  }
+
+  .account-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .rider-table {
+    display: none;
+  }
+
+  .rider-mobile-list {
+    display: grid;
+    gap: 10px;
   }
 }

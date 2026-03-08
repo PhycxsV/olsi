@@ -92,6 +92,12 @@
   list-style: none;
 }
 
+.validation-note {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
 .rider-item {
   display: flex;
   align-items: center;
@@ -116,11 +122,21 @@
     flex: 1;
     color: #1f2937;
   }
+  .rider-distance {
+    color: #4b5563;
+    font-size: 0.75rem;
+  }
   .rider-status {
     font-size: 0.75rem;
     color: #6b7280;
     text-transform: capitalize;
   }
+}
+
+.no-riders {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 0.8125rem;
 }
 
 .intake-empty {

@@ -24,6 +24,8 @@ export interface GeofenceStatus {
   inGeofence: boolean;
   zoneName: string | null;
   message: string;
+  radiusKm: number;
+  bookerLocation: { lat: number; lng: number };
 }
 
 export interface ActiveRider {
@@ -32,6 +34,7 @@ export interface ActiveRider {
   supplierId: string;
   supplierName: string;
   status: 'available' | 'busy' | 'offline';
+  distanceToBookerKm: number;
 }
 
 /** Response from mock POST /bookings (intake). */

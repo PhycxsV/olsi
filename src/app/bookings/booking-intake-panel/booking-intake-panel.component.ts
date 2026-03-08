@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { BookingIntakeResponse } from '../../core/models/booking-priority.model';
+import { ActiveRider, BookingIntakeResponse } from '../../core/models/booking-priority.model';
 
 @Component({
   selector: 'app-booking-intake-panel',
@@ -8,4 +8,8 @@ import { BookingIntakeResponse } from '../../core/models/booking-priority.model'
 })
 export class BookingIntakePanelComponent {
   @Input() intake: BookingIntakeResponse | null = null;
+
+  get availableRidersFromPreferred(): ActiveRider[] {
+    return (this.intake?.activeRidersFromPreferred ?? []).filter(r => r.status === 'available');
+  }
 }
