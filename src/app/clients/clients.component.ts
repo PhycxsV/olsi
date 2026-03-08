@@ -23,6 +23,9 @@ export interface ClientRow {
   businessAddress: string;
   webhookUrl: string;
   registeredOn: string;
+  /** Preferred provider for priority push routing */
+  preferredProviderId?: string;
+  preferredProviderName?: string;
 }
 
 export interface ClientVehicleCharging {

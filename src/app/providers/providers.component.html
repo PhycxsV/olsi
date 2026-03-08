@@ -143,5 +143,23 @@
       <span>Deliveries Today</span>
       <strong>{{ selectedProvider.deliveriesToday }}</strong>
     </div>
+
+    <section class="detail-section">
+      <h3 class="section-title">Riders</h3>
+      <div class="rider-mobile-list" *ngIf="providerRiders.length; else noProviderRiders">
+        <article class="rider-mobile-card" *ngFor="let row of providerRiders">
+          <div class="rider-mobile-head">
+            <h4>{{ row.riderName }}</h4>
+            <span>{{ row.riderId }}</span>
+          </div>
+          <div class="rider-mobile-meta">
+            <p><span>Added</span>{{ row.addedAt }}</p>
+          </div>
+        </article>
+      </div>
+      <ng-template #noProviderRiders>
+        <p class="drawer-empty-state">No riders linked to this provider yet.</p>
+      </ng-template>
+    </section>
   </div>
 </aside>

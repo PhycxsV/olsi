@@ -383,3 +383,66 @@
     text-align: right;
   }
 }
+
+.detail-section {
+  margin-top: 16px;
+}
+
+.section-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.rider-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rider-mobile-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.rider-mobile-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+
+  h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+}
+
+.rider-mobile-meta p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #334155;
+
+  span {
+    color: #64748b;
+  }
+}
+
+.drawer-empty-state {
+  margin: 0;
+  padding: 10px 0;
+  color: #64748b;
+  font-size: 0.85rem;
+}
