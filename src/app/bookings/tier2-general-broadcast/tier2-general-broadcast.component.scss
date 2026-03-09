@@ -103,6 +103,11 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
 
+  &.assigned {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.06);
+  }
+
   .supplier-name {
     font-weight: 600;
     color: #1f2937;
@@ -111,6 +116,21 @@
     display: block;
     font-size: 0.75rem;
     color: #6b7280;
+  }
+}
+
+.auto-assigned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #059669;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -140,9 +160,5 @@
   .supplier-card {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .supplier-card button {
-    width: 100%;
   }
 }

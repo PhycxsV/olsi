@@ -6,6 +6,7 @@ import { AccreditationRoutingModule } from './accreditation-routing.module';
 import { AccreditationComponent } from './accreditation.component';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { ExpiryDateDialogComponent } from './provider-detail-dialog/expiry-date-dialog/expiry-date-dialog.component';
+import { DocumentViewDialogComponent } from './provider-detail-dialog/document-view-dialog/document-view-dialog.component';
 import { AddProviderDialogComponent } from './add-provider-dialog/add-provider-dialog.component';
 
 import { MatCardModule } from '@angular/material/card';
@@ -23,7 +24,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
-  declarations: [AccreditationComponent, ProviderDetailDialogComponent, ExpiryDateDialogComponent, AddProviderDialogComponent],
+  declarations: [AccreditationComponent, ProviderDetailDialogComponent, ExpiryDateDialogComponent, DocumentViewDialogComponent, AddProviderDialogComponent],
   imports: [
     CommonModule,
     FormsModule,

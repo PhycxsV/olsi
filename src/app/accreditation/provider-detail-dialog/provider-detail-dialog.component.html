@@ -135,7 +135,7 @@
           <article class="document-card" *ngFor="let doc of (provider.documents || [])">
             <header class="document-card-header">
               <h4 class="document-card-title">{{ doc.title }}</h4>
-              <span class="document-card-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-submitted'">
+              <span class="document-card-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-pending'">
                 <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
                 {{ doc.status }}
               </span>
@@ -181,12 +181,6 @@
                   <mat-icon>visibility</mat-icon>
                   View
                 </button>
-              </div>
-              <div class="document-screening-actions" *ngIf="doc.status === 'Submitted'">
-                <span class="screening-label">Review</span>
-                <button mat-button color="primary" (click)="onDocAction(doc, 'accept')" class="document-btn-small">Accept</button>
-                <button mat-button (click)="onDocAction(doc, 'reject')" class="document-btn-small">Reject</button>
-                <button mat-button (click)="onDocAction(doc, 'reupload')" class="document-btn-small">Re-upload</button>
               </div>
             </footer>
           </article>

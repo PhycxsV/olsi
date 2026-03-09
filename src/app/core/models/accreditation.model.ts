@@ -5,7 +5,7 @@ export interface ProviderDocument {
   filename: string;
   uploadedAt: string;
   uploadedBy: string;
-  status: 'Verified' | 'Submitted';
+  status: 'Verified' | 'Pending';
   note?: string;
   /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
   expiryDate?: string;

@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../accreditation.component';
 import { ExpiryDateDialogComponent } from './expiry-date-dialog/expiry-date-dialog.component';
+import { DocumentViewDialogComponent, DocumentViewDialogData } from './document-view-dialog/document-view-dialog.component';
 
 @Component({
   selector: 'app-provider-detail-dialog',
@@ -46,7 +47,7 @@ export class ProviderDetailDialogComponent {
     doc.filename = file.name;
     doc.uploadedAt = uploadedAt;
     doc.uploadedBy = 'Current user';
-    doc.status = 'Submitted';
+    doc.status = 'Pending';
     input.value = '';
   }
 
@@ -70,11 +71,12 @@ export class ProviderDetailDialogComponent {
   }
 
   viewDocument(doc: ProviderDocument): void {
-    console.log('View document', doc);
-  }
-
-  onDocAction(doc: ProviderDocument, action: 'accept' | 'reject' | 'reupload'): void {
-    console.log('Document screening (backend TBD)', action, doc);
+    this.matDialog.open(DocumentViewDialogComponent, {
+      width: '520px',
+      maxWidth: '94vw',
+      data: { document: doc, provider: this.provider } as DocumentViewDialogData,
+      panelClass: 'document-view-dialog-panel',
+    });
   }
 
   copyToClipboard(text: string): void {
