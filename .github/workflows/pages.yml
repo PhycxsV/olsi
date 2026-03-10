@@ -35,7 +35,7 @@ jobs:
 
       # Base href must match your GitHub Pages path: https://<user>.github.io/<repo>/
       - name: Build Angular app
-        run: npx ng build admin-dashboard --configuration=production --base-href /ols/
+        run: npx ng build admin-dashboard --configuration=production --base-href /olsi/
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
