@@ -12,7 +12,7 @@
       </div>
       <div class="expiry-doc-info">
         <span class="expiry-doc-title">{{ document.title }}</span>
-        <span class="expiry-doc-filename" *ngIf="document.filename">{{ document.filename }}</span>
+        <span class="expiry-doc-filename" *ngIf="document.filename" [title]="document.filename">{{ document.filename }}</span>
       </div>
     </section>
 

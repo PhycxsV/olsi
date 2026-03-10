@@ -12,17 +12,17 @@
         <ng-container *ngIf="isPdf">
           <mat-icon class="doc-view-preview-icon pdf-icon">picture_as_pdf</mat-icon>
           <span class="doc-view-preview-label">PDF document</span>
-          <span class="doc-view-filename">{{ document.filename }}</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
         </ng-container>
         <ng-container *ngIf="!isPdf && isImage">
           <mat-icon class="doc-view-preview-icon image-icon">image</mat-icon>
           <span class="doc-view-preview-label">Image file</span>
-          <span class="doc-view-filename">{{ document.filename }}</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
         </ng-container>
         <ng-container *ngIf="!isPdf && !isImage">
           <mat-icon class="doc-view-preview-icon file-icon">description</mat-icon>
           <span class="doc-view-preview-label">Uploaded file</span>
-          <span class="doc-view-filename">{{ document.filename }}</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
         </ng-container>
       </div>
     </section>

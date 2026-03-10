@@ -144,7 +144,7 @@
               <div class="document-meta-grid">
                 <section class="document-meta-item" *ngIf="doc.filename">
                   <span class="document-meta-item-label">File name</span>
-                  <span class="document-meta-item-value document-filename">{{ doc.filename }}</span>
+                  <span class="document-meta-item-value document-filename" [title]="doc.filename">{{ doc.filename }}</span>
                 </section>
                 <section class="document-meta-item">
                   <span class="document-meta-item-label">Uploaded by</span>
