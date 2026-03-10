@@ -108,8 +108,10 @@
   font-size: 0.875rem;
   font-family: ui-monospace, 'SF Mono', monospace;
   color: #374151;
-  word-break: break-all;
   max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .doc-view-meta {

@@ -92,7 +92,10 @@
   font-family: ui-monospace, monospace;
   color: #64748b;
   line-height: 1.35;
-  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .expiry-date-field {
