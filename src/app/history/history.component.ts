@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import { HistoryDetailDialogComponent } from './history-detail-dialog/history-detail-dialog.component';
 
 export type DeliveryStatus = 'Pending' | 'Unassigned' | 'Offered' | 'Assigned' | 'In Progress' | 'Completed';
 
@@ -23,9 +25,6 @@ export class HistoryComponent implements OnInit {
   dateFilter = '';
   clientFilter = '';
   providerFilter = '';
-  drawerOpen = false;
-  selectedRow: HistoryRow | null = null;
-  detailTabIndex = 0;
 
   records: HistoryRow[] = [
     { bookingId: 'BK-001', client: 'FreshMart', provider: 'SpeedRiders', pickup: '123 Warehouse Rd. CBD', dropoff: '456 Customer Ave. Makati', status: 'Pending', amount: '₱150' },
@@ -45,7 +44,10 @@ export class HistoryComponent implements OnInit {
   filteredRecords: HistoryRow[] = [];
   displayedColumns = ['bookingId', 'client', 'provider', 'pickup', 'dropoff', 'status', 'amount'];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private dialog: MatDialog,
+  ) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -53,8 +55,7 @@ export class HistoryComponent implements OnInit {
       if (order) {
         const row = this.records.find(r => r.bookingId === order);
         if (row) {
-          this.selectedRow = row;
-          this.drawerOpen = true;
+          this.openDetail(row);
         }
       }
     });
@@ -116,14 +117,17 @@ export class HistoryComponent implements OnInit {
   }
 
   openDetail(row: HistoryRow): void {
-    this.selectedRow = row;
-    this.detailTabIndex = 0;
-    this.drawerOpen = true;
-  }
-
-  closeDrawer(): void {
-    this.drawerOpen = false;
-    this.selectedRow = null;
+    this.dialog.open(HistoryDetailDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      height: '100%',
+      maxHeight: '100vh',
+      position: { right: '0', top: '0' },
+      data: row,
+      panelClass: 'provider-detail-dialog-right',
+      enterAnimationDuration: '300ms',
+      exitAnimationDuration: '250ms',
+    });
   }
 
   getStatusClass(status: string): string {

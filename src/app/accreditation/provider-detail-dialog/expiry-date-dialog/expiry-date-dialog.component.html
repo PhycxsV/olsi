@@ -1,0 +1,37 @@
+<div class="expiry-dialog">
+  <div class="expiry-dialog-header">
+    <h2 mat-dialog-title class="expiry-dialog-title">Set Expiry Date</h2>
+    <p class="expiry-dialog-subtitle">Choose the expiry date for this document.</p>
+  </div>
+
+  <mat-dialog-content class="expiry-dialog-content">
+    <section class="expiry-doc-card">
+      <div class="expiry-doc-heading">
+        <mat-icon class="expiry-doc-heading-icon">description</mat-icon>
+        <span class="expiry-doc-heading-label">Document Information</span>
+      </div>
+      <div class="expiry-doc-info">
+        <span class="expiry-doc-title">{{ document.title }}</span>
+        <span class="expiry-doc-filename" *ngIf="document.filename">{{ document.filename }}</span>
+      </div>
+    </section>
+
+    <section class="expiry-picker-card">
+      <div class="expiry-picker-heading">
+        <span class="expiry-picker-label">Expiry date</span>
+        <button mat-button type="button" (click)="clear()" class="expiry-clear-btn">Clear</button>
+      </div>
+      <mat-form-field appearance="outline" class="expiry-date-field">
+        <mat-label>Select date</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="expiry-dialog-actions">
+    <button mat-button (click)="cancel()" type="button" class="expiry-btn secondary-btn">Cancel</button>
+    <button mat-flat-button color="primary" (click)="apply()" type="button" class="expiry-btn">Apply date</button>
+  </mat-dialog-actions>
+</div>

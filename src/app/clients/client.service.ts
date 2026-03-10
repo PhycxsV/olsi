@@ -26,6 +26,8 @@ export class ClientService {
       businessAddress: '123 Commerce Blvd, Makati City',
       webhookUrl: 'https://api.freshmart.ph/webhooks/delivery',
       registeredOn: 'June 15, 2023',
+      preferredProviderId: '2',
+      preferredProviderName: 'MetroFleet',
     },
     {
       id: '2',
@@ -40,6 +42,8 @@ export class ClientService {
       businessAddress: '88 Ortigas Ave, Pasig City',
       webhookUrl: 'https://api.quickeats.ph/olsi/webhook',
       registeredOn: 'August 02, 2023',
+      preferredProviderId: '1',
+      preferredProviderName: 'SpeedRiders',
     },
     {
       id: '3',
@@ -54,6 +58,8 @@ export class ClientService {
       businessAddress: '32 Timog Avenue, Quezon City',
       webhookUrl: 'https://medipharm.ph/webhooks/dispatch',
       registeredOn: 'September 10, 2023',
+      preferredProviderId: '3',
+      preferredProviderName: 'SwiftDeliver',
     },
     {
       id: '4',
@@ -68,6 +74,8 @@ export class ClientService {
       businessAddress: '45 Electronics Park, Taguig City',
       webhookUrl: 'https://techstore.ph/integration/webhook',
       registeredOn: 'May 18, 2023',
+      preferredProviderId: '3',
+      preferredProviderName: 'SwiftDeliver',
     },
     {
       id: '5',
@@ -82,6 +90,8 @@ export class ClientService {
       businessAddress: '14 Fashion Road, Manila',
       webhookUrl: 'https://fashionhub.manila/api/webhook',
       registeredOn: 'November 05, 2023',
+      preferredProviderId: '2',
+      preferredProviderName: 'MetroFleet',
     },
     {
       id: '6',
@@ -96,6 +106,8 @@ export class ClientService {
       businessAddress: '9 Green Market St, Mandaluyong',
       webhookUrl: 'https://greengrocers.co/integrations/olsi',
       registeredOn: 'July 25, 2023',
+      preferredProviderId: '5',
+      preferredProviderName: 'ExpressWay',
     },
   ];
 
@@ -139,6 +151,23 @@ export class ClientService {
 
   getSupplierRidersByClientId(id: string): ClientSupplierRider[] {
     return [...(this.clientSupplierRiders[id] ?? [])];
+  }
+
+  getRidersByProviderName(providerName: string): ClientSupplierRider[] {
+    const target = providerName.trim().toLowerCase();
+    if (!target) return [];
+
+    const uniqueByRiderId = new Map<string, ClientSupplierRider>();
+    Object.values(this.clientSupplierRiders).forEach(rows => {
+      rows.forEach(row => {
+        if (row.supplierName.trim().toLowerCase() !== target) return;
+        if (!uniqueByRiderId.has(row.riderId)) {
+          uniqueByRiderId.set(row.riderId, { ...row });
+        }
+      });
+    });
+
+    return [...uniqueByRiderId.values()].sort((a, b) => a.riderName.localeCompare(b.riderName));
   }
 
   updateClient(id: string, patch: Partial<ClientRow>): void {

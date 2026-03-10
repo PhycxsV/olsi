@@ -59,6 +59,10 @@ export class ClientFormDialogComponent {
   }
 
   save(): void {
+    if (!this.draft.clientId.trim()) {
+      window.alert('Client ID is required.');
+      return;
+    }
     if (!this.draft.name.trim()) {
       window.alert('Client name is required.');
       return;

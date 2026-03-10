@@ -92,145 +92,143 @@
     <mat-tab label="Accounts">
       <div class="tab-content">
         <section class="detail-section">
-          <h3 class="section-title">Supplier Riders</h3>
-          <p class="section-hint">Riders from accredited supplier accounts assigned to this client.</p>
+          <h3 class="section-title">Preferred Provider</h3>
+          <p class="section-hint">This provider receives the priority push for this client's bookings.</p>
 
-          <div class="account-stats">
-            <div class="account-stat-card">
-              <span class="account-stat-label">Total Riders</span>
-              <strong class="account-stat-value">{{ whitelistedRiders.length }}</strong>
-            </div>
-            <div class="account-stat-card">
-              <span class="account-stat-label">Linked Suppliers</span>
-              <strong class="account-stat-value">{{ uniqueSupplierCount }}</strong>
-            </div>
-          </div>
-
-          <div class="supplier-chip-list" *ngIf="supplierRiderGroups.length">
-            <div class="supplier-chip" *ngFor="let group of supplierRiderGroups">
-              <span class="supplier-chip-name">{{ group.supplierName }}</span>
-              <span class="supplier-chip-count">{{ group.riderCount }}</span>
-            </div>
-          </div>
-
-          <table mat-table [dataSource]="whitelistedRiders" class="data-table rider-table">
-            <ng-container matColumnDef="riderName">
-              <th mat-header-cell *matHeaderCellDef>Rider Name</th>
-              <td mat-cell *matCellDef="let row">
-                <div class="rider-name-cell">{{ row.riderName }}</div>
-                <div class="rider-id-cell">{{ row.riderId }}</div>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="supplierName">
-              <th mat-header-cell *matHeaderCellDef>Supplier</th>
-              <td mat-cell *matCellDef="let row">{{ row.supplierName }}</td>
-            </ng-container>
-            <ng-container matColumnDef="addedAt">
-              <th mat-header-cell *matHeaderCellDef>Added</th>
-              <td mat-cell *matCellDef="let row">{{ row.addedAt }}</td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['riderName', 'supplierName', 'addedAt']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['riderName', 'supplierName', 'addedAt']"></tr>
-            <tr class="mat-row empty-row" *matNoDataRow>
-              <td class="mat-cell" colspan="3">No supplier riders linked to this client.</td>
-            </tr>
-          </table>
-
-          <div class="rider-mobile-list" *ngIf="whitelistedRiders.length">
-            <article class="rider-mobile-card" *ngFor="let row of whitelistedRiders">
-              <div class="rider-mobile-head">
-                <h4>{{ row.riderName }}</h4>
-                <span>{{ row.riderId }}</span>
+          <div class="preferred-provider-card" *ngIf="client?.preferredProviderName; else noPreferredProvider">
+            <div class="provider-card-header">
+              <div class="provider-avatar">
+                {{ (client.preferredProviderName || 'P').charAt(0) }}
               </div>
-              <div class="rider-mobile-meta">
-                <p><span>Supplier</span>{{ row.supplierName }}</p>
-                <p><span>Added</span>{{ row.addedAt }}</p>
+              <div class="provider-title-group">
+                <h4 class="provider-name">{{ client.preferredProviderName }}</h4>
+                <p class="provider-subtitle">Primary account for client priority dispatch</p>
               </div>
-            </article>
+            </div>
+
+            <div class="provider-meta-grid">
+              <div class="provider-meta-item">
+                <span class="meta-label">Provider ID</span>
+                <span class="meta-value">{{ client.preferredProviderId || '—' }}</span>
+              </div>
+              <div class="provider-meta-item">
+                <span class="meta-label">Priority Flow Role</span>
+                <span class="meta-value">Receives Tier 1 priority push</span>
+              </div>
+            </div>
+
+            <div class="provider-note">
+              <mat-icon>info</mat-icon>
+              <span>Riders for this provider are listed in Provider Details.</span>
+            </div>
           </div>
+
+          <ng-template #noPreferredProvider>
+            <div class="preferred-provider-empty">
+              <mat-icon>business</mat-icon>
+              <p>No preferred provider set for this client.</p>
+            </div>
+          </ng-template>
         </section>
       </div>
     </mat-tab>
     <mat-tab label="Transactions">
       <div class="tab-content">
-        <table mat-table [dataSource]="transactions" class="data-table">
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-          </ng-container>
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let row">{{ row.date }}</td>
-          </ng-container>
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Type</th>
-            <td mat-cell *matCellDef="let row">{{ row.type }}</td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="['id', 'date', 'type', 'amount']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['id', 'date', 'type', 'amount']"></tr>
-        </table>
+        <section class="detail-section table-section">
+          <h3 class="section-title">Transactions</h3>
+          <p class="section-hint">Financial activity related to this client account.</p>
+          <div class="table-card">
+            <table mat-table [dataSource]="transactions" class="data-table">
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>ID</th>
+                <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+              </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+              </ng-container>
+              <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef>Type</th>
+                <td mat-cell *matCellDef="let row">{{ row.type }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['id', 'date', 'type', 'amount']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['id', 'date', 'type', 'amount']"></tr>
+            </table>
+          </div>
+        </section>
       </div>
     </mat-tab>
     <mat-tab label="Topups">
       <div class="tab-content">
-        <table mat-table [dataSource]="topups" class="data-table">
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-          </ng-container>
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let row">{{ row.date }}</td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="['id', 'date', 'amount', 'status']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['id', 'date', 'amount', 'status']"></tr>
-        </table>
+        <section class="detail-section table-section">
+          <h3 class="section-title">Topups</h3>
+          <p class="section-hint">Recent wallet and balance topup records.</p>
+          <div class="table-card">
+            <table mat-table [dataSource]="topups" class="data-table">
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>ID</th>
+                <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+              </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">{{ row.status }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['id', 'date', 'amount', 'status']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['id', 'date', 'amount', 'status']"></tr>
+            </table>
+          </div>
+        </section>
       </div>
     </mat-tab>
     <mat-tab label="History">
       <div class="tab-content">
-        <h3 class="section-title">Booking History</h3>
-        <table mat-table [dataSource]="clientBookings" class="data-table">
-          <ng-container matColumnDef="orderNo">
-            <th mat-header-cell *matHeaderCellDef>Order No</th>
-            <td mat-cell *matCellDef="let row">{{ row.orderNo }}</td>
-          </ng-container>
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Date</th>
-            <td mat-cell *matCellDef="let row">{{ row.date }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="destination">
-            <th mat-header-cell *matHeaderCellDef>Destination</th>
-            <td mat-cell *matCellDef="let row">{{ row.destination }}</td>
-          </ng-container>
-          <ng-container matColumnDef="amount">
-            <th mat-header-cell *matHeaderCellDef>Amount</th>
-            <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
-          </ng-container>
-          <tr mat-header-row *matHeaderRowDef="['orderNo', 'date', 'status', 'destination', 'amount']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['orderNo', 'date', 'status', 'destination', 'amount']"></tr>
-          <tr class="mat-row empty-row" *matNoDataRow>
-            <td class="mat-cell" colspan="5">No bookings yet.</td>
-          </tr>
-        </table>
+        <section class="detail-section table-section">
+          <h3 class="section-title">Booking History</h3>
+          <p class="section-hint">Completed and past booking activity for this client.</p>
+          <div class="table-card">
+            <table mat-table [dataSource]="clientBookings" class="data-table">
+              <ng-container matColumnDef="orderNo">
+                <th mat-header-cell *matHeaderCellDef>Order No</th>
+                <td mat-cell *matCellDef="let row">{{ row.orderNo }}</td>
+              </ng-container>
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let row">{{ row.date }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let row">
+                  <span class="status-badge" [ngClass]="getStatusClass(row.status)">{{ row.status }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="destination">
+                <th mat-header-cell *matHeaderCellDef>Destination</th>
+                <td mat-cell *matCellDef="let row">{{ row.destination }}</td>
+              </ng-container>
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let row">{{ row.amount }}</td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="['orderNo', 'date', 'status', 'destination', 'amount']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['orderNo', 'date', 'status', 'destination', 'amount']"></tr>
+              <tr class="mat-row empty-row" *matNoDataRow>
+                <td class="mat-cell" colspan="5">No bookings yet.</td>
+              </tr>
+            </table>
+          </div>
+        </section>
       </div>
     </mat-tab>
   </mat-tab-group>

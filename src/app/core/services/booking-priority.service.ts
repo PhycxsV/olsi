@@ -290,27 +290,42 @@ export class BookingPriorityService {
     this.onTier1Timeout();
   }
 
+  /** SLA compliance per supplier (used for auto-assign in Tier 2). */
+  private static readonly SUPPLIER_SLA: Record<string, number> = {
+    sr: 97,
+    mf: 92,
+    sd: 99,
+    ew: 94,
+  };
+
   private startTier2(): void {
+    const availableSuppliers = [
+      { id: 'sr', name: 'SpeedRiders', ridersInArea: 12, slaPercent: BookingPriorityService.SUPPLIER_SLA['sr'] },
+      { id: 'mf', name: 'MetroFleet', ridersInArea: 8, slaPercent: BookingPriorityService.SUPPLIER_SLA['mf'] },
+      { id: 'sd', name: 'SwiftDeliver', ridersInArea: 6, slaPercent: BookingPriorityService.SUPPLIER_SLA['sd'] },
+      { id: 'ew', name: 'Expressway', ridersInArea: 4, slaPercent: BookingPriorityService.SUPPLIER_SLA['ew'] },
+    ];
     const payload: Tier2Payload = {
       status: 'BROADCAST',
       availableSupplierIds: ['sr', 'mf', 'sd', 'ew'],
-      availableSuppliers: [
-        { id: 'sr', name: 'SpeedRiders', ridersInArea: 12 },
-        { id: 'mf', name: 'MetroFleet', ridersInArea: 8 },
-        { id: 'sd', name: 'SwiftDeliver', ridersInArea: 6 },
-        { id: 'ew', name: 'Expressway', ridersInArea: 4 },
-      ],
+      availableSuppliers,
       broadcastSentAt: new Date().toLocaleTimeString(),
     };
     this.tier2$.next(payload);
+    const best = availableSuppliers.reduce((a, b) => (a.slaPercent >= b.slaPercent ? a : b));
+    this.assignFromTier2(best.id, best.name, best.slaPercent);
   }
 
-  /** Assign from Tier 2 (broadcast). */
-  assignFromTier2(supplierId: string, supplierName: string): void {
+  /** Assign from Tier 2 (broadcast). Auto-assign uses this with highest-SLA supplier. */
+  assignFromTier2(supplierId: string, supplierName: string, slaPercent?: number): void {
     this.state$.next('ASSIGNED_BROADCAST');
+    const current = this.tier2$.value;
     this.tier2$.next({
-      ...this.tier2$.value!,
+      ...current!,
       status: 'ASSIGNED_BROADCAST',
+      assignedSupplierId: supplierId,
+      assignedSupplierName: supplierName,
+      assignedSlaPercent: slaPercent,
     });
   }
 

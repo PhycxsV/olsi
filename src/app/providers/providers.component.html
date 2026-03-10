@@ -7,10 +7,6 @@
         <p class="page-subtitle">{{ summaryText }}</p>
       </div>
     </div>
-    <button mat-flat-button color="primary" class="add-btn" (click)="onAddProvider()">
-      <mat-icon>add</mat-icon>
-      Add Provider
-    </button>
   </div>
 
   <div class="toolbar">
@@ -103,45 +99,3 @@
     <p>No providers match your search.</p>
   </div>
 </div>
-
-<div class="overlay-backdrop" *ngIf="detailDrawerOpen" (click)="closeDetailDrawer()"></div>
-
-<aside class="provider-detail-drawer" *ngIf="detailDrawerOpen && selectedProvider">
-  <header class="drawer-header">
-    <h2>{{ selectedProvider.name }}</h2>
-    <button mat-icon-button (click)="closeDetailDrawer()" aria-label="Close">
-      <mat-icon>close</mat-icon>
-    </button>
-  </header>
-
-  <div class="drawer-body">
-    <div class="detail-row">
-      <span>Status</span>
-      <strong>{{ selectedProvider.status }}</strong>
-    </div>
-    <div class="detail-row">
-      <span>Service Area</span>
-      <strong>{{ selectedProvider.location }}</strong>
-    </div>
-    <div class="detail-row">
-      <span>Riders</span>
-      <strong>{{ selectedProvider.activeRiders }}/{{ selectedProvider.totalRiders }}</strong>
-    </div>
-    <div class="detail-row">
-      <span>Avg. Time</span>
-      <strong>{{ selectedProvider.avgTimeMin }} min</strong>
-    </div>
-    <div class="detail-row">
-      <span>Acceptance</span>
-      <strong>{{ selectedProvider.acceptancePercent }}%</strong>
-    </div>
-    <div class="detail-row">
-      <span>SLA</span>
-      <strong>{{ selectedProvider.slaPercent }}%</strong>
-    </div>
-    <div class="detail-row">
-      <span>Deliveries Today</span>
-      <strong>{{ selectedProvider.deliveriesToday }}</strong>
-    </div>
-  </div>
-</aside>

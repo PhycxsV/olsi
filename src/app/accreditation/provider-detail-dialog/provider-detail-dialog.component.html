@@ -1,91 +1,117 @@
 <div class="dialog-container">
   <div class="dialog-header">
-    <div class="header-title-block">
-      <h2 class="dialog-title">{{ provider.name }}</h2>
-      <span class="registration-id">{{ provider.registrationId }}</span>
-      <span class="status-badge" [ngClass]="getStatusClass(provider.status)">{{ provider.status }}</span>
+    <div class="header-main">
+      <div class="provider-avatar">{{ provider.name.charAt(0) }}</div>
+      <div class="header-title-block">
+        <h2 class="dialog-title">{{ provider.name }}</h2>
+        <span class="registration-id">{{ provider.registrationId }}</span>
+      </div>
     </div>
-    <button mat-icon-button (click)="close()" aria-label="Close">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-actions">
+      <span class="status-badge" [ngClass]="getStatusClass(provider.status)">{{ provider.status }}</span>
+      <button mat-icon-button (click)="close()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
   </div>
 
   <div class="progress-section">
-    <span class="progress-label">Accreditation Progress</span>
+    <div class="progress-header">
+      <span class="progress-label">Accreditation Progress</span>
+      <span class="progress-text">{{ progressPercent }}% complete</span>
+    </div>
     <mat-progress-bar mode="determinate" [value]="progressPercent" class="progress-bar"></mat-progress-bar>
-    <span class="progress-text">{{ progressPercent }}% complete</span>
     <span class="progress-detail">{{ provider.documentsVerified }} of {{ provider.documentsTotal }} documents verified.</span>
   </div>
 
-  <button mat-stroked-button class="edit-btn" (click)="onEdit()">Edit Provider</button>
-
   <mat-tab-group [(selectedIndex)]="activeTabIndex" class="detail-tabs">
     <mat-tab label="Company Info">
-      <div class="tab-content">
-        <section class="info-section">
-          <h3 class="section-title">Company Information</h3>
-          <div class="info-grid">
-            <div class="info-row">
-              <span class="info-label">Company Name</span>
-              <span class="info-value">{{ provider.name }}</span>
+      <div class="tab-content company-info-tab">
+        <div class="company-hero">
+          <div class="company-hero-main">
+            <span class="company-name">{{ provider.name }}</span>
+            <span class="company-reg-id">{{ provider.registrationId }}</span>
+          </div>
+          <div class="company-meta-row">
+            <span class="company-meta-item">
+              <mat-icon class="company-meta-icon">receipt_long</mat-icon>
+              {{ provider.rateType }}
+            </span>
+            <span class="company-meta-item">
+              <mat-icon class="company-meta-icon">phone_android</mat-icon>
+              {{ provider.appUsage }}
+            </span>
+          </div>
+        </div>
+
+        <section class="company-block company-addresses">
+          <h3 class="company-block-title">
+            <mat-icon class="block-icon">location_on</mat-icon>
+            Addresses
+          </h3>
+          <div class="address-cards">
+            <div class="address-card">
+              <span class="address-card-label">Office</span>
+              <p class="address-card-value">{{ provider.officeAddress }}</p>
             </div>
-            <div class="info-row">
-              <span class="info-label">Registration Number</span>
-              <span class="info-value">{{ provider.registrationId }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Office Address</span>
-              <span class="info-value">{{ provider.officeAddress }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Garage Address</span>
-              <span class="info-value">{{ provider.garageAddress }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Charging Type</span>
-              <span class="info-value">{{ provider.rateType }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Rider App</span>
-              <span class="info-value">{{ provider.appUsage }}</span>
+            <div class="address-card">
+              <span class="address-card-label">Garage</span>
+              <p class="address-card-value">{{ provider.garageAddress }}</p>
             </div>
           </div>
         </section>
-        <section class="info-section" *ngIf="provider.bank">
-          <h3 class="section-title">Bank Information</h3>
-          <div class="info-grid">
-            <div class="info-row">
-              <span class="info-label">Bank Name</span>
-              <span class="info-value">{{ provider.bank.bankName }}</span>
+
+        <section class="company-block company-bank" *ngIf="provider.bank">
+          <h3 class="company-block-title">
+            <mat-icon class="block-icon">account_balance</mat-icon>
+            Bank Information
+          </h3>
+          <div class="bank-grid">
+            <div class="bank-row">
+              <span class="bank-label">Bank</span>
+              <span class="bank-value">{{ provider.bank.bankName }}</span>
             </div>
-            <div class="info-row">
-              <span class="info-label">Account Name</span>
-              <span class="info-value">{{ provider.bank.accountName }}</span>
+            <div class="bank-row">
+              <span class="bank-label">Account Name</span>
+              <span class="bank-value">{{ provider.bank.accountName }}</span>
             </div>
-            <div class="info-row">
-              <span class="info-label">Account Number</span>
-              <span class="info-value">{{ provider.bank.accountNumber }}</span>
+            <div class="bank-row">
+              <span class="bank-label">Account Number</span>
+              <span class="bank-value mono">{{ provider.bank.accountNumber }}</span>
             </div>
-            <div class="info-row" *ngIf="provider.bank.bankBranch">
-              <span class="info-label">Branch</span>
-              <span class="info-value">{{ provider.bank.bankBranch }}</span>
+            <div class="bank-row" *ngIf="provider.bank.bankBranch">
+              <span class="bank-label">Branch</span>
+              <span class="bank-value">{{ provider.bank.bankBranch }}</span>
             </div>
           </div>
         </section>
-        <section class="info-section">
-          <h3 class="section-title">Contact Information</h3>
-          <div class="info-grid">
-            <div class="info-row">
-              <span class="info-label">Contact Person</span>
-              <span class="info-value">{{ provider.contactPerson }}</span>
+
+        <section class="company-block company-contact">
+          <h3 class="company-block-title">
+            <mat-icon class="block-icon">contact_phone</mat-icon>
+            Contact
+          </h3>
+          <div class="contact-cards">
+            <div class="contact-card">
+              <mat-icon class="contact-card-icon">person</mat-icon>
+              <div class="contact-card-body">
+                <span class="contact-card-label">Contact Person</span>
+                <span class="contact-card-value">{{ provider.contactPerson }}</span>
+              </div>
             </div>
-            <div class="info-row">
-              <span class="info-label">Phone</span>
-              <span class="info-value">{{ provider.phone }}</span>
+            <div class="contact-card">
+              <mat-icon class="contact-card-icon">phone</mat-icon>
+              <div class="contact-card-body">
+                <span class="contact-card-label">Phone</span>
+                <a [href]="'tel:' + provider.phone" class="contact-card-value contact-link">{{ provider.phone }}</a>
+              </div>
             </div>
-            <div class="info-row">
-              <span class="info-label">Email</span>
-              <span class="info-value">{{ provider.email }}</span>
+            <div class="contact-card">
+              <mat-icon class="contact-card-icon">email</mat-icon>
+              <div class="contact-card-body">
+                <span class="contact-card-label">Email</span>
+                <a [href]="'mailto:' + provider.email" class="contact-card-value contact-link">{{ provider.email }}</a>
+              </div>
             </div>
           </div>
         </section>
@@ -93,30 +119,78 @@
     </mat-tab>
     <mat-tab label="Documents">
       <div class="tab-content documents-tab">
-        <p class="doc-tab-note">Requirements are image files. Screening actions (Accept, Reject, Re-upload) will be confirmed with backend.</p>
-        <div class="document-card" *ngFor="let doc of (provider.documents || [])">
-          <div class="doc-main">
-            <span class="doc-title">{{ doc.title }}</span>
-            <span class="doc-filename">{{ doc.filename }}</span>
-            <span class="doc-uploaded">Uploaded: {{ doc.uploadedAt }} by {{ doc.uploadedBy }}</span>
-            <span class="doc-note error-note" *ngIf="doc.note">{{ doc.note }}</span>
+        <div class="documents-tab-header">
+          <div class="documents-summary">
+            <span class="documents-summary-count">{{ provider.documentsTotal }} document{{ provider.documentsTotal !== 1 ? 's' : '' }}</span>
+            <span class="documents-summary-divider">·</span>
+            <span class="documents-summary-verified">{{ provider.documentsVerified }} verified</span>
           </div>
-          <div class="doc-actions">
-            <span class="doc-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-submitted'">
-              <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
-              {{ doc.status }}
-            </span>
-            <button mat-stroked-button (click)="viewDocument(doc)" class="view-doc-btn">
-              <mat-icon>visibility</mat-icon>
-              View
-            </button>
-            <span class="screening-actions" *ngIf="doc.status === 'Submitted'">
-              <button mat-button (click)="onDocAction(doc, 'accept')">Accept</button>
-              <button mat-button (click)="onDocAction(doc, 'reject')">Reject</button>
-              <button mat-button (click)="onDocAction(doc, 'reupload')">Re-upload</button>
-            </span>
+          <div class="documents-intro">
+            <mat-icon class="documents-intro-icon">info</mat-icon>
+            <p class="documents-intro-text">Upload a file or image for each document. Set an expiry date per document; expiring soon will show alerts on the dashboard.</p>
           </div>
         </div>
+
+        <div class="documents-list" *ngIf="(provider.documents || []).length; else noDocuments">
+          <article class="document-card" *ngFor="let doc of (provider.documents || [])">
+            <header class="document-card-header">
+              <h4 class="document-card-title">{{ doc.title }}</h4>
+              <span class="document-card-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-pending'">
+                <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
+                {{ doc.status }}
+              </span>
+            </header>
+            <div class="document-card-body">
+              <div class="document-meta-grid">
+                <section class="document-meta-item" *ngIf="doc.filename">
+                  <span class="document-meta-item-label">File name</span>
+                  <span class="document-meta-item-value document-filename">{{ doc.filename }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Uploaded by</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedBy }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Uploaded date</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedAt }}</span>
+                </section>
+                <section class="document-meta-item">
+                  <span class="document-meta-item-label">Expiry date</span>
+                  <span class="document-meta-item-value document-expiry-display">{{ formatExpiryDisplay(doc) }}</span>
+                </section>
+              </div>
+              <div class="document-note-banner" *ngIf="doc.note">
+                <mat-icon class="document-note-icon">warning</mat-icon>
+                <span class="document-note error-note">{{ doc.note }}</span>
+              </div>
+              <div class="document-expiry-row">
+                <button mat-button type="button" (click)="openExpiryDialog(doc)" class="document-btn-small set-date-btn-small" matTooltip="Set expiry date">
+                  <mat-icon>event</mat-icon>
+                  Set date
+                </button>
+              </div>
+            </div>
+            <footer class="document-card-actions">
+              <div class="document-primary-actions">
+                <input #fileInput type="file" accept="image/*,.pdf,application/pdf" (change)="onFileSelectedForDoc($event, doc)" class="file-input-hidden" />
+                <button mat-button type="button" (click)="fileInput.click()" class="document-btn-small" [attr.aria-label]="'Upload file for ' + doc.title">
+                  <mat-icon>upload_file</mat-icon>
+                  Upload
+                </button>
+                <button mat-button (click)="viewDocument(doc)" class="document-btn-small">
+                  <mat-icon>visibility</mat-icon>
+                  View
+                </button>
+              </div>
+            </footer>
+          </article>
+        </div>
+        <ng-template #noDocuments>
+          <div class="documents-empty">
+            <mat-icon class="documents-empty-icon">folder_off</mat-icon>
+            <p class="documents-empty-text">No documents listed for this provider.</p>
+          </div>
+        </ng-template>
       </div>
     </mat-tab>
     <mat-tab label="Integration">

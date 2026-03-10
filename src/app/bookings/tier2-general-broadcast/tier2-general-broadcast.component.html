@@ -19,31 +19,27 @@
   </div>
 
   <div class="suppliers-block">
-    <h4 class="suppliers-title">Available suppliers in area</h4>
+    <h4 class="suppliers-title">Available suppliers in area (by SLA compliance)</h4>
     <div class="supplier-cards">
       <div
         *ngFor="let s of tier2.availableSuppliers"
         class="supplier-card"
-        [class.assigned]="tier2.status === 'ASSIGNED_BROADCAST'"
+        [class.assigned]="tier2.status === 'ASSIGNED_BROADCAST' && tier2.assignedSupplierId === s.id"
       >
         <div class="supplier-info">
           <span class="supplier-name">{{ s.name }}</span>
-          <span class="supplier-meta">{{ s.ridersInArea }} riders in area</span>
+          <span class="supplier-meta">{{ s.ridersInArea }} riders · {{ s.slaPercent }}% SLA</span>
         </div>
-        <button
-          *ngIf="tier2.status === 'BROADCAST'"
-          mat-flat-button
-          color="primary"
-          (click)="assignSupplier(s.id, s.name)"
-        >
-          Assign
-        </button>
+        <span *ngIf="tier2.status === 'ASSIGNED_BROADCAST' && tier2.assignedSupplierId === s.id" class="auto-assigned-badge">
+          <mat-icon>verified</mat-icon>
+          Auto-assigned
+        </span>
       </div>
     </div>
   </div>
 
   <div class="tier2-outcome" *ngIf="tier2.status === 'ASSIGNED_BROADCAST'">
     <mat-icon>check_circle</mat-icon>
-    <span>Booking assigned from broadcast.</span>
+    <span>Booking auto-assigned to <strong>{{ tier2.assignedSupplierName }}</strong> (highest SLA: {{ tier2.assignedSlaPercent }}%).</span>
   </div>
 </section>

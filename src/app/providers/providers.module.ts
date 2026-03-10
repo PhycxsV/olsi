@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProvidersRoutingModule } from './providers-routing.module';
 import { ProvidersComponent } from './providers.component';
 import { ProviderFormDialogComponent } from './provider-form-dialog.component';
+import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -17,7 +18,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
-  declarations: [ProvidersComponent, ProviderFormDialogComponent],
+  declarations: [ProvidersComponent, ProviderFormDialogComponent, ProviderDetailDialogComponent],
   imports: [
     CommonModule,
     FormsModule,
