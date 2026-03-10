@@ -1,6 +1,4 @@
 <div class="history-container">
-  <mat-drawer-container class="drawer-container" [hasBackdrop]="true">
-    <mat-drawer-content>
       <div class="page-header">
         <div class="title-block">
           <mat-icon class="page-icon">history</mat-icon>
@@ -120,62 +118,4 @@
           </mat-card>
         </div>
       </mat-card>
-    </mat-drawer-content>
-    <mat-drawer #detailDrawer mode="over" [(opened)]="drawerOpen" position="end" class="detail-drawer">
-      <div class="drawer-header">
-        <h2>Booking detail</h2>
-        <button mat-icon-button (click)="closeDrawer()" aria-label="Close">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-      <div class="drawer-body" *ngIf="selectedRow">
-        <mat-tab-group [(selectedIndex)]="detailTabIndex" class="detail-tabs">
-          <mat-tab label="Details">
-            <div class="detail-content">
-              <div class="detail-row">
-                <span class="label">Booking ID</span>
-                <span class="value">{{ selectedRow.bookingId }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Status</span>
-                <span class="value"><span class="status-badge" [ngClass]="getStatusClass(selectedRow.status)">{{ selectedRow.status }}</span></span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Client</span>
-                <span class="value">{{ selectedRow.client }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Provider</span>
-                <span class="value">{{ selectedRow.provider }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Pickup</span>
-                <span class="value">{{ selectedRow.pickup }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Dropoff</span>
-                <span class="value">{{ selectedRow.dropoff }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="label">Amount</span>
-                <span class="value">{{ selectedRow.amount }}</span>
-              </div>
-            </div>
-          </mat-tab>
-          <mat-tab label="Messages">
-            <div class="detail-content placeholder">
-              <mat-icon>chat</mat-icon>
-              <p>Chat with rider (mock). No messages yet.</p>
-            </div>
-          </mat-tab>
-          <mat-tab label="Track">
-            <div class="detail-content placeholder">
-              <mat-icon>map</mat-icon>
-              <p>Live delivery tracking (mock). Map placeholder.</p>
-            </div>
-          </mat-tab>
-        </mat-tab-group>
-      </div>
-    </mat-drawer>
-  </mat-drawer-container>
 </div>

@@ -13,13 +13,6 @@ export interface ClientBookingRow {
   amount: string;
 }
 
-export interface WhitelistedRiderRow {
-  riderId: string;
-  riderName: string;
-  supplierName: string;
-  addedAt: string;
-}
-
 @Component({
   selector: 'app-client-detail',
   templateUrl: './client-detail.component.html',
@@ -34,12 +27,6 @@ export class ClientDetailComponent implements OnInit {
     { orderNo: 'ORD-501', date: '2025-02-22 09:00', status: 'Completed', destination: 'Manila', amount: '₱ 150' },
     { orderNo: 'ORD-502', date: '2025-02-21 14:30', status: 'Completed', destination: 'Quezon City', amount: '₱ 280' },
     { orderNo: 'ORD-503', date: '2025-02-20 11:00', status: 'Cancelled', destination: 'Makati', amount: '—' },
-  ];
-
-  /** Mock: whitelisted riders for this client */
-  whitelistedRiders: WhitelistedRiderRow[] = [
-    { riderId: 'R-001', riderName: 'Juan Dela Cruz', supplierName: 'MetroFleet', addedAt: 'Jan 10, 2024' },
-    { riderId: 'R-002', riderName: 'Maria Santos', supplierName: 'SwiftDeliver', addedAt: 'Jan 05, 2024' },
   ];
 
   /** Mock: transactions */

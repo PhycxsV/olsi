@@ -12,6 +12,21 @@ import {
 
 /** Configurable Tier 1 window in minutes (e.g. 3–5). */
 const DEFAULT_TIER1_WINDOW_MINUTES = 4;
+const RIDER_VISIBILITY_RADIUS_KM = 5;
+
+interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
+interface MockRiderSeed {
+  riderId: string;
+  riderName: string;
+  supplierId: string;
+  supplierName: string;
+  status: 'available' | 'busy' | 'offline';
+  location: GeoPoint;
+}
 
 @Injectable({ providedIn: 'root' })
 export class BookingPriorityService {
@@ -58,24 +73,37 @@ export class BookingPriorityService {
    * Returns intake: account mapping, geofence, active riders from preferred supplier.
    */
   submitBookingIntake(accountId: string, _payload?: unknown): Observable<BookingIntakeResponse> {
+    const preferredSupplier = this.getPreferredSupplierForAccount(accountId);
+    const bookerLocation = this.getBookerLocation(accountId);
+    const riders = this.getMockRiders();
+    const activeRidersFromPreferred = riders
+      .filter(r => r.supplierId === preferredSupplier.id)
+      .map(r => ({
+        riderId: r.riderId,
+        riderName: r.riderName,
+        supplierId: r.supplierId,
+        supplierName: r.supplierName,
+        status: r.status,
+        distanceToBookerKm: this.getDistanceKm(bookerLocation, r.location),
+      }))
+      .filter(r => r.status === 'available' && r.distanceToBookerKm <= RIDER_VISIBILITY_RADIUS_KM);
+
     const mock: BookingIntakeResponse = {
       bookingId: `BK-${Date.now().toString(36).toUpperCase()}`,
       accountMapping: {
         accountId,
         accountName: this.getAccountName(accountId),
-        preferredSupplierId: 'mf',
-        preferredSupplierName: 'MetroFleet',
+        preferredSupplierId: preferredSupplier.id,
+        preferredSupplierName: preferredSupplier.name,
       },
       geofence: {
         inGeofence: true,
         zoneName: 'Metro Manila',
-        message: 'Pickup and dropoff within service zone.',
+        message: `Showing only riders from ${preferredSupplier.name} within ${RIDER_VISIBILITY_RADIUS_KM}km of the booker.`,
+        radiusKm: RIDER_VISIBILITY_RADIUS_KM,
+        bookerLocation,
       },
-      activeRidersFromPreferred: [
-        { riderId: 'r1', riderName: 'Juan D.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'available' },
-        { riderId: 'r2', riderName: 'Maria S.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'busy' },
-        { riderId: 'r3', riderName: 'Pedro L.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'available' },
-      ],
+      activeRidersFromPreferred,
     };
     this.intake$.next(mock);
     this.state$.next('PENDING_PRIORITY_ACCEPTANCE');
@@ -91,6 +119,52 @@ export class BookingPriorityService {
       '6': 'GreenGrocers Co.',
     };
     return names[accountId] || `Account ${accountId}`;
+  }
+
+  private getPreferredSupplierForAccount(accountId: string): { id: string; name: string } {
+    const map: Record<string, { id: string; name: string }> = {
+      '1': { id: 'mf', name: 'MetroFleet' },
+      '2': { id: 'sr', name: 'SpeedRiders' },
+      '4': { id: 'sd', name: 'SwiftDeliver' },
+      '6': { id: 'ew', name: 'Expressway' },
+    };
+    return map[accountId] || { id: 'mf', name: 'MetroFleet' };
+  }
+
+  private getBookerLocation(accountId: string): GeoPoint {
+    const map: Record<string, GeoPoint> = {
+      '1': { lat: 14.5547, lng: 121.0244 }, // Makati
+      '2': { lat: 14.6091, lng: 121.0223 }, // Quezon City
+      '4': { lat: 14.5176, lng: 121.0509 }, // BGC/Taguig
+      '6': { lat: 14.5764, lng: 121.0851 }, // Pasig
+    };
+    return map[accountId] || { lat: 14.5547, lng: 121.0244 };
+  }
+
+  private getMockRiders(): MockRiderSeed[] {
+    return [
+      { riderId: 'r1', riderName: 'Juan D.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'available', location: { lat: 14.5572, lng: 121.0195 } },
+      { riderId: 'r2', riderName: 'Maria S.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'busy', location: { lat: 14.5646, lng: 121.0286 } },
+      { riderId: 'r3', riderName: 'Pedro L.', supplierId: 'mf', supplierName: 'MetroFleet', status: 'available', location: { lat: 14.6104, lng: 121.015 } },
+      { riderId: 'r4', riderName: 'Ana C.', supplierId: 'sr', supplierName: 'SpeedRiders', status: 'available', location: { lat: 14.6112, lng: 121.0181 } },
+      { riderId: 'r5', riderName: 'Mark T.', supplierId: 'sr', supplierName: 'SpeedRiders', status: 'available', location: { lat: 14.6502, lng: 121.0679 } },
+      { riderId: 'r6', riderName: 'Lito R.', supplierId: 'sd', supplierName: 'SwiftDeliver', status: 'available', location: { lat: 14.5501, lng: 121.0463 } },
+      { riderId: 'r7', riderName: 'Joan V.', supplierId: 'ew', supplierName: 'Expressway', status: 'available', location: { lat: 14.5825, lng: 121.0958 } },
+    ];
+  }
+
+  private getDistanceKm(origin: GeoPoint, target: GeoPoint): number {
+    const toRad = (deg: number): number => (deg * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(target.lat - origin.lat);
+    const dLng = toRad(target.lng - origin.lng);
+    const lat1 = toRad(origin.lat);
+    const lat2 = toRad(target.lat);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return Number((earthRadiusKm * c).toFixed(2));
   }
 
   private startTier1(intake: BookingIntakeResponse): void {
@@ -216,27 +290,42 @@ export class BookingPriorityService {
     this.onTier1Timeout();
   }
 
+  /** SLA compliance per supplier (used for auto-assign in Tier 2). */
+  private static readonly SUPPLIER_SLA: Record<string, number> = {
+    sr: 97,
+    mf: 92,
+    sd: 99,
+    ew: 94,
+  };
+
   private startTier2(): void {
+    const availableSuppliers = [
+      { id: 'sr', name: 'SpeedRiders', ridersInArea: 12, slaPercent: BookingPriorityService.SUPPLIER_SLA['sr'] },
+      { id: 'mf', name: 'MetroFleet', ridersInArea: 8, slaPercent: BookingPriorityService.SUPPLIER_SLA['mf'] },
+      { id: 'sd', name: 'SwiftDeliver', ridersInArea: 6, slaPercent: BookingPriorityService.SUPPLIER_SLA['sd'] },
+      { id: 'ew', name: 'Expressway', ridersInArea: 4, slaPercent: BookingPriorityService.SUPPLIER_SLA['ew'] },
+    ];
     const payload: Tier2Payload = {
       status: 'BROADCAST',
       availableSupplierIds: ['sr', 'mf', 'sd', 'ew'],
-      availableSuppliers: [
-        { id: 'sr', name: 'SpeedRiders', ridersInArea: 12 },
-        { id: 'mf', name: 'MetroFleet', ridersInArea: 8 },
-        { id: 'sd', name: 'SwiftDeliver', ridersInArea: 6 },
-        { id: 'ew', name: 'Expressway', ridersInArea: 4 },
-      ],
+      availableSuppliers,
       broadcastSentAt: new Date().toLocaleTimeString(),
     };
     this.tier2$.next(payload);
+    const best = availableSuppliers.reduce((a, b) => (a.slaPercent >= b.slaPercent ? a : b));
+    this.assignFromTier2(best.id, best.name, best.slaPercent);
   }
 
-  /** Assign from Tier 2 (broadcast). */
-  assignFromTier2(supplierId: string, supplierName: string): void {
+  /** Assign from Tier 2 (broadcast). Auto-assign uses this with highest-SLA supplier. */
+  assignFromTier2(supplierId: string, supplierName: string, slaPercent?: number): void {
     this.state$.next('ASSIGNED_BROADCAST');
+    const current = this.tier2$.value;
     this.tier2$.next({
-      ...this.tier2$.value!,
+      ...current!,
       status: 'ASSIGNED_BROADCAST',
+      assignedSupplierId: supplierId,
+      assignedSupplierName: supplierName,
+      assignedSlaPercent: slaPercent,
     });
   }
 

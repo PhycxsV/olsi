@@ -1,0 +1,55 @@
+<div class="doc-view-dialog">
+  <header class="doc-view-header">
+    <h2 mat-dialog-title class="doc-view-title">{{ document.title }}</h2>
+    <button mat-icon-button (click)="close()" aria-label="Close" class="doc-view-close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <mat-dialog-content class="doc-view-content">
+    <section class="doc-view-preview">
+      <div class="doc-view-preview-inner" [class.is-pdf]="isPdf" [class.is-image]="isImage">
+        <ng-container *ngIf="isPdf">
+          <mat-icon class="doc-view-preview-icon pdf-icon">picture_as_pdf</mat-icon>
+          <span class="doc-view-preview-label">PDF document</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
+        </ng-container>
+        <ng-container *ngIf="!isPdf && isImage">
+          <mat-icon class="doc-view-preview-icon image-icon">image</mat-icon>
+          <span class="doc-view-preview-label">Image file</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
+        </ng-container>
+        <ng-container *ngIf="!isPdf && !isImage">
+          <mat-icon class="doc-view-preview-icon file-icon">description</mat-icon>
+          <span class="doc-view-preview-label">Uploaded file</span>
+          <span class="doc-view-filename" [title]="document.filename">{{ document.filename }}</span>
+        </ng-container>
+      </div>
+    </section>
+
+    <div class="doc-view-meta">
+      <div class="doc-view-meta-row">
+        <span class="doc-view-meta-label">Uploaded by</span>
+        <span class="doc-view-meta-value">{{ document.uploadedBy }}</span>
+      </div>
+      <div class="doc-view-meta-row">
+        <span class="doc-view-meta-label">Uploaded date</span>
+        <span class="doc-view-meta-value">{{ document.uploadedAt }}</span>
+      </div>
+      <div class="doc-view-meta-row" *ngIf="document.status === 'Verified'">
+        <span class="doc-view-meta-label">Status</span>
+        <span class="doc-view-status-badge verified">
+          <mat-icon>check_circle</mat-icon>
+          Verified
+        </span>
+      </div>
+    </div>
+
+    <div class="doc-view-actions" *ngIf="isPending">
+      <button mat-flat-button color="primary" (click)="verify()" class="doc-view-verify-btn">
+        <mat-icon>verified</mat-icon>
+        Verify document
+      </button>
+    </div>
+  </mat-dialog-content>
+</div>

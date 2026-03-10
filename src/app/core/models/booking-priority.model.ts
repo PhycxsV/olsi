@@ -24,6 +24,8 @@ export interface GeofenceStatus {
   inGeofence: boolean;
   zoneName: string | null;
   message: string;
+  radiusKm: number;
+  bookerLocation: { lat: number; lng: number };
 }
 
 export interface ActiveRider {
@@ -32,6 +34,7 @@ export interface ActiveRider {
   supplierId: string;
   supplierName: string;
   status: 'available' | 'busy' | 'offline';
+  distanceToBookerKm: number;
 }
 
 /** Response from mock POST /bookings (intake). */
@@ -65,6 +68,10 @@ export interface SupplierResponse {
 export interface Tier2Payload {
   status: BookingPriorityState;
   availableSupplierIds: string[];
-  availableSuppliers: { id: string; name: string; ridersInArea: number }[];
+  availableSuppliers: { id: string; name: string; ridersInArea: number; slaPercent: number }[];
   broadcastSentAt: string;
+  /** Set when auto-assigned by highest SLA. */
+  assignedSupplierId?: string;
+  assignedSupplierName?: string;
+  assignedSlaPercent?: number;
 }

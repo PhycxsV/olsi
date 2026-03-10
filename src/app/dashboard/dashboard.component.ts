@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { AccreditationService } from '../core/services/accreditation.service';
+import type { DocumentExpiringSoon } from '../core/models/accreditation.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,6 +10,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 })
 export class DashboardComponent {
   loading = false;
+  /** Days ahead to consider "expiring soon" for document expiry alerts */
+  readonly expiryAlertDays = 30;
   dateRange = new FormGroup({
     start: new FormControl<Date | null>(null),
     end: new FormControl<Date | null>(null),
@@ -44,6 +48,12 @@ export class DashboardComponent {
     { label: 'Cancelled', count: 4, total: 32, percent: 12.5, color: '#ef4444', subStatuses: ['Cancelled'] },
     { label: 'Returned', count: 2, total: 32, percent: 6.25, color: '#dc2626', subStatuses: ['Returned'] },
   ];
+
+  constructor(private accreditationService: AccreditationService) {}
+
+  get documentsExpiringSoon(): DocumentExpiringSoon[] {
+    return this.accreditationService.getDocumentsExpiringSoon(this.expiryAlertDays);
+  }
 
   clearDates(): void {
     this.dateRange.reset();

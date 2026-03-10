@@ -50,6 +50,28 @@
       </mat-card>
     </div>
 
+    <section class="section expiry-alerts-section" *ngIf="documentsExpiringSoon.length > 0">
+      <h2 class="section-title">
+        <mat-icon class="section-title-icon">warning</mat-icon>
+        Documents expiring soon
+      </h2>
+      <mat-card class="expiry-alerts-card">
+        <mat-card-content>
+          <p class="expiry-alerts-intro">The following provider documents expire within the next {{ expiryAlertDays }} days.</p>
+          <ul class="expiry-alerts-list">
+            <li *ngFor="let item of documentsExpiringSoon" class="expiry-alerts-item">
+              <span class="expiry-doc-title">{{ item.documentTitle }}</span>
+              <span class="expiry-doc-provider">{{ item.providerName }}</span>
+              <span class="expiry-doc-days" [class.expiry-urgent]="item.daysLeft <= 7">
+                {{ item.daysLeft }} day{{ item.daysLeft !== 1 ? 's' : '' }} left
+              </span>
+              <span class="expiry-doc-date">Expires: {{ item.expiryDate | date:'medium' }}</span>
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
     <section class="section chart-section">
       <h2 class="section-title">Bookings Over Time</h2>
       <div class="chart-wrapper">

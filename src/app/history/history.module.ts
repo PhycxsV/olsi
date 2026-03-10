@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HistoryRoutingModule } from './history-routing.module';
 import { HistoryComponent } from './history.component';
+import { HistoryDetailDialogComponent } from './history-detail-dialog/history-detail-dialog.component';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,11 +14,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
-  declarations: [HistoryComponent],
+  declarations: [HistoryComponent, HistoryDetailDialogComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -31,7 +32,7 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatTableModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatSidenavModule,
+    MatDialogModule,
     MatTabsModule,
   ],
 })
