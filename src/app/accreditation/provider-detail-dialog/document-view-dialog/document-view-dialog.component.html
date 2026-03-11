@@ -36,19 +36,28 @@
         <span class="doc-view-meta-label">Uploaded date</span>
         <span class="doc-view-meta-value">{{ document.uploadedAt }}</span>
       </div>
-      <div class="doc-view-meta-row" *ngIf="document.status === 'Verified'">
+      <div class="doc-view-meta-row">
         <span class="doc-view-meta-label">Status</span>
-        <span class="doc-view-status-badge verified">
-          <mat-icon>check_circle</mat-icon>
-          Verified
+        <span class="doc-view-status-badge" [ngClass]="statusBadgeClass">
+          <mat-icon>{{ statusIcon }}</mat-icon>
+          {{ document.status }}
         </span>
       </div>
     </div>
 
-    <div class="doc-view-actions" *ngIf="isPending">
-      <button mat-flat-button color="primary" (click)="verify()" class="doc-view-verify-btn">
-        <mat-icon>verified</mat-icon>
-        Verify document
+    <div class="doc-view-actions">
+      <span class="doc-view-status-label">Set status</span>
+      <mat-form-field appearance="outline" class="doc-view-status-select">
+        <mat-select [value]="document.status" (selectionChange)="setStatus($event.value)" placeholder="Choose status">
+          <mat-option value="Verified">Verified</mat-option>
+          <mat-option value="Rejected">Rejected</mat-option>
+          <mat-option value="Under Review">Under Review</mat-option>
+          <mat-option value="Pending">Pending</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="applyAndClose()" class="doc-view-apply-btn">
+        <mat-icon>check</mat-icon>
+        Apply &amp; close
       </button>
     </div>
   </mat-dialog-content>

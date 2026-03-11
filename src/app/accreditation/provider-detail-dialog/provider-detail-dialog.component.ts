@@ -34,6 +34,20 @@ export class ProviderDetailDialogComponent {
     return m[status] || 'badge-pending';
   }
 
+  getDocumentStatusClass(status: string): string {
+    if (status === 'Verified') return 'status-verified';
+    if (status === 'Rejected') return 'status-rejected';
+    if (status === 'Under Review') return 'status-under-review';
+    return 'status-pending';
+  }
+
+  getDocumentStatusIcon(status: string): string {
+    if (status === 'Verified') return 'check_circle';
+    if (status === 'Rejected') return 'cancel';
+    if (status === 'Under Review') return 'schedule';
+    return 'schedule';
+  }
+
   close(): void {
     this.dialogRef.close();
   }

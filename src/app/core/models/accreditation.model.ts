@@ -1,11 +1,13 @@
 export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
 
+export type DocumentStatus = 'Verified' | 'Pending' | 'Rejected' | 'Under Review';
+
 export interface ProviderDocument {
   title: string;
   filename: string;
   uploadedAt: string;
   uploadedBy: string;
-  status: 'Verified' | 'Pending';
+  status: DocumentStatus;
   note?: string;
   /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
   expiryDate?: string;

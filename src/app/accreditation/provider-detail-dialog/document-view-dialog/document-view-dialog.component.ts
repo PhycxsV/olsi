@@ -30,6 +30,29 @@ export class DocumentViewDialogComponent {
     return this.document.status === 'Pending';
   }
 
+  readonly statusOptions: Array<'Verified' | 'Pending' | 'Rejected' | 'Under Review'> = [
+    'Verified',
+    'Rejected',
+    'Under Review',
+    'Pending',
+  ];
+
+  get statusBadgeClass(): string {
+    const s = this.document.status;
+    if (s === 'Verified') return 'verified';
+    if (s === 'Rejected') return 'rejected';
+    if (s === 'Under Review') return 'under-review';
+    return 'pending';
+  }
+
+  get statusIcon(): string {
+    const s = this.document.status;
+    if (s === 'Verified') return 'check_circle';
+    if (s === 'Rejected') return 'cancel';
+    if (s === 'Under Review') return 'schedule';
+    return 'schedule';
+  }
+
   get fileExt(): string {
     const name = this.document.filename || '';
     const i = name.lastIndexOf('.');
@@ -44,11 +67,16 @@ export class DocumentViewDialogComponent {
     return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(this.fileExt);
   }
 
-  verify(): void {
-    this.document.status = 'Verified';
+  setStatus(status: 'Verified' | 'Pending' | 'Rejected' | 'Under Review'): void {
+    this.document.status = status;
     const docs = this.provider.documents || [];
     this.provider.documentsVerified = docs.filter(d => d.status === 'Verified').length;
-    this.dialogRef.close({ verified: true });
+  }
+
+  applyAndClose(): void {
+    const docs = this.provider.documents || [];
+    this.provider.documentsVerified = docs.filter(d => d.status === 'Verified').length;
+    this.dialogRef.close({ updated: true });
   }
 
   close(): void {

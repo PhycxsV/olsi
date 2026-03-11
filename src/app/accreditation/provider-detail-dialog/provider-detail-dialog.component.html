@@ -135,8 +135,8 @@
           <article class="document-card" *ngFor="let doc of (provider.documents || [])">
             <header class="document-card-header">
               <h4 class="document-card-title">{{ doc.title }}</h4>
-              <span class="document-card-status" [ngClass]="doc.status === 'Verified' ? 'status-verified' : 'status-pending'">
-                <mat-icon class="status-icon">{{ doc.status === 'Verified' ? 'check_circle' : 'schedule' }}</mat-icon>
+              <span class="document-card-status" [ngClass]="getDocumentStatusClass(doc.status)">
+                <mat-icon class="status-icon">{{ getDocumentStatusIcon(doc.status) }}</mat-icon>
                 {{ doc.status }}
               </span>
             </header>

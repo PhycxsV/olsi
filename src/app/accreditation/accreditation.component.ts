@@ -11,7 +11,7 @@ export interface ProviderDocument {
   filename: string;
   uploadedAt: string;
   uploadedBy: string;
-  status: 'Verified' | 'Pending';
+  status: 'Verified' | 'Pending' | 'Rejected' | 'Under Review';
   note?: string;
   /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
   expiryDate?: string;
