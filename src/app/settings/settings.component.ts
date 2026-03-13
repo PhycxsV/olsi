@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { CHARGING_RULES } from '../core/charging.model';
+import { PlatformSettingsService } from '../core/services/platform-settings.service';
 
 @Component({
   selector: 'app-settings',
@@ -14,7 +15,12 @@ export class SettingsComponent {
   perDistanceRule = CHARGING_RULES.per_distance;
   adValoremRule = CHARGING_RULES.ad_valorem;
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private platformSettingsService: PlatformSettingsService,
+  ) {
+    const providerBillingSettings = this.platformSettingsService.getProviderBillingSettings();
+
     this.settingsForm = this.fb.group({
       enableAutoDistribution: [true],
       firstComeFirstServed: [true],
@@ -32,10 +38,16 @@ export class SettingsComponent {
       perDistanceBaseRate: [CHARGING_RULES.per_distance.baseRatePhp],
       perDistanceExcessMultiplier: [CHARGING_RULES.per_distance.excessMultiplierPhpPerKm],
       adValoremMultiplier: [CHARGING_RULES.ad_valorem.multiplier],
+      autoDeductProviderSystemFee: [providerBillingSettings.autoDeductProviderSystemFee],
+      providerSystemFeePercent: [providerBillingSettings.providerSystemFeePercent],
     });
   }
 
   save(): void {
+    this.platformSettingsService.updateProviderBillingSettings({
+      autoDeductProviderSystemFee: !!this.settingsForm.get('autoDeductProviderSystemFee')?.value,
+      providerSystemFeePercent: Number(this.settingsForm.get('providerSystemFeePercent')?.value) || 5,
+    });
     console.log('Save settings', this.settingsForm.value);
   }
 }
