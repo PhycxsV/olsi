@@ -44,7 +44,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Date</mat-label>
-          <mat-select [(ngModel)]="dateFilter">
+          <mat-select [(ngModel)]="dateFilter" (ngModelChange)="applyFilters()">
             <mat-option *ngFor="let o of dateOptions" [value]="o.value">{{ o.label }}</mat-option>
           </mat-select>
         </mat-form-field>

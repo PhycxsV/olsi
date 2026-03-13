@@ -86,6 +86,16 @@
   justify-content: flex-end;
 }
 
+.detail-tabs {
+  background: transparent;
+}
+
+.tab-panel {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -129,6 +139,13 @@
   color: #0f172a;
 }
 
+.section-copy {
+  margin: 0 0 14px;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .detail-row {
   display: flex;
   align-items: center;
@@ -151,6 +168,109 @@
   font-size: 0.92rem;
   color: #0f172a;
   text-align: right;
+}
+
+.billing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.billing-field {
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.biweekly-controls {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.date-range-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.range-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.range-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.range-helper {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.billing-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #9c1f22 0%, #c2410c 100%);
+  color: #fff;
+}
+
+.billing-highlight-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.88;
+}
+
+.billing-highlight-value {
+  font-size: 1.6rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.billing-highlight-note {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.billing-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.full-width-field {
+  width: 100%;
+}
+
+.billing-footnote {
+  margin: 12px 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+}
+
+.variance-negative {
+  color: #b91c1c;
 }
 
 .rider-list {
@@ -207,6 +327,14 @@
 
 @media (max-width: 768px) {
   .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .billing-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .date-range-fields {
     grid-template-columns: 1fr;
   }
 }
