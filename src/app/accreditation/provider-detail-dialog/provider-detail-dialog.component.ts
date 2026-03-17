@@ -52,6 +52,10 @@ export class ProviderDetailDialogComponent {
     this.dialogRef.close();
   }
 
+  edit(): void {
+    this.dialogRef.close({ action: 'edit' });
+  }
+
   onFileSelectedForDoc(event: Event, doc: ProviderDocument): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

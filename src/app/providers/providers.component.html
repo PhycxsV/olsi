@@ -15,10 +15,25 @@
       <input matInput [(ngModel)]="searchText" placeholder="Search providers..." />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
-    <button mat-stroked-button>
+    <button mat-stroked-button [matMenuTriggerFor]="filtersMenu">
       <mat-icon>filter_list</mat-icon>
       Filters
+      <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
     </button>
+    <mat-menu #filtersMenu="matMenu" xPosition="before">
+      <button mat-menu-item (click)="setStatusFilter('')">
+        <mat-icon *ngIf="!statusFilter">check</mat-icon>
+        <span>All statuses</span>
+      </button>
+      <button mat-menu-item (click)="setStatusFilter('Active')">
+        <mat-icon *ngIf="statusFilter === 'Active'">check</mat-icon>
+        <span>Active</span>
+      </button>
+      <button mat-menu-item (click)="setStatusFilter('Paused')">
+        <mat-icon *ngIf="statusFilter === 'Paused'">check</mat-icon>
+        <span>Paused</span>
+      </button>
+    </mat-menu>
   </div>
 
   <div class="provider-cards">

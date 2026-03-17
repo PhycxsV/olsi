@@ -9,6 +9,10 @@
     </div>
     <div class="header-actions">
       <span class="status-badge" [ngClass]="getStatusClass(provider.status)">{{ provider.status }}</span>
+      <button mat-stroked-button (click)="edit()" class="header-edit-btn">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
       <button mat-icon-button (click)="close()" aria-label="Close">
         <mat-icon>close</mat-icon>
       </button>

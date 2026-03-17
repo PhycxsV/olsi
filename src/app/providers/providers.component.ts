@@ -25,6 +25,8 @@ export interface ProviderCard {
 })
 export class ProvidersComponent implements OnInit {
   searchText = '';
+  /** '' = all, 'Active' | 'Paused' */
+  statusFilter: 'Active' | 'Paused' | '' = '';
 
   constructor(
     private dialog: MatDialog,
@@ -46,11 +48,21 @@ export class ProvidersComponent implements OnInit {
   }
 
   get filteredProviders(): ProviderCard[] {
-    if (!this.searchText.trim()) return this.providers;
-    const q = this.searchText.toLowerCase();
-    return this.providers.filter(p =>
-      p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q)
-    );
+    let list = this.providers;
+    if (this.statusFilter) {
+      list = list.filter(p => p.status === this.statusFilter);
+    }
+    if (this.searchText.trim()) {
+      const q = this.searchText.toLowerCase();
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(q) || p.location.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }
+
+  setStatusFilter(value: 'Active' | 'Paused' | ''): void {
+    this.statusFilter = value;
   }
 
   get summaryText(): string {

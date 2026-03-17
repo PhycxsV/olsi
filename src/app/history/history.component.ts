@@ -1,19 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
+import { DeliveryHistoryService, HistoryRow } from '../core/services/delivery-history.service';
 import { HistoryDetailDialogComponent } from './history-detail-dialog/history-detail-dialog.component';
-
-export type DeliveryStatus = 'Pending' | 'Unassigned' | 'Offered' | 'Assigned' | 'In Progress' | 'Completed';
-
-export interface HistoryRow {
-  bookingId: string;
-  client: string;
-  provider: string;
-  pickup: string;
-  dropoff: string;
-  status: DeliveryStatus;
-  amount: string;
-}
 
 @Component({
   selector: 'app-history',
@@ -25,21 +14,11 @@ export class HistoryComponent implements OnInit {
   dateFilter = '';
   clientFilter = '';
   providerFilter = '';
-
-  records: HistoryRow[] = [
-    { bookingId: 'BK-001', client: 'FreshMart', provider: 'SpeedRiders', pickup: '123 Warehouse Rd. CBD', dropoff: '456 Customer Ave. Makati', status: 'Pending', amount: '₱150' },
-    { bookingId: 'BK-002', client: 'QuickEats', provider: '—', pickup: '789 Restaurant Blvd. BGC', dropoff: '321 Condo Tower, Ortigas', status: 'Unassigned', amount: '₱85' },
-    { bookingId: 'BK-003', client: 'MediPharm', provider: '—', pickup: '555 Pharma Bldg', dropoff: '100 Health St. QC', status: 'Offered', amount: '₱120' },
-    { bookingId: 'BK-004', client: 'TechStore', provider: 'MetroFleet', pickup: '200 Tech Park', dropoff: '88 Gadget Lane', status: 'Assigned', amount: '₱200' },
-    { bookingId: 'BK-005', client: 'FreshMart', provider: 'SpeedRiders', pickup: '123 Warehouse Rd. CBD', dropoff: '777 Subdivision, Cavite', status: 'In Progress', amount: '₱180' },
-    { bookingId: 'BK-006', client: 'QuickEats', provider: 'MetroFleet', pickup: '789 Restaurant Blvd. BGC', dropoff: '50 Food Court, Pasig', status: 'Completed', amount: '₱95' },
-    { bookingId: 'BK-007', client: 'GreenGrocers', provider: 'SwiftDeliver', pickup: '400 Farm Rd.', dropoff: '22 Market St.', status: 'Completed', amount: '₱160' },
-    { bookingId: 'BK-008', client: 'FashionHub', provider: '—', pickup: '600 Mall Ave.', dropoff: '15 Residence Blvd.', status: 'Pending', amount: '₱140' },
-  ];
+  records: HistoryRow[] = [];
 
   dateOptions = [{ value: '', label: 'All Dates' }, { value: 'today', label: 'Today' }, { value: 'week', label: 'This Week' }, { value: 'month', label: 'This Month' }];
-  clientOptions = [{ value: '', label: 'All Clients' }, { value: 'FreshMart', label: 'FreshMart' }, { value: 'QuickEats', label: 'QuickEats' }, { value: 'MediPharm', label: 'MediPharm' }, { value: 'TechStore', label: 'TechStore' }, { value: 'GreenGrocers', label: 'GreenGrocers' }, { value: 'FashionHub', label: 'FashionHub' }];
-  providerOptions = [{ value: '', label: 'All Providers' }, { value: 'SpeedRiders', label: 'SpeedRiders' }, { value: 'MetroFleet', label: 'MetroFleet' }, { value: 'SwiftDeliver', label: 'SwiftDeliver' }];
+  clientOptions = [{ value: '', label: 'All Clients' }];
+  providerOptions = [{ value: '', label: 'All Providers' }];
 
   filteredRecords: HistoryRow[] = [];
   displayedColumns = ['bookingId', 'client', 'provider', 'pickup', 'dropoff', 'status', 'amount'];
@@ -47,9 +26,17 @@ export class HistoryComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private dialog: MatDialog,
+    private deliveryHistoryService: DeliveryHistoryService,
   ) {}
 
   ngOnInit(): void {
+    this.records = this.deliveryHistoryService.getRecords();
+    this.clientOptions = this.buildOptions(this.records.map(record => record.client), 'All Clients');
+    this.providerOptions = this.buildOptions(
+      this.records.map(record => record.provider).filter(provider => provider !== '—'),
+      'All Providers',
+    );
+
     this.route.queryParams.subscribe(params => {
       const order = params['order'];
       if (order) {
@@ -67,11 +54,8 @@ export class HistoryComponent implements OnInit {
   }
 
   get totalRevenue(): string {
-    const sum = this.filteredRecords.reduce((acc, r) => {
-      const n = parseInt(r.amount.replace(/[^\d]/g, ''), 10) || 0;
-      return acc + n;
-    }, 0);
-    return `₱${sum}`;
+    const sum = this.deliveryHistoryService.sumAmounts(this.filteredRecords);
+    return this.deliveryHistoryService.formatCurrency(sum);
   }
 
   get avgDeliveryTime(): string {
@@ -84,6 +68,26 @@ export class HistoryComponent implements OnInit {
 
   applyFilters(): void {
     let list = [...this.records];
+    if (this.dateFilter) {
+      const now = new Date();
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+
+      if (this.dateFilter === 'week') {
+        start.setDate(now.getDate() - 6);
+      } else if (this.dateFilter === 'month') {
+        start.setDate(1);
+      }
+
+      list = list.filter(record => {
+        const recordDate = this.deliveryHistoryService.getRecordDate(record);
+        if (!recordDate) return false;
+        if (this.dateFilter === 'today') {
+          return recordDate >= start;
+        }
+        return recordDate >= start && recordDate <= now;
+      });
+    }
     if (this.clientFilter) {
       list = list.filter(r => r.client === this.clientFilter);
     }
@@ -104,8 +108,10 @@ export class HistoryComponent implements OnInit {
   }
 
   exportCsv(): void {
-    const headers = this.displayedColumns.join(',');
-    const rows = this.filteredRecords.map(r => `${r.bookingId},${r.client},${r.provider},"${r.pickup}","${r.dropoff}",${r.status},${r.amount}`);
+    const headers = [...this.displayedColumns, 'recordedAt', 'completedAt'].join(',');
+    const rows = this.filteredRecords.map(r =>
+      `${r.bookingId},${r.client},${r.provider},"${r.pickup}","${r.dropoff}",${r.status},${r.amount},${r.recordedAt},${r.completedAt ?? ''}`
+    );
     const csv = [headers, ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -140,5 +146,10 @@ export class HistoryComponent implements OnInit {
       Completed: 'badge-completed',
     };
     return m[status] || 'badge-pending';
+  }
+
+  private buildOptions(values: string[], allLabel: string): Array<{ value: string; label: string }> {
+    const unique = [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    return [{ value: '', label: allLabel }, ...unique.map(value => ({ value, label: value }))];
   }
 }

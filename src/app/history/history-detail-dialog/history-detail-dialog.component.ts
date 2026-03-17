@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { HistoryRow } from '../history.component';
+import { HistoryRow } from '../../core/services/delivery-history.service';
 
 @Component({
   selector: 'app-history-detail-dialog',

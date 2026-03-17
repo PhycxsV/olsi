@@ -1,5 +1,5 @@
 <div class="add-provider-dialog">
-  <h2 mat-dialog-title>Add Provider</h2>
+  <h2 mat-dialog-title>{{ isEditMode ? 'Edit Provider' : 'Add Provider' }}</h2>
 
   <mat-dialog-content>
     <section class="form-section">
@@ -128,6 +128,6 @@
 
   <mat-dialog-actions align="end" class="dialog-actions">
     <button mat-button type="button" (click)="close()">Cancel</button>
-    <button mat-flat-button color="primary" type="button" (click)="save()">Add Provider</button>
+    <button mat-flat-button color="primary" type="button" (click)="save()">{{ isEditMode ? 'Save' : 'Add Provider' }}</button>
   </mat-dialog-actions>
 </div>

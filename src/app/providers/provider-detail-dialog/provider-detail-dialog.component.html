@@ -16,57 +16,191 @@
   </div>
 
   <div class="dialog-body">
-    <section class="metrics-grid">
-      <article class="metric-card">
-        <span class="metric-label">Riders</span>
-        <strong class="metric-value">{{ data.provider.activeRiders }}/{{ data.provider.totalRiders }}</strong>
-      </article>
-      <article class="metric-card">
-        <span class="metric-label">Avg. Time</span>
-        <strong class="metric-value">{{ data.provider.avgTimeMin }} min</strong>
-      </article>
-      <article class="metric-card">
-        <span class="metric-label">Acceptance</span>
-        <strong class="metric-value">{{ data.provider.acceptancePercent }}%</strong>
-      </article>
-      <article class="metric-card">
-        <span class="metric-label">SLA</span>
-        <strong class="metric-value">{{ data.provider.slaPercent }}%</strong>
-      </article>
-    </section>
+    <div class="top-actions">
+      <button mat-stroked-button color="primary" (click)="editProvider()">Edit Provider</button>
+    </div>
 
-    <section class="section-card">
-      <h3 class="section-title">Operational Summary</h3>
-      <div class="detail-row">
-        <span>Service Area</span>
-        <strong>{{ data.provider.location }}</strong>
-      </div>
-      <div class="detail-row">
-        <span>Deliveries Today</span>
-        <strong>{{ data.provider.deliveriesToday }}</strong>
-      </div>
-      <div class="detail-row">
-        <span>Status</span>
-        <strong>{{ data.provider.status }}</strong>
-      </div>
-    </section>
+    <mat-tab-group class="detail-tabs">
+      <mat-tab label="Overview">
+        <div class="tab-panel">
+          <section class="metrics-grid">
+            <article class="metric-card">
+              <span class="metric-label">Riders</span>
+              <strong class="metric-value">{{ data.provider.activeRiders }}/{{ data.provider.totalRiders }}</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Avg. Time</span>
+              <strong class="metric-value">{{ data.provider.avgTimeMin }} min</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">Acceptance</span>
+              <strong class="metric-value">{{ data.provider.acceptancePercent }}%</strong>
+            </article>
+            <article class="metric-card">
+              <span class="metric-label">SLA</span>
+              <strong class="metric-value">{{ data.provider.slaPercent }}%</strong>
+            </article>
+          </section>
 
-    <section class="section-card">
-      <h3 class="section-title">Riders</h3>
-      <div class="rider-list" *ngIf="data.riders.length; else noRiders">
-        <article class="rider-card" *ngFor="let row of data.riders">
-          <div class="rider-head">
-            <h4>{{ row.riderName }}</h4>
-            <span>{{ row.riderId }}</span>
-          </div>
-          <div class="rider-meta">
-            <p><span>Added</span>{{ row.addedAt }}</p>
-          </div>
-        </article>
-      </div>
-      <ng-template #noRiders>
-        <p class="empty-state">No riders linked to this provider yet.</p>
-      </ng-template>
-    </section>
+          <section class="section-card">
+            <h3 class="section-title">Operational Summary</h3>
+            <div class="detail-row">
+              <span>Service Area</span>
+              <strong>{{ data.provider.location }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Deliveries Today</span>
+              <strong>{{ data.provider.deliveriesToday }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Status</span>
+              <strong>{{ data.provider.status }}</strong>
+            </div>
+          </section>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Billing">
+        <div class="tab-panel">
+          <section class="section-card">
+            <div class="billing-controls">
+              <mat-form-field appearance="outline" class="billing-field">
+                <mat-label>Billing view</mat-label>
+                <mat-select [(ngModel)]="periodType" (ngModelChange)="onPeriodTypeChange()">
+                  <mat-option value="monthly">Monthly</mat-option>
+                  <mat-option value="biweekly">14-day range</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field *ngIf="periodType === 'monthly'" appearance="outline" class="billing-field">
+                <mat-label>Month</mat-label>
+                <mat-select [(ngModel)]="selectedMonthValue" (ngModelChange)="onMonthChange()">
+                  <mat-option *ngFor="let option of monthlyRanges" [value]="option.value">{{ option.label }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <div *ngIf="periodType === 'biweekly'" class="biweekly-controls">
+                <div class="date-range-fields">
+                  <mat-form-field appearance="outline" class="billing-field">
+                    <mat-label>Start date</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="biweeklyStartPicker"
+                      [ngModel]="biweeklyStartDate"
+                      (ngModelChange)="onBiweeklyStartDateChange($event)"
+                      [max]="maxBiweeklyStartDate"
+                      name="biweeklyStartDate" />
+                    <mat-datepicker-toggle matSuffix [for]="biweeklyStartPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #biweeklyStartPicker></mat-datepicker>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="billing-field">
+                    <mat-label>End date</mat-label>
+                    <input
+                      matInput
+                      [matDatepicker]="biweeklyEndPicker"
+                      [ngModel]="biweeklyEndDate"
+                      (ngModelChange)="onBiweeklyEndDateChange($event)"
+                      [max]="maxBiweeklyEndDate"
+                      name="biweeklyEndDate" />
+                    <mat-datepicker-toggle matSuffix [for]="biweeklyEndPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #biweeklyEndPicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+
+                <div class="range-summary">
+                  <span class="range-pill">14-day billing window</span>
+                  <p class="range-helper">Selecting either date automatically keeps the range at 14 days.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="billing-highlight">
+              <span class="billing-highlight-label">{{ primaryDisplayedTotalLabel }}</span>
+              <strong class="billing-highlight-value">{{ primaryDisplayedTotalText }}</strong>
+              <span class="billing-highlight-note">{{ currentRangeLabel }}</span>
+            </div>
+
+            <div class="billing-summary-grid">
+              <article class="metric-card">
+                <span class="metric-label">Completed Deliveries</span>
+                <strong class="metric-value">{{ completedDeliveryCount }}</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">Computed Delivery Total</span>
+                <strong class="metric-value">{{ computedDeliveryTotalText }}</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">IT/System Fee ({{ systemFeePercent }}%)</span>
+                <strong class="metric-value">{{ systemFeeAmountText }}</strong>
+              </article>
+              <article class="metric-card">
+                <span class="metric-label">Variance vs Computed</span>
+                <strong class="metric-value" [class.variance-negative]="variance < 0">{{ varianceText }}</strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="section-card">
+            <h3 class="section-title">Sales Invoice Comparison</h3>
+            <p class="section-copy">
+              Enter the provider's submitted Sales Invoice total for this period. OLSI can compare it against completed deliveries and optionally view the net after the IT/System fee.
+            </p>
+
+            <mat-form-field appearance="outline" class="full-width-field">
+              <mat-label>Provider Sales Invoice total</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                [ngModel]="salesInvoiceTotal"
+                (ngModelChange)="onSalesInvoiceTotalChange($event)"
+                name="salesInvoiceTotal" />
+            </mat-form-field>
+
+            <div class="detail-row">
+              <span>Provider SI (gross)</span>
+              <strong>{{ salesInvoiceTotalText }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Less IT/System fee</span>
+              <strong>{{ systemFeeAmountText }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Net after fee</span>
+              <strong>{{ netAfterFeeText }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Computed completed deliveries</span>
+              <strong>{{ computedDeliveryTotalText }}</strong>
+            </div>
+
+            <p class="billing-footnote">{{ varianceLabel }}</p>
+          </section>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Riders">
+        <div class="tab-panel">
+          <section class="section-card">
+            <h3 class="section-title">Riders</h3>
+            <div class="rider-list" *ngIf="data.riders.length; else noRiders">
+              <article class="rider-card" *ngFor="let row of data.riders">
+                <div class="rider-head">
+                  <h4>{{ row.riderName }}</h4>
+                  <span>{{ row.riderId }}</span>
+                </div>
+                <div class="rider-meta">
+                  <p><span>Added</span>{{ row.addedAt }}</p>
+                </div>
+              </article>
+            </div>
+            <ng-template #noRiders>
+              <p class="empty-state">No riders linked to this provider yet.</p>
+            </ng-template>
+          </section>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </div>
 </div>

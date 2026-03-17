@@ -16,6 +16,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [ProvidersComponent, ProviderFormDialogComponent, ProviderDetailDialogComponent],
@@ -31,6 +34,9 @@ import { MatSelectModule } from '@angular/material/select';
     MatMenuModule,
     MatSlideToggleModule,
     MatSelectModule,
+    MatTabsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatDialogModule,
   ],
 })
