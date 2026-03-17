@@ -68,10 +68,16 @@
           <span class="documents-count">{{ p.documentsVerified }}/{{ p.documentsTotal }} verified</span>
         </div>
         <p class="app-usage">{{ p.appUsage }}</p>
-        <button mat-stroked-button class="view-details-btn" (click)="openDetail(p)">
-          <mat-icon>visibility</mat-icon>
-          View Details
-        </button>
+        <div class="card-actions">
+          <button mat-stroked-button class="view-details-btn" (click)="openDetail(p)">
+            <mat-icon>visibility</mat-icon>
+            View Details
+          </button>
+          <button mat-stroked-button class="edit-btn" (click)="openEditProvider(p)">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </button>
+        </div>
       </mat-card-content>
     </mat-card>
   </div>

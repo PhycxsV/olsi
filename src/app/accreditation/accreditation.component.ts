@@ -167,6 +167,10 @@ export class AccreditationComponent implements OnInit {
       panelClass: 'provider-detail-dialog-right',
       enterAnimationDuration: '300ms',
       exitAnimationDuration: '250ms',
+    }).afterClosed().subscribe((result: { action?: string } | undefined) => {
+      if (result?.action === 'edit') {
+        this.openEditProvider(provider);
+      }
     });
   }
 
@@ -183,6 +187,55 @@ export class AccreditationComponent implements OnInit {
       this.providers = [...this.providers, newProvider];
       this.accreditationService.setProviders(this.providers);
     });
+  }
+
+  openEditProvider(provider: AccreditationProvider): void {
+    const draft = this.providerToDraft(provider);
+    this.dialog.open(AddProviderDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      data: { draft, mode: 'edit', providerId: provider.id },
+    }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
+      if (!result) return;
+      const idx = this.providers.findIndex(p => p.id === provider.id);
+      if (idx < 0) return;
+      const existing = this.providers[idx];
+      const updated = this.buildProviderFromDraft(result);
+      this.providers[idx] = {
+        ...updated,
+        id: existing.id,
+        documents: existing.documents,
+        documentsVerified: existing.documentsVerified,
+        documentsTotal: existing.documentsTotal,
+        activeRiders: existing.activeRiders,
+        accreditedOn: existing.accreditedOn,
+        registeredOn: existing.registeredOn,
+        apiTokenMasked: result.apiToken?.trim() ? (result.apiToken.slice(0, 8) + '........') : existing.apiTokenMasked,
+      };
+      this.providers = [...this.providers];
+      this.accreditationService.setProviders(this.providers);
+    });
+  }
+
+  private providerToDraft(provider: AccreditationProvider): AddProviderDraft {
+    return {
+      name: provider.name,
+      registrationId: provider.registrationId,
+      status: provider.status,
+      capacity: provider.capacity,
+      officeAddress: provider.officeAddress,
+      garageAddress: provider.garageAddress,
+      rateType: provider.rateType,
+      serviceAreas: provider.serviceAreas ? [...provider.serviceAreas] : [],
+      appUsage: provider.appUsage,
+      contactPerson: provider.contactPerson,
+      phone: provider.phone,
+      email: provider.email,
+      apiUrl: provider.apiUrl ?? '',
+      apiToken: '',
+      bank: provider.bank ? { ...provider.bank } : undefined,
+    };
   }
 
   private createEmptyAddProviderDraft(): AddProviderDraft {

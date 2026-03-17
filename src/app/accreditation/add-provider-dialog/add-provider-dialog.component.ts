@@ -23,6 +23,9 @@ export interface AddProviderDraft {
 
 export interface AddProviderDialogData {
   draft: AddProviderDraft;
+  mode?: 'add' | 'edit';
+  /** Set when mode is 'edit' so the parent can update the correct provider. */
+  providerId?: string;
 }
 
 @Component({
@@ -33,6 +36,7 @@ export interface AddProviderDialogData {
 export class AddProviderDialogComponent {
   draft: AddProviderDraft;
   showBank = false;
+  readonly isEditMode: boolean;
 
   readonly rateTypeOptions = [
     { value: 'Fixed Rate', label: 'Fixed Rate' },
@@ -47,6 +51,7 @@ export class AddProviderDialogComponent {
     private dialogRef: MatDialogRef<AddProviderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddProviderDialogData,
   ) {
+    this.isEditMode = data.mode === 'edit';
     this.draft = {
       ...data.draft,
       serviceAreas: data.draft.serviceAreas ? [...data.draft.serviceAreas] : [],

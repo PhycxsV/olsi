@@ -1,10 +1,14 @@
 :host {
   display: block;
+  width: 100%;
 }
 
 .accreditation-container {
-  max-width: 1400px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -13,7 +17,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .title-block {
@@ -55,7 +59,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
   .search-field {
     width: 280px;
@@ -69,8 +73,8 @@
 .status-cards {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .status-card {
@@ -136,8 +140,8 @@
 
 .provider-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
 }
 
 .provider-card {
@@ -150,7 +154,7 @@
   }
 
   .mat-mdc-card-content {
-    padding: 20px !important;
+    padding: 16px !important;
   }
 }
 
@@ -270,9 +274,17 @@
   color: #6b7280;
 }
 
-.view-details-btn {
+.card-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
   margin-top: 16px;
-  width: 100%;
+}
+
+.view-details-btn,
+.edit-btn {
+  flex: 1;
+  min-width: 0;
 
   mat-icon {
     margin-right: 6px;
