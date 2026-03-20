@@ -1,0 +1,37 @@
+<div class="login-page">
+  <div class="bg-orb orb-one"></div>
+  <div class="bg-orb orb-two"></div>
+
+  <section class="login-shell">
+    <mat-card class="login-card">
+      <div class="card-accent-top"></div>
+      <div class="card-head">
+        <span class="card-kicker">One Stop Logistics Solutions</span>
+        <h2>Sign in</h2>
+        <p>Use your test account to continue</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" placeholder="name@test.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+        </mat-form-field>
+
+        <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+        <button mat-flat-button color="primary" class="full-width login-btn" type="submit">Log in</button>
+      </form>
+
+      <div class="mock-accounts">
+        <p class="accounts-title">Mock accounts</p>
+        <p><strong>Admin:</strong> admin@test.com / admin123</p>
+        <p><strong>User:</strong> non-admin@test.com / user123</p>
+      </div>
+    </mat-card>
+  </section>
+</div>

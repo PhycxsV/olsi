@@ -5,6 +5,7 @@ export interface ProviderFormDraft {
   name: string;
   location: string;
   status: 'Active' | 'Paused';
+  integrationType: 'provider_app' | 'aggregator_app' | 'third_party_app';
   activeRiders: number;
   totalRiders: number;
   avgTimeMin: number;
@@ -24,6 +25,11 @@ export interface ProviderFormDialogData {
 })
 export class ProviderFormDialogComponent {
   draft: ProviderFormDraft;
+  readonly integrationTypeOptions: Array<{ value: ProviderFormDraft['integrationType']; label: string }> = [
+    { value: 'provider_app', label: 'Provider Rider App' },
+    { value: 'aggregator_app', label: 'Aggregator Rider App' },
+    { value: 'third_party_app', label: '3rd Party App' },
+  ];
 
   constructor(
     private dialogRef: MatDialogRef<ProviderFormDialogComponent>,

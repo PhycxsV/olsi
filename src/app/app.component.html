@@ -1,3 +1,8 @@
+<div class="auth-route-shell" *ngIf="isLoginRoute; else appShell">
+  <router-outlet></router-outlet>
+</div>
+
+<ng-template #appShell>
 <div class="app-shell">
   <header class="app-header">
     <button mat-icon-button class="menu-btn" (click)="mobileDrawerOpen = true" aria-label="Menu">
@@ -9,7 +14,7 @@
       <span class="logo-blue">Logistics Solutions</span>
     </div>
     <nav class="main-nav">
-      <a *ngFor="let item of navItems" mat-button [routerLink]="item.path" routerLinkActive="active">
+      <a *ngFor="let item of visibleNavItems" mat-button [routerLink]="item.path" routerLinkActive="active">
         <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
         <span class="nav-label">{{ item.label }}</span>
       </a>
@@ -22,8 +27,8 @@
       <mat-icon>account_circle</mat-icon>
     </button>
     <mat-menu #userMenu="matMenu">
-      <button mat-menu-item disabled>Profile</button>
-      <button mat-menu-item disabled>Log out</button>
+      <button mat-menu-item disabled>{{ currentUserLabel }}</button>
+      <button mat-menu-item (click)="logout()">Log out</button>
     </mat-menu>
   </header>
 
@@ -35,7 +40,7 @@
       </div>
       <div class="drawer-nav">
         <a
-          *ngFor="let item of navItems"
+          *ngFor="let item of visibleNavItems"
           mat-list-item
           [routerLink]="item.path"
           routerLinkActive="active"
@@ -53,3 +58,4 @@
     </mat-drawer-content>
   </mat-drawer-container>
 </div>
+</ng-template>

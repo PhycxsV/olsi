@@ -3,6 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
 import { AccreditationService } from '../core/services/accreditation.service';
+import { VEHICLE_TYPES } from '../core/vehicle.model';
+import { CHARGING_TYPES } from '../core/charging.model';
+import { ProviderRateService } from '../core/services/provider-rate.service';
+import type { ProviderRateCsvError, ProviderRateRow } from '../core/models/provider-rate.model';
 
 export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
 
@@ -66,6 +70,13 @@ export interface StatusCardItem {
 export class AccreditationComponent implements OnInit {
   searchText = '';
   statusFilter: AccreditationStatus | '' = '';
+  viewMode: 'cards' | 'table' = 'cards';
+  readonly tableColumns: string[] = ['name', 'registrationId', 'status', 'capacity', 'documents', 'serviceAreas', 'actions'];
+  readonly rateCsvHeaders = ['provider name', 'vehicle type', 'charging type', 'rate'];
+  selectedRateCsvFileName = '';
+  rateCsvImportErrors: ProviderRateCsvError[] = [];
+  rateCsvImportSuccess = '';
+  providerRates: ProviderRateRow[] = [];
 
   statusCards: StatusCardItem[] = [
     { label: 'Total', value: 6, type: 'total' },
@@ -110,12 +121,14 @@ export class AccreditationComponent implements OnInit {
   constructor(
     private dialog: MatDialog,
     private accreditationService: AccreditationService,
+    private providerRateService: ProviderRateService,
   ) {}
 
   ngOnInit(): void {
     if (this.accreditationService.getProviders().length === 0) {
       this.accreditationService.setProviders(this.providers);
     }
+    this.providerRates = this.providerRateService.getRates();
   }
 
   get filteredProviders(): AccreditationProvider[] {
@@ -132,6 +145,170 @@ export class AccreditationComponent implements OnInit {
       );
     }
     return list;
+  }
+
+  setViewMode(mode: 'cards' | 'table'): void {
+    this.viewMode = mode;
+  }
+
+  onRateCsvSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.selectedRateCsvFileName = file?.name || '';
+    this.rateCsvImportErrors = [];
+    this.rateCsvImportSuccess = '';
+  }
+
+  importProviderRatesCsv(fileInput: HTMLInputElement): void {
+    const file = fileInput.files?.[0];
+    if (!file) {
+      this.rateCsvImportErrors = [{ row: 0, message: 'Please choose a CSV file to import.' }];
+      this.rateCsvImportSuccess = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const csvText = typeof reader.result === 'string' ? reader.result : '';
+      const result = this.parseAndValidateProviderRatesCsv(csvText);
+      if (result.errors.length) {
+        this.rateCsvImportErrors = result.errors;
+        this.rateCsvImportSuccess = '';
+        return;
+      }
+      this.providerRateService.replaceAll(result.rows);
+      this.providerRates = this.providerRateService.getRates();
+      this.rateCsvImportErrors = [];
+      this.rateCsvImportSuccess = `Imported ${result.rows.length} provider rate row(s).`;
+      fileInput.value = '';
+      this.selectedRateCsvFileName = '';
+    };
+    reader.onerror = () => {
+      this.rateCsvImportErrors = [{ row: 0, message: 'Failed to read CSV file.' }];
+      this.rateCsvImportSuccess = '';
+    };
+    reader.readAsText(file);
+  }
+
+  private parseAndValidateProviderRatesCsv(csvText: string): { rows: ProviderRateRow[]; errors: ProviderRateCsvError[] } {
+    const lines = csvText
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
+    if (!lines.length) {
+      return { rows: [], errors: [{ row: 1, message: 'CSV file is empty.' }] };
+    }
+
+    const headerCells = this.parseCsvLine(lines[0]).map(cell => cell.trim().toLowerCase());
+    const headerIsValid = headerCells.length === this.rateCsvHeaders.length &&
+      this.rateCsvHeaders.every((header, idx) => headerCells[idx] === header);
+    if (!headerIsValid) {
+      return {
+        rows: [],
+        errors: [{ row: 1, message: `Invalid CSV header. Expected: ${this.rateCsvHeaders.join(', ')}` }],
+      };
+    }
+
+    const knownProviders = new Map<string, string>(
+      this.providers.map(provider => [provider.name.trim().toLowerCase(), provider.name.trim()]),
+    );
+    const allowedVehicleTypes = new Set<string>([
+      ...VEHICLE_TYPES.map(v => v.id.toLowerCase()),
+      ...VEHICLE_TYPES.map(v => v.label.toLowerCase()),
+    ]);
+    const allowedChargingTypes = new Set<string>([
+      ...CHARGING_TYPES.map(c => c.id.toLowerCase()),
+      ...CHARGING_TYPES.map(c => c.label.toLowerCase()),
+    ]);
+
+    const errors: ProviderRateCsvError[] = [];
+    const rows: ProviderRateRow[] = [];
+    const seenKeys = new Set<string>();
+
+    for (let i = 1; i < lines.length; i++) {
+      const rowNumber = i + 1;
+      const cells = this.parseCsvLine(lines[i]).map(cell => cell.trim());
+      if (cells.length !== this.rateCsvHeaders.length) {
+        errors.push({ row: rowNumber, message: 'Invalid column count.' });
+        continue;
+      }
+
+      const [providerNameRaw, vehicleTypeRaw, chargingTypeRaw, rateRaw] = cells;
+      if (!providerNameRaw || !vehicleTypeRaw || !chargingTypeRaw || !rateRaw) {
+        errors.push({ row: rowNumber, message: 'All columns are required.' });
+        continue;
+      }
+
+      const providerNameKey = providerNameRaw.toLowerCase();
+      const vehicleTypeKey = vehicleTypeRaw.toLowerCase();
+      const chargingTypeKey = chargingTypeRaw.toLowerCase();
+      const canonicalProviderName = knownProviders.get(providerNameKey);
+      if (!canonicalProviderName) {
+        errors.push({ row: rowNumber, message: `Unknown provider name: ${providerNameRaw}` });
+        continue;
+      }
+      if (!allowedVehicleTypes.has(vehicleTypeKey)) {
+        errors.push({ row: rowNumber, message: `Unknown vehicle type: ${vehicleTypeRaw}` });
+        continue;
+      }
+      if (!allowedChargingTypes.has(chargingTypeKey)) {
+        errors.push({ row: rowNumber, message: `Unknown charging type: ${chargingTypeRaw}` });
+        continue;
+      }
+
+      const rate = Number(rateRaw);
+      if (!Number.isFinite(rate) || rate < 0) {
+        errors.push({ row: rowNumber, message: `Invalid rate: ${rateRaw}` });
+        continue;
+      }
+
+      const key = `${canonicalProviderName.toLowerCase()}|${vehicleTypeKey}|${chargingTypeKey}`;
+      if (seenKeys.has(key)) {
+        errors.push({
+          row: rowNumber,
+          message: `Duplicate row for provider "${canonicalProviderName}", vehicle "${vehicleTypeRaw}", charging "${chargingTypeRaw}"`,
+        });
+        continue;
+      }
+      seenKeys.add(key);
+
+      rows.push({
+        providerName: canonicalProviderName,
+        vehicleType: vehicleTypeRaw,
+        chargingType: chargingTypeRaw,
+        rate,
+      });
+    }
+
+    return { rows: errors.length ? [] : rows, errors };
+  }
+
+  private parseCsvLine(line: string): string[] {
+    const values: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      const next = line[i + 1];
+      if (ch === '"' && inQuotes && next === '"') {
+        current += '"';
+        i++;
+        continue;
+      }
+      if (ch === '"') {
+        inQuotes = !inQuotes;
+        continue;
+      }
+      if (ch === ',' && !inQuotes) {
+        values.push(current);
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+    values.push(current);
+    return values;
   }
 
   get summaryText(): string {

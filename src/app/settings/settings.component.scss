@@ -9,6 +9,7 @@
 
 .page-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 24px;
@@ -178,6 +179,11 @@
 }
 
 @media (max-width: 768px) {
+  .settings-container {
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+
   .section-card {
     mat-card-header,
     mat-card-content {
@@ -208,5 +214,12 @@
     button {
       width: 100%;
     }
+  }
+}
+
+@media (max-width: 560px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

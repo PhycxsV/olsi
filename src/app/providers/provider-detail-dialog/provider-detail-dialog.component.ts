@@ -80,6 +80,19 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
     return this.completedDeliveries.length;
   }
 
+  get canShowRiderList(): boolean {
+    return this.data.provider.integrationType !== 'third_party_app';
+  }
+
+  get integrationTypeLabel(): string {
+    const labels: Record<ProviderCard['integrationType'], string> = {
+      provider_app: 'Provider Rider App',
+      aggregator_app: 'Aggregator Rider App',
+      third_party_app: '3rd Party App',
+    };
+    return labels[this.data.provider.integrationType] ?? 'Provider Rider App';
+  }
+
   get computedDeliveryTotal(): number {
     return this.deliveryHistoryService.sumAmounts(this.completedDeliveries);
   }
