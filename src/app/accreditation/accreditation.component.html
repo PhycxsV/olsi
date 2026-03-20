@@ -25,6 +25,48 @@
         <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
       </mat-select>
     </mat-form-field>
+    <div class="view-toggle" role="group" aria-label="Accreditation view mode">
+      <button mat-stroked-button [class.is-active]="viewMode === 'cards'" (click)="setViewMode('cards')">
+        <mat-icon>view_module</mat-icon>
+        Cards
+      </button>
+      <button mat-stroked-button [class.is-active]="viewMode === 'table'" (click)="setViewMode('table')">
+        <mat-icon>table_rows</mat-icon>
+        Table
+      </button>
+    </div>
+  </div>
+
+  <div class="rates-import-panel">
+    <div class="rates-import-header">
+      <div>
+        <h3>Provider Rates CSV</h3>
+        <p>Import a full provider-rate list. This replaces all existing imported rates.</p>
+      </div>
+      <div class="rates-import-actions">
+        <input #ratesCsvInput type="file" accept=".csv,text/csv" class="file-input-hidden" (change)="onRateCsvSelected($event)" />
+        <button mat-stroked-button type="button" (click)="ratesCsvInput.click()">
+          <mat-icon>upload_file</mat-icon>
+          Choose CSV
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="importProviderRatesCsv(ratesCsvInput)">
+          <mat-icon>file_upload</mat-icon>
+          Import
+        </button>
+      </div>
+    </div>
+
+    <p class="rates-file-name" *ngIf="selectedRateCsvFileName">Selected file: {{ selectedRateCsvFileName }}</p>
+    <p class="rates-import-success" *ngIf="rateCsvImportSuccess">{{ rateCsvImportSuccess }}</p>
+
+    <div class="rates-import-errors" *ngIf="rateCsvImportErrors.length">
+      <p class="rates-import-errors-title">Import failed. Fix these rows and upload again:</p>
+      <ul>
+        <li *ngFor="let err of rateCsvImportErrors">Row {{ err.row }}: {{ err.message }}</li>
+      </ul>
+    </div>
+
+    <p class="rates-import-count">Current imported rate rows: {{ providerRates.length }}</p>
   </div>
 
   <div class="status-cards">
@@ -39,7 +81,7 @@
     </mat-card>
   </div>
 
-  <div class="provider-cards">
+  <div class="provider-cards" *ngIf="viewMode === 'cards'">
     <mat-card *ngFor="let p of filteredProviders" class="provider-card">
       <mat-card-content>
         <div class="card-top">
@@ -80,6 +122,79 @@
         </div>
       </mat-card-content>
     </mat-card>
+  </div>
+
+  <div class="table-view-wrapper" *ngIf="viewMode === 'table' && filteredProviders.length > 0">
+    <table mat-table [dataSource]="filteredProviders" class="accreditation-table">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Provider</th>
+        <td mat-cell *matCellDef="let p">
+          <div class="table-provider-name">{{ p.name }}</div>
+          <div class="table-provider-address">{{ p.address }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="registrationId">
+        <th mat-header-cell *matHeaderCellDef>Registration ID</th>
+        <td mat-cell *matCellDef="let p">
+          <span class="table-registration-id">{{ p.registrationId }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let p">
+          <span class="status-badge" [ngClass]="getStatusClass(p.status)">{{ p.status }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="capacity">
+        <th mat-header-cell *matHeaderCellDef>Capacity</th>
+        <td mat-cell *matCellDef="let p">
+          <div class="table-capacity">
+            <mat-icon>groups</mat-icon>
+            <span>{{ p.capacity }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="documents">
+        <th mat-header-cell *matHeaderCellDef>Documents</th>
+        <td mat-cell *matCellDef="let p">
+          <div class="table-documents">
+            <mat-progress-bar mode="determinate" [value]="(p.documentsVerified / p.documentsTotal) * 100" class="table-doc-progress"></mat-progress-bar>
+            <span>{{ p.documentsVerified }}/{{ p.documentsTotal }} verified</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="serviceAreas">
+        <th mat-header-cell *matHeaderCellDef>Service Areas</th>
+        <td mat-cell *matCellDef="let p">
+          <div class="table-service-areas">
+            <mat-chip-set>
+              <mat-chip *ngFor="let area of getServiceAreasDisplay(p.serviceAreas, 2).visible">{{ area }}</mat-chip>
+              <mat-chip *ngIf="getServiceAreasDisplay(p.serviceAreas, 2).more > 0">+{{ getServiceAreasDisplay(p.serviceAreas, 2).more }}</mat-chip>
+            </mat-chip-set>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let p" class="table-actions-cell">
+          <button mat-icon-button class="table-action-btn" matTooltip="View details" (click)="openDetail(p)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button class="table-action-btn" matTooltip="Edit provider" (click)="openEditProvider(p)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+    </table>
   </div>
 
   <div class="empty-state" *ngIf="filteredProviders.length === 0">

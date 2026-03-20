@@ -21,6 +21,15 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
+        <mat-label>App Type</mat-label>
+        <mat-select [(ngModel)]="draft.integrationType">
+          <mat-option *ngFor="let opt of integrationTypeOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="grid two-col">
+      <mat-form-field appearance="outline">
         <mat-label>Total Riders</mat-label>
         <input matInput type="number" min="1" [(ngModel)]="draft.totalRiders" />
       </mat-form-field>

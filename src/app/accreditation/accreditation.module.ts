@@ -22,6 +22,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   declarations: [AccreditationComponent, ProviderDetailDialogComponent, ExpiryDateDialogComponent, DocumentViewDialogComponent, AddProviderDialogComponent],
@@ -42,6 +43,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatTooltipModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTableModule,
   ],
 })
 export class AccreditationModule {}

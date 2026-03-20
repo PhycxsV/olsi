@@ -5,6 +5,8 @@
 .providers-container {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .page-header {
@@ -262,6 +264,10 @@
 }
 
 @media (max-width: 768px) {
+  .providers-container {
+    padding: 0 12px;
+  }
+
   .provider-cards {
     grid-template-columns: 1fr;
   }

@@ -292,7 +292,7 @@
   }
 
   .clients-table {
-    min-width: 900px;
+    min-width: 760px;
   }
 
   .api-key-box {
@@ -540,6 +540,18 @@
 }
 
 @media (max-width: 560px) {
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .clients-table {
+    min-width: 640px;
+  }
+
+  .api-key-box {
+    max-width: 140px;
+  }
+
   .detail-grid.two-col,
   .activity-grid,
   .editor-grid,

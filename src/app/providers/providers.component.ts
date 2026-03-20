@@ -10,6 +10,7 @@ export interface ProviderCard {
   name: string;
   location: string;
   status: 'Active' | 'Paused';
+  integrationType: 'provider_app' | 'aggregator_app' | 'third_party_app';
   activeRiders: number;
   totalRiders: number;
   avgTimeMin: number;
@@ -36,11 +37,11 @@ export class ProvidersComponent implements OnInit {
   ) {}
 
   providers: ProviderCard[] = [
-    { id: '1', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156 },
-    { id: '2', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98 },
-    { id: '3', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142 },
-    { id: '4', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0 },
-    { id: '5', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120 },
+    { id: '1', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', integrationType: 'provider_app', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156 },
+    { id: '2', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', integrationType: 'aggregator_app', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98 },
+    { id: '3', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', integrationType: 'provider_app', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142 },
+    { id: '4', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'third_party_app', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0 },
+    { id: '5', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', integrationType: 'aggregator_app', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120 },
   ];
 
   ngOnInit(): void {
@@ -113,6 +114,7 @@ export class ProvidersComponent implements OnInit {
         name: provider.name,
         location: provider.location,
         status: provider.status,
+        integrationType: provider.integrationType,
         activeRiders: provider.activeRiders,
         totalRiders: provider.totalRiders,
         avgTimeMin: provider.avgTimeMin,
@@ -123,7 +125,9 @@ export class ProvidersComponent implements OnInit {
   }
 
   private openProviderDetail(provider: ProviderCard): void {
-    const riders = this.clientService.getRidersByProviderName(provider.name);
+    const riders = provider.integrationType === 'third_party_app'
+      ? []
+      : this.clientService.getRidersByProviderName(provider.name);
     this.dialog.open(ProviderDetailDialogComponent, {
       width: '560px',
       maxWidth: '95vw',
@@ -140,6 +144,7 @@ export class ProvidersComponent implements OnInit {
         name: provider.name,
         location: provider.location,
         status: provider.status,
+        integrationType: provider.integrationType,
         activeRiders: provider.activeRiders,
         totalRiders: provider.totalRiders,
         avgTimeMin: provider.avgTimeMin,
@@ -181,6 +186,7 @@ export class ProvidersComponent implements OnInit {
           name: result.name.trim(),
           location: result.location.trim(),
           status: result.status,
+          integrationType: result.integrationType,
           activeRiders: result.activeRiders,
           totalRiders: result.totalRiders,
           avgTimeMin: result.avgTimeMin,
@@ -198,6 +204,7 @@ export class ProvidersComponent implements OnInit {
         name: result.name.trim(),
         location: result.location.trim(),
         status: result.status,
+        integrationType: result.integrationType,
         activeRiders: result.activeRiders,
         totalRiders: result.totalRiders,
         avgTimeMin: result.avgTimeMin,
@@ -212,6 +219,7 @@ export class ProvidersComponent implements OnInit {
       name: '',
       location: '',
       status: 'Active',
+      integrationType: 'provider_app',
       activeRiders: 20,
       totalRiders: 25,
       avgTimeMin: 30,

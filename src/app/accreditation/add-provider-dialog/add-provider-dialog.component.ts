@@ -37,6 +37,7 @@ export class AddProviderDialogComponent {
   draft: AddProviderDraft;
   showBank = false;
   readonly isEditMode: boolean;
+  readonly aggregatorAppUsageValue = 'Uses Aggregator Rider App';
 
   readonly rateTypeOptions = [
     { value: 'Fixed Rate', label: 'Fixed Rate' },
@@ -59,6 +60,7 @@ export class AddProviderDialogComponent {
     if (this.draft.bank && (this.draft.bank.bankName || this.draft.bank.accountNumber)) {
       this.showBank = true;
     }
+    this.onAppUsageChange();
   }
 
   get serviceAreasText(): string {
@@ -82,6 +84,16 @@ export class AddProviderDialogComponent {
   removeBank(): void {
     this.showBank = false;
     this.draft.bank = undefined;
+  }
+
+  get isAggregatorMode(): boolean {
+    return this.draft.appUsage === this.aggregatorAppUsageValue;
+  }
+
+  onAppUsageChange(): void {
+    if (!this.isAggregatorMode) return;
+    this.draft.apiUrl = '';
+    this.draft.apiToken = '';
   }
 
   save(): void {
@@ -110,6 +122,10 @@ export class AddProviderDialogComponent {
         window.alert('Please complete bank name, account name, and account number, or remove bank details.');
         return;
       }
+    }
+    if (this.isAggregatorMode) {
+      this.draft.apiUrl = '';
+      this.draft.apiToken = '';
     }
     this.dialogRef.close(this.draft);
   }

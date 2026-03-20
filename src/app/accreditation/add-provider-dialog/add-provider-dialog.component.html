@@ -52,7 +52,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>App Usage</mat-label>
-          <mat-select [(ngModel)]="draft.appUsage">
+          <mat-select [(ngModel)]="draft.appUsage" (ngModelChange)="onAppUsageChange()">
             <mat-option *ngFor="let opt of appUsageOptions" [value]="opt.value">{{ opt.label }}</mat-option>
           </mat-select>
         </mat-form-field>
@@ -85,11 +85,12 @@
       <h3 class="form-section-title">API</h3>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>API URL</mat-label>
-        <input matInput [(ngModel)]="draft.apiUrl" placeholder="https://api.example.com" />
+        <input matInput [(ngModel)]="draft.apiUrl" [disabled]="isAggregatorMode" placeholder="https://api.example.com" />
+        <mat-hint *ngIf="isAggregatorMode">Disabled when using Aggregator Rider App.</mat-hint>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>API Token</mat-label>
-        <input matInput type="password" [(ngModel)]="draft.apiToken" placeholder="API token (stored securely)" />
+        <input matInput type="password" [(ngModel)]="draft.apiToken" [disabled]="isAggregatorMode" placeholder="API token (stored securely)" />
       </mat-form-field>
     </section>
 

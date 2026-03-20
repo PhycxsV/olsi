@@ -45,6 +45,10 @@
           <section class="section-card">
             <h3 class="section-title">Operational Summary</h3>
             <div class="detail-row">
+              <span>App Type</span>
+              <strong>{{ integrationTypeLabel }}</strong>
+            </div>
+            <div class="detail-row">
               <span>Service Area</span>
               <strong>{{ data.provider.location }}</strong>
             </div>
@@ -180,7 +184,7 @@
         </div>
       </mat-tab>
 
-      <mat-tab label="Riders">
+      <mat-tab label="Riders" *ngIf="canShowRiderList">
         <div class="tab-panel">
           <section class="section-card">
             <h3 class="section-title">Riders</h3>
