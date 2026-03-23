@@ -44,30 +44,73 @@
         <p>Import a full provider-rate list. This replaces all existing imported rates.</p>
       </div>
       <div class="rates-import-actions">
+        <button mat-flat-button color="primary" type="button" (click)="openRateCsvImportDialog()">
+          <mat-icon>file_upload</mat-icon>
+          Import CSV
+        </button>
+      </div>
+    </div>
+
+    <p class="rates-import-success" *ngIf="rateCsvImportSuccess">{{ rateCsvImportSuccess }}</p>
+    <p class="rates-import-count">Current imported rate rows: {{ providerRates.length }}</p>
+  </div>
+  <ng-template #rateCsvImportDialog>
+    <h2 mat-dialog-title>Import Provider Rates CSV</h2>
+    <div mat-dialog-content class="rates-import-modal-content">
+      <p class="rates-import-modal-caption">
+        Upload a CSV, preview the parsed rows, then confirm import.
+      </p>
+
+      <div class="rates-import-actions">
         <input #ratesCsvInput type="file" accept=".csv,text/csv" class="file-input-hidden" (change)="onRateCsvSelected($event)" />
         <button mat-stroked-button type="button" (click)="ratesCsvInput.click()">
           <mat-icon>upload_file</mat-icon>
           Choose CSV
         </button>
-        <button mat-flat-button color="primary" type="button" (click)="importProviderRatesCsv(ratesCsvInput)">
-          <mat-icon>file_upload</mat-icon>
-          Import
+        <button mat-stroked-button type="button" (click)="previewProviderRatesCsv(ratesCsvInput)">
+          <mat-icon>preview</mat-icon>
+          Preview
         </button>
       </div>
+
+      <p class="rates-file-name" *ngIf="selectedRateCsvFileName">Selected file: {{ selectedRateCsvFileName }}</p>
+
+      <div class="rates-import-errors" *ngIf="rateCsvImportErrors.length">
+        <p class="rates-import-errors-title">Preview failed. Fix these rows and upload again:</p>
+        <ul>
+          <li *ngFor="let err of rateCsvImportErrors">Row {{ err.row }}: {{ err.message }}</li>
+        </ul>
+      </div>
+
+      <div class="rates-preview-table-wrapper" *ngIf="rateCsvPreviewRows.length">
+        <p class="rates-preview-title">Preview (showing {{ rateCsvPreviewRows.length }} row(s))</p>
+        <table class="rates-preview-table">
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Vehicle Type</th>
+              <th>Charging Type</th>
+              <th>Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rateCsvPreviewRows">
+              <td>{{ row.providerName }}</td>
+              <td>{{ row.vehicleType }}</td>
+              <td>{{ row.chargingType }}</td>
+              <td>{{ row.rate }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <p class="rates-file-name" *ngIf="selectedRateCsvFileName">Selected file: {{ selectedRateCsvFileName }}</p>
-    <p class="rates-import-success" *ngIf="rateCsvImportSuccess">{{ rateCsvImportSuccess }}</p>
-
-    <div class="rates-import-errors" *ngIf="rateCsvImportErrors.length">
-      <p class="rates-import-errors-title">Import failed. Fix these rows and upload again:</p>
-      <ul>
-        <li *ngFor="let err of rateCsvImportErrors">Row {{ err.row }}: {{ err.message }}</li>
-      </ul>
+    <div mat-dialog-actions align="end">
+      <button mat-button type="button" [mat-dialog-close]="true">Cancel</button>
+      <button mat-flat-button color="primary" type="button" [disabled]="!rateCsvPreviewRows.length || rateCsvImportErrors.length > 0" (click)="confirmImportProviderRatesCsv(ratesCsvInput)">
+        Import {{ rateCsvPreviewRows.length || '' }}
+      </button>
     </div>
-
-    <p class="rates-import-count">Current imported rate rows: {{ providerRates.length }}</p>
-  </div>
+  </ng-template>
 
   <div class="status-cards">
     <mat-card *ngFor="let card of statusCards" class="status-card" [ngClass]="'status-card--' + card.type">

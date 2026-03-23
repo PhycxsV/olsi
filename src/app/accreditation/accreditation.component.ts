@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
@@ -68,6 +68,7 @@ export interface StatusCardItem {
   styleUrls: ['./accreditation.component.scss'],
 })
 export class AccreditationComponent implements OnInit {
+  @ViewChild('rateCsvImportDialog') rateCsvImportDialogTemplate!: TemplateRef<unknown>;
   searchText = '';
   statusFilter: AccreditationStatus | '' = '';
   viewMode: 'cards' | 'table' = 'cards';
@@ -76,6 +77,7 @@ export class AccreditationComponent implements OnInit {
   selectedRateCsvFileName = '';
   rateCsvImportErrors: ProviderRateCsvError[] = [];
   rateCsvImportSuccess = '';
+  rateCsvPreviewRows: ProviderRateRow[] = [];
   providerRates: ProviderRateRow[] = [];
 
   statusCards: StatusCardItem[] = [
@@ -155,15 +157,26 @@ export class AccreditationComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     this.selectedRateCsvFileName = file?.name || '';
+    this.rateCsvPreviewRows = [];
     this.rateCsvImportErrors = [];
     this.rateCsvImportSuccess = '';
   }
 
-  importProviderRatesCsv(fileInput: HTMLInputElement): void {
+  openRateCsvImportDialog(): void {
+    this.selectedRateCsvFileName = '';
+    this.rateCsvImportErrors = [];
+    this.rateCsvPreviewRows = [];
+    this.dialog.open(this.rateCsvImportDialogTemplate, {
+      width: '820px',
+      maxWidth: '95vw',
+    });
+  }
+
+  previewProviderRatesCsv(fileInput: HTMLInputElement): void {
     const file = fileInput.files?.[0];
     if (!file) {
       this.rateCsvImportErrors = [{ row: 0, message: 'Please choose a CSV file to import.' }];
-      this.rateCsvImportSuccess = '';
+      this.rateCsvPreviewRows = [];
       return;
     }
     const reader = new FileReader();
@@ -172,21 +185,32 @@ export class AccreditationComponent implements OnInit {
       const result = this.parseAndValidateProviderRatesCsv(csvText);
       if (result.errors.length) {
         this.rateCsvImportErrors = result.errors;
-        this.rateCsvImportSuccess = '';
+        this.rateCsvPreviewRows = [];
         return;
       }
-      this.providerRateService.replaceAll(result.rows);
-      this.providerRates = this.providerRateService.getRates();
+      this.rateCsvPreviewRows = result.rows;
       this.rateCsvImportErrors = [];
-      this.rateCsvImportSuccess = `Imported ${result.rows.length} provider rate row(s).`;
-      fileInput.value = '';
-      this.selectedRateCsvFileName = '';
     };
     reader.onerror = () => {
       this.rateCsvImportErrors = [{ row: 0, message: 'Failed to read CSV file.' }];
-      this.rateCsvImportSuccess = '';
+      this.rateCsvPreviewRows = [];
     };
     reader.readAsText(file);
+  }
+
+  confirmImportProviderRatesCsv(fileInput: HTMLInputElement): void {
+    if (!this.rateCsvPreviewRows.length) {
+      this.rateCsvImportErrors = [{ row: 0, message: 'Please preview a valid CSV file before importing.' }];
+      return;
+    }
+    this.providerRateService.replaceAll(this.rateCsvPreviewRows);
+    this.providerRates = this.providerRateService.getRates();
+    this.rateCsvImportSuccess = `Imported ${this.rateCsvPreviewRows.length} provider rate row(s).`;
+    this.rateCsvImportErrors = [];
+    this.rateCsvPreviewRows = [];
+    this.dialog.closeAll();
+    fileInput.value = '';
+    this.selectedRateCsvFileName = '';
   }
 
   private parseAndValidateProviderRatesCsv(csvText: string): { rows: ProviderRateRow[]; errors: ProviderRateCsvError[] } {
