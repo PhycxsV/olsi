@@ -35,11 +35,6 @@ export class ClientDetailComponent implements OnInit {
     { id: 'TXN-002', date: 'Feb 21, 2025', type: 'Booking', amount: '₱ 280' },
   ];
 
-  /** Mock: topups */
-  topups: { id: string; date: string; amount: string; status: string }[] = [
-    { id: 'TOP-001', date: 'Feb 01, 2025', amount: '₱ 5,000', status: 'Credited' },
-  ];
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
