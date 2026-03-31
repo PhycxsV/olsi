@@ -16,7 +16,7 @@ import {
   ProviderBillingPeriodType,
   ProviderBillingService,
 } from '../../core/services/provider-billing.service';
-import { ProviderCard } from '../providers.component';
+import { ProviderCard } from '../provider.service';
 
 export interface ProviderDetailDialogData {
   provider: ProviderCard;

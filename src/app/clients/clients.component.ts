@@ -23,9 +23,13 @@ export interface ClientRow {
   businessAddress: string;
   webhookUrl: string;
   registeredOn: string;
-  /** Preferred provider for priority push routing */
-  preferredProviderId?: string;
-  preferredProviderName?: string;
+  /** Preferred providers for priority push routing (multiple allowed). */
+  preferredProviders?: PreferredProviderRef[];
+}
+
+export interface PreferredProviderRef {
+  id: string;
+  name: string;
 }
 
 export interface ClientVehicleCharging {
@@ -202,6 +206,7 @@ export class ClientsComponent {
           apiKeyMasked: result.apiKeyMasked.trim() || 'sk_live_********',
           webhookUrl: result.webhookUrl.trim() || '—',
           registeredOn: result.registeredOn.trim() || '—',
+          preferredProviders: [],
         });
         return;
       }

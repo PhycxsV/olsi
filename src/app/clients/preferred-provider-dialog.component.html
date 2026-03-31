@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+
+<mat-dialog-content class="dialog-body">
+  <p class="dialog-hint">Choose up to {{ maxSelectableInDialog }} provider{{ maxSelectableInDialog === 1 ? '' : 's' }} to add to this client’s priority dispatch list.</p>
+  <p class="dialog-empty" *ngIf="providers.length === 0">Every known provider is already assigned. Remove one from the client to add a different provider.</p>
+  <div class="provider-list" *ngIf="providers.length > 0">
+    <div class="provider-row" *ngFor="let selectedId of selectedProviderIds; let i = index; trackBy: trackByIndex">
+      <mat-form-field appearance="outline" class="provider-field">
+        <mat-label>Provider {{ i + 1 }}</mat-label>
+        <mat-select [(ngModel)]="selectedProviderIds[i]">
+          <mat-option *ngFor="let p of getSelectableProviders(i)" [value]="p.id">
+            {{ p.name }}
+            <span class="option-meta" *ngIf="p.status === 'Paused'"> (Paused)</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-stroked-button type="button" class="remove-selection-btn" *ngIf="selectedProviderIds.length > 1" (click)="removeProvider(i)">
+        Remove
+      </button>
+    </div>
+
+    <button mat-button type="button" class="add-another-btn" *ngIf="canAddAnotherProvider" (click)="addAnotherProvider()">
+      <mat-icon>add</mat-icon>
+      Add another provider
+    </button>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="providers.length === 0 || !hasValidSelections">
+    Save
+  </button>
+</mat-dialog-actions>

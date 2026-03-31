@@ -4,20 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService, ClientSupplierRider } from '../clients/client.service';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { ProviderFormDialogComponent, ProviderFormDraft } from './provider-form-dialog.component';
-
-export interface ProviderCard {
-  id: string;
-  name: string;
-  location: string;
-  status: 'Active' | 'Paused';
-  integrationType: 'provider_app' | 'aggregator_app' | 'third_party_app';
-  activeRiders: number;
-  totalRiders: number;
-  avgTimeMin: number;
-  acceptancePercent: number;
-  slaPercent: number;
-  deliveriesToday: number;
-}
+import { ProviderCard, ProviderService } from './provider.service';
 
 @Component({
   selector: 'app-providers',
@@ -34,15 +21,12 @@ export class ProvidersComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private clientService: ClientService,
+    private providerService: ProviderService,
   ) {}
 
-  providers: ProviderCard[] = [
-    { id: '1', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', integrationType: 'provider_app', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156 },
-    { id: '2', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', integrationType: 'aggregator_app', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98 },
-    { id: '3', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', integrationType: 'provider_app', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142 },
-    { id: '4', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'third_party_app', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0 },
-    { id: '5', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', integrationType: 'aggregator_app', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120 },
-  ];
+  get providers(): ProviderCard[] {
+    return this.providerService.getProviders();
+  }
 
   ngOnInit(): void {
     this.openProviderFromQueryParam();
@@ -180,7 +164,7 @@ export class ProvidersComponent implements OnInit {
     }).afterClosed().subscribe((result: ProviderFormDraft | undefined) => {
       if (!result) return;
       if (mode === 'create') {
-        this.providers.unshift({
+        this.providerService.addProvider({
           id: Date.now().toString(),
           deliveriesToday: result.status === 'Active' ? 80 + Math.floor(Math.random() * 80) : 0,
           name: result.name.trim(),
@@ -196,11 +180,9 @@ export class ProvidersComponent implements OnInit {
         return;
       }
       if (!targetId) return;
-      const idx = this.providers.findIndex(p => p.id === targetId);
-      if (idx < 0) return;
-      const existing = this.providers[idx];
-      this.providers[idx] = {
-        ...existing,
+      const existing = this.providerService.getProviderById(targetId);
+      if (!existing) return;
+      this.providerService.updateProvider(targetId, {
         name: result.name.trim(),
         location: result.location.trim(),
         status: result.status,
@@ -210,7 +192,7 @@ export class ProvidersComponent implements OnInit {
         avgTimeMin: result.avgTimeMin,
         acceptancePercent: result.acceptancePercent,
         slaPercent: result.slaPercent,
-      };
+      });
     });
   }
 

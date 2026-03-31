@@ -89,44 +89,71 @@
 
       </div>
     </mat-tab>
-    <mat-tab label="Preferred Provider">
+    <mat-tab label="Preferred Providers">
       <div class="tab-content">
         <section class="detail-section">
-          <h3 class="section-title">Preferred Provider</h3>
-          <p class="section-hint">This provider receives the priority push for this client's bookings.</p>
-
-          <div class="preferred-provider-card" *ngIf="client?.preferredProviderName; else noPreferredProvider">
-            <div class="provider-card-header">
-              <div class="provider-avatar">
-                {{ (client.preferredProviderName || 'P').charAt(0) }}
-              </div>
-              <div class="provider-title-group">
-                <h4 class="provider-name">{{ client.preferredProviderName }}</h4>
-                <p class="provider-subtitle">Primary provider for client priority dispatch</p>
-              </div>
+          <div class="preferred-provider-section-head">
+            <div>
+              <h3 class="section-title">Preferred Providers</h3>
+              <p class="section-hint section-hint--tight">These providers receive priority push for this client’s bookings, in the order shown.</p>
             </div>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              (click)="openPreferredProviderDialog()"
+              [disabled]="!canAddMorePreferredProviders"
+            >
+              <mat-icon>add</mat-icon>
+              Add provider
+            </button>
+          </div>
 
-            <div class="provider-meta-grid">
-              <div class="provider-meta-item">
-                <span class="meta-label">Provider ID</span>
-                <span class="meta-value">{{ client.preferredProviderId || '—' }}</span>
+          <div class="preferred-provider-list" *ngIf="preferredProvidersList.length > 0; else noPreferredProvider">
+            <div class="preferred-provider-card" *ngFor="let p of preferredProvidersList; let i = index">
+              <div class="preferred-provider-card-row">
+                <div class="provider-card-header">
+                  <div class="provider-avatar">
+                    {{ (p.name || 'P').charAt(0) }}
+                  </div>
+                  <div class="provider-title-group">
+                    <h4 class="provider-name">{{ p.name }}</h4>
+                    <p class="provider-subtitle">Priority dispatch slot {{ i + 1 }}</p>
+                  </div>
+                </div>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="removePreferredProvider(p.id)"
+                  aria-label="Remove provider"
+                  class="remove-provider-btn"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
               </div>
-              <div class="provider-meta-item">
-                <span class="meta-label">Priority Flow Role</span>
-                <span class="meta-value">Receives Tier 1 priority push</span>
-              </div>
-            </div>
 
-            <div class="provider-note">
-              <mat-icon>info</mat-icon>
-              <span>Riders for this provider are listed in Provider Details.</span>
+              <div class="provider-meta-grid">
+                <div class="provider-meta-item">
+                  <span class="meta-label">Provider ID</span>
+                  <span class="meta-value">{{ p.id || '—' }}</span>
+                </div>
+                <div class="provider-meta-item">
+                  <span class="meta-label">Priority Flow Role</span>
+                  <span class="meta-value">Tier {{ i + 1 }} priority push</span>
+                </div>
+              </div>
+
+              <div class="provider-note">
+                <mat-icon>info</mat-icon>
+                <span>Riders for this provider are listed in Provider Details.</span>
+              </div>
             </div>
           </div>
 
           <ng-template #noPreferredProvider>
             <div class="preferred-provider-empty">
               <mat-icon>business</mat-icon>
-              <p>No preferred provider set for this client.</p>
+              <p>No preferred providers yet. Use Add provider to assign at least one.</p>
             </div>
           </ng-template>
         </section>

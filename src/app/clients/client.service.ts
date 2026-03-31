@@ -26,8 +26,10 @@ export class ClientService {
       businessAddress: '123 Commerce Blvd, Makati City',
       webhookUrl: 'https://api.freshmart.ph/webhooks/delivery',
       registeredOn: 'June 15, 2023',
-      preferredProviderId: '2',
-      preferredProviderName: 'MetroFleet',
+      preferredProviders: [
+        { id: '2', name: 'MetroFleet' },
+        { id: '1', name: 'SpeedRiders' },
+      ],
     },
     {
       id: '2',
@@ -42,8 +44,10 @@ export class ClientService {
       businessAddress: '88 Ortigas Ave, Pasig City',
       webhookUrl: 'https://api.quickeats.ph/olsi/webhook',
       registeredOn: 'August 02, 2023',
-      preferredProviderId: '1',
-      preferredProviderName: 'SpeedRiders',
+      preferredProviders: [
+        { id: '1', name: 'SpeedRiders' },
+        { id: '3', name: 'SwiftDeliver' },
+      ],
     },
     {
       id: '3',
@@ -58,8 +62,7 @@ export class ClientService {
       businessAddress: '32 Timog Avenue, Quezon City',
       webhookUrl: 'https://medipharm.ph/webhooks/dispatch',
       registeredOn: 'September 10, 2023',
-      preferredProviderId: '3',
-      preferredProviderName: 'SwiftDeliver',
+      preferredProviders: [{ id: '3', name: 'SwiftDeliver' }, { id: '5', name: 'ExpressWay' }],
     },
     {
       id: '4',
@@ -74,8 +77,7 @@ export class ClientService {
       businessAddress: '45 Electronics Park, Taguig City',
       webhookUrl: 'https://techstore.ph/integration/webhook',
       registeredOn: 'May 18, 2023',
-      preferredProviderId: '3',
-      preferredProviderName: 'SwiftDeliver',
+      preferredProviders: [{ id: '3', name: 'SwiftDeliver' }, { id: '4', name: 'QuickHaul' }],
     },
     {
       id: '5',
@@ -90,8 +92,7 @@ export class ClientService {
       businessAddress: '14 Fashion Road, Manila',
       webhookUrl: 'https://fashionhub.manila/api/webhook',
       registeredOn: 'November 05, 2023',
-      preferredProviderId: '2',
-      preferredProviderName: 'MetroFleet',
+      preferredProviders: [{ id: '2', name: 'MetroFleet' }, { id: '5', name: 'ExpressWay' }],
     },
     {
       id: '6',
@@ -106,8 +107,7 @@ export class ClientService {
       businessAddress: '9 Green Market St, Mandaluyong',
       webhookUrl: 'https://greengrocers.co/integrations/olsi',
       registeredOn: 'July 25, 2023',
-      preferredProviderId: '5',
-      preferredProviderName: 'ExpressWay',
+      preferredProviders: [{ id: '5', name: 'ExpressWay' }, { id: '2', name: 'MetroFleet' }],
     },
   ];
 

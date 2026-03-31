@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { ChargingTypeId, CHARGING_TYPES } from '../../core/charging.model';
 import { VEHICLE_TYPES } from '../../core/vehicle.model';
-import { ClientRow, ClientStatus } from '../clients.component';
+import { ClientRow, ClientStatus, PreferredProviderRef } from '../clients.component';
 import { ClientService } from '../client.service';
+import { PreferredProviderDialogComponent, PreferredProviderDialogSelection } from '../preferred-provider-dialog.component';
+import { ProviderService } from '../../providers/provider.service';
 
 export interface ClientBookingRow {
   orderNo: string;
@@ -19,7 +22,9 @@ export interface ClientBookingRow {
   styleUrls: ['./client-detail.component.scss'],
 })
 export class ClientDetailComponent implements OnInit {
+  private readonly maxPreferredProviders = 2;
   client: ClientRow | null = null;
+  private clientRouteId: string | null = null;
   activeTabIndex = 0;
 
   /** Mock: client's bookings */
@@ -39,13 +44,65 @@ export class ClientDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private clientService: ClientService,
+    private providerService: ProviderService,
+    private dialog: MatDialog,
   ) {}
+
+  get preferredProvidersList(): PreferredProviderRef[] {
+    return this.client?.preferredProviders ?? [];
+  }
+
+  get canAddMorePreferredProviders(): boolean {
+    if (!this.client) return false;
+    const currentCount = (this.client.preferredProviders ?? []).length;
+    if (currentCount >= this.maxPreferredProviders) return false;
+    const taken = new Set((this.client.preferredProviders ?? []).map(p => p.id));
+    return this.providerService.getProviders().some(p => !taken.has(p.id));
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    this.clientRouteId = id;
     if (id) {
       this.client = this.clientService.getClientById(id) ?? null;
     }
+  }
+
+  openPreferredProviderDialog(): void {
+    if (!this.client?.id) return;
+    const excludeProviderIds = (this.client.preferredProviders ?? []).map(p => p.id);
+    this.dialog
+      .open(PreferredProviderDialogComponent, {
+        width: '400px',
+        maxWidth: '95vw',
+        data: { excludeProviderIds },
+      })
+      .afterClosed()
+      .subscribe((result: { selections: PreferredProviderDialogSelection[] } | undefined) => {
+        if (!result || !this.clientRouteId) return;
+        const current = this.clientService.getClientById(this.clientRouteId);
+        if (!current) return;
+        const existing = [...(current.preferredProviders ?? [])];
+        const existingIds = new Set(existing.map(provider => provider.id));
+        result.selections.forEach(selection => {
+          if (existing.length >= this.maxPreferredProviders) return;
+          if (existingIds.has(selection.providerId)) return;
+          existing.push({ id: selection.providerId, name: selection.providerName });
+          existingIds.add(selection.providerId);
+        });
+        if (existing.length === (current.preferredProviders ?? []).length) return;
+        this.clientService.updateClient(this.clientRouteId, { preferredProviders: existing });
+        this.client = this.clientService.getClientById(this.clientRouteId) ?? null;
+      });
+  }
+
+  removePreferredProvider(providerId: string): void {
+    if (!this.clientRouteId) return;
+    const current = this.clientService.getClientById(this.clientRouteId);
+    if (!current) return;
+    const next = (current.preferredProviders ?? []).filter(p => p.id !== providerId);
+    this.clientService.updateClient(this.clientRouteId, { preferredProviders: next });
+    this.client = this.clientService.getClientById(this.clientRouteId) ?? null;
   }
 
   goBack(): void {
