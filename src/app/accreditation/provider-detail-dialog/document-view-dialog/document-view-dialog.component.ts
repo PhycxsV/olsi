@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AccreditationProvider, ProviderDocument } from '../../accreditation.component';
+import type { AccreditationProvider, ProviderDocument } from '../../../core/models/accreditation.model';
+import { KeriProvidersApiService } from '../../../core/api/keri-providers-api.service';
 
 export interface DocumentViewDialogData {
   document: ProviderDocument;
@@ -16,6 +17,7 @@ export class DocumentViewDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<DocumentViewDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DocumentViewDialogData,
+    private keriApi: KeriProvidersApiService,
   ) {}
 
   get document(): ProviderDocument {
@@ -76,6 +78,15 @@ export class DocumentViewDialogComponent {
   applyAndClose(): void {
     const docs = this.provider.documents || [];
     this.provider.documentsVerified = docs.filter(d => d.status === 'Verified').length;
+    if (
+      this.keriApi.isConfigured() &&
+      this.document.providerDocumentId &&
+      this.document.status === 'Verified'
+    ) {
+      this.keriApi.verifyProviderDocument(this.document.providerDocumentId).subscribe({
+        error: err => console.error(err),
+      });
+    }
     this.dialogRef.close({ updated: true });
   }
 

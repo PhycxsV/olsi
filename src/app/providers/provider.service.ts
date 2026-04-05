@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Observable, map, of, tap } from 'rxjs';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 export interface ProviderCard {
   id: string;
@@ -12,6 +14,8 @@ export interface ProviderCard {
   acceptancePercent: number;
   slaPercent: number;
   deliveriesToday: number;
+  /** KERI: `provider_document_id` for PUT /api/provider/toggle-active */
+  apiResourceId?: string;
 }
 
 const INITIAL_PROVIDERS: ProviderCard[] = [
@@ -25,6 +29,21 @@ const INITIAL_PROVIDERS: ProviderCard[] = [
 @Injectable({ providedIn: 'root' })
 export class ProviderService {
   private providers: ProviderCard[] = INITIAL_PROVIDERS.map(p => ({ ...p }));
+
+  constructor(private keriApi: KeriProvidersApiService) {}
+
+  /** Replaces the in-memory list when `environment.apiUrl` is set. */
+  loadAccreditedFromApiIfConfigured(): Observable<void> {
+    if (!this.keriApi.isConfigured()) {
+      return of(undefined);
+    }
+    return this.keriApi.getAccreditedProviders().pipe(
+      tap(cards => {
+        this.providers = cards;
+      }),
+      map(() => undefined),
+    );
+  }
 
   getProviders(): ProviderCard[] {
     return this.providers;

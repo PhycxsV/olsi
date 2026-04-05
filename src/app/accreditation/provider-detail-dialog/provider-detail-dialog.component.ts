@@ -1,6 +1,8 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../accreditation.component';
+import type { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../../core/models/accreditation.model';
+import { KeriProvidersApiService } from '../../core/api/keri-providers-api.service';
+import { formatExpiryApiDate } from '../../core/api/keri-mapper';
 import { ExpiryDateDialogComponent } from './expiry-date-dialog/expiry-date-dialog.component';
 import { DocumentViewDialogComponent, DocumentViewDialogData } from './document-view-dialog/document-view-dialog.component';
 
@@ -16,6 +18,7 @@ export class ProviderDetailDialogComponent {
     public dialogRef: MatDialogRef<ProviderDetailDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public provider: AccreditationProvider,
     private matDialog: MatDialog,
+    private keriApi: KeriProvidersApiService,
   ) {}
 
   get progressPercent(): number {
@@ -60,13 +63,53 @@ export class ProviderDetailDialogComponent {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    const now = new Date();
-    const uploadedAt = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + now.toTimeString().slice(0, 5);
-    doc.filename = file.name;
-    doc.uploadedAt = uploadedAt;
-    doc.uploadedBy = 'Current user';
-    doc.status = 'Pending';
     input.value = '';
+
+    if (!this.keriApi.isConfigured()) {
+      const now = new Date();
+      const uploadedAt =
+        now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) +
+        ' ' +
+        now.toTimeString().slice(0, 5);
+      doc.filename = file.name;
+      doc.uploadedAt = uploadedAt;
+      doc.uploadedBy = 'Current user';
+      doc.status = 'Pending';
+      return;
+    }
+
+    const providerId = String(this.provider.apiProviderId ?? this.provider.id);
+    const docId = doc.providerDocumentId;
+    if (!docId) {
+      window.alert(
+        'This document has no server id. Upload requires provider data loaded from the API (with document ids).',
+      );
+      return;
+    }
+    const expiry = formatExpiryApiDate(doc.expiryDate) || new Date().toISOString().slice(0, 10);
+    this.keriApi
+      .uploadProviderDocument({
+        providerId,
+        providerDocumentId: docId,
+        expiryDate: expiry,
+        file,
+      })
+      .subscribe({
+        next: () => {
+          const now = new Date();
+          doc.filename = file.name;
+          doc.uploadedAt =
+            now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) +
+            ' ' +
+            now.toTimeString().slice(0, 5);
+          doc.uploadedBy = 'Current user';
+          doc.status = 'Pending';
+        },
+        error: err => {
+          const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Upload failed.';
+          window.alert(typeof msg === 'string' ? msg : 'Upload failed.');
+        },
+      });
   }
 
   formatExpiryDisplay(doc: ProviderDocument): string {
@@ -77,11 +120,21 @@ export class ProviderDetailDialogComponent {
   }
 
   openExpiryDialog(doc: ProviderDocument): void {
-    this.matDialog.open(ExpiryDateDialogComponent, {
-      width: '520px',
-      maxWidth: '94vw',
-      data: { document: doc },
-    });
+    this.matDialog
+      .open(ExpiryDateDialogComponent, {
+        width: '520px',
+        maxWidth: '94vw',
+        data: { document: doc },
+      })
+      .afterClosed()
+      .subscribe((closedDoc: ProviderDocument | undefined) => {
+        if (!closedDoc?.providerDocumentId || !this.keriApi.isConfigured()) return;
+        const exp = formatExpiryApiDate(closedDoc.expiryDate);
+        if (!exp) return;
+        this.keriApi.updateProviderDocumentExpiry(closedDoc.providerDocumentId, exp).subscribe({
+          error: err => console.error(err),
+        });
+      });
   }
 
   onExpiryChange(): void {

@@ -5,6 +5,7 @@ import { ClientService, ClientSupplierRider } from '../clients/client.service';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { ProviderFormDialogComponent, ProviderFormDraft } from './provider-form-dialog.component';
 import { ProviderCard, ProviderService } from './provider.service';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 @Component({
   selector: 'app-providers',
@@ -22,6 +23,7 @@ export class ProvidersComponent implements OnInit {
     private router: Router,
     private clientService: ClientService,
     private providerService: ProviderService,
+    private keriApi: KeriProvidersApiService,
   ) {}
 
   get providers(): ProviderCard[] {
@@ -29,7 +31,10 @@ export class ProvidersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.openProviderFromQueryParam();
+    this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+      next: () => this.openProviderFromQueryParam(),
+      error: () => this.openProviderFromQueryParam(),
+    });
   }
 
   get filteredProviders(): ProviderCard[] {
@@ -74,6 +79,25 @@ export class ProvidersComponent implements OnInit {
 
   toggleActive(provider: ProviderCard): void {
     const nextActive = provider.status !== 'Active';
+    if (this.keriApi.isConfigured() && provider.apiResourceId) {
+      this.keriApi.toggleProviderActive(provider.apiResourceId, nextActive).subscribe({
+        next: () => {
+          provider.status = nextActive ? 'Active' : 'Paused';
+          if (provider.status === 'Paused') {
+            provider.activeRiders = 0;
+            provider.deliveriesToday = 0;
+          } else {
+            provider.activeRiders = Math.max(1, Math.floor(provider.totalRiders * 0.8));
+            provider.deliveriesToday = 80 + Math.floor(Math.random() * 80);
+          }
+        },
+        error: err => {
+          const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Update failed.';
+          window.alert(typeof msg === 'string' ? msg : 'Update failed.');
+        },
+      });
+      return;
+    }
     provider.status = nextActive ? 'Active' : 'Paused';
     if (provider.status === 'Paused') {
       provider.activeRiders = 0;
