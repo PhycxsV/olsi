@@ -20,6 +20,16 @@
   margin-bottom: 20px;
 }
 
+.accreditation-api-banner {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: #4b5563;
+
+  &--error {
+    color: #b91c1c;
+  }
+}
+
 .title-block {
   display: flex;
   align-items: flex-start;

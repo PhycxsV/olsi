@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import type { AccreditationStatus } from '../accreditation.component';
-import type { BankInfo } from '../accreditation.component';
+import type { AccreditationStatus, BankInfo } from '../../core/models/accreditation.model';
 
 export interface AddProviderDraft {
   name: string;

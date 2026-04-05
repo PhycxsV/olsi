@@ -7,54 +7,8 @@ import { VEHICLE_TYPES } from '../core/vehicle.model';
 import { CHARGING_TYPES } from '../core/charging.model';
 import { ProviderRateService } from '../core/services/provider-rate.service';
 import type { ProviderRateCsvError, ProviderRateRow } from '../core/models/provider-rate.model';
-
-export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
-
-export interface ProviderDocument {
-  title: string;
-  filename: string;
-  uploadedAt: string;
-  uploadedBy: string;
-  status: 'Verified' | 'Pending' | 'Rejected' | 'Under Review';
-  note?: string;
-  /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
-  expiryDate?: string;
-}
-
-export interface BankInfo {
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  bankBranch?: string;
-}
-
-export interface AccreditationProvider {
-  id: string;
-  name: string;
-  status: AccreditationStatus;
-  registrationId: string;
-  address: string;
-  capacity: number;
-  rateType: string;
-  serviceAreas: string[];
-  documentsVerified: number;
-  documentsTotal: number;
-  appUsage: string;
-  officeAddress: string;
-  garageAddress: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  bank?: BankInfo;
-  documents: ProviderDocument[];
-  activeRiders?: number;
-  accreditedOn?: string;
-  registeredOn?: string;
-  apiUrl?: string;
-  apiTokenMasked?: string;
-  /** Vehicle types this provider can cater (filters bookings) */
-  vehicleTypeIds?: string[];
-}
+import type { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../core/models/accreditation.model';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 export interface StatusCardItem {
   label: string;
@@ -79,14 +33,19 @@ export class AccreditationComponent implements OnInit {
   rateCsvImportSuccess = '';
   rateCsvPreviewRows: ProviderRateRow[] = [];
   providerRates: ProviderRateRow[] = [];
+  providersLoading = false;
+  providersError = '';
 
-  statusCards: StatusCardItem[] = [
-    { label: 'Total', value: 6, type: 'total' },
-    { label: 'Accredited', value: 3, type: 'accredited' },
-    { label: 'In Review', value: 1, type: 'in_review' },
-    { label: 'Pending', value: 1, type: 'pending' },
-    { label: 'Rejected', value: 1, type: 'rejected' },
-  ];
+  get statusCards(): StatusCardItem[] {
+    const list = this.providers;
+    return [
+      { label: 'Total', value: list.length, type: 'total' },
+      { label: 'Accredited', value: list.filter(p => p.status === 'Accredited').length, type: 'accredited' },
+      { label: 'In Review', value: list.filter(p => p.status === 'In Review').length, type: 'in_review' },
+      { label: 'Pending', value: list.filter(p => p.status === 'Pending').length, type: 'pending' },
+      { label: 'Rejected', value: list.filter(p => p.status === 'Rejected').length, type: 'rejected' },
+    ];
+  }
 
   /** Returns all documents in Pending state (verification done via View modal). */
   private static defaultDocuments(): ProviderDocument[] {
@@ -124,13 +83,37 @@ export class AccreditationComponent implements OnInit {
     private dialog: MatDialog,
     private accreditationService: AccreditationService,
     private providerRateService: ProviderRateService,
+    private keriApi: KeriProvidersApiService,
   ) {}
 
   ngOnInit(): void {
+    this.providerRates = this.providerRateService.getRates();
+    if (this.keriApi.isConfigured()) {
+      this.reloadProvidersFromApi();
+      return;
+    }
     if (this.accreditationService.getProviders().length === 0) {
       this.accreditationService.setProviders(this.providers);
+    } else {
+      this.providers = [...this.accreditationService.getProviders()];
     }
-    this.providerRates = this.providerRateService.getRates();
+  }
+
+  private reloadProvidersFromApi(): void {
+    this.providersLoading = true;
+    this.providersError = '';
+    this.keriApi.getAllProviders().subscribe({
+      next: list => {
+        this.providers = list;
+        this.accreditationService.setProviders(this.providers);
+        this.providersLoading = false;
+      },
+      error: err => {
+        this.providersError =
+          err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to load providers.';
+        this.providersLoading = false;
+      },
+    });
   }
 
   get filteredProviders(): AccreditationProvider[] {
@@ -384,6 +367,17 @@ export class AccreditationComponent implements OnInit {
       data: { draft },
     }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
       if (!result) return;
+      if (this.keriApi.isConfigured()) {
+        this.keriApi.createProvider(result).subscribe({
+          next: () => this.reloadProvidersFromApi(),
+          error: err => {
+            const msg =
+              err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to create provider.';
+            window.alert(typeof msg === 'string' ? msg : 'Failed to create provider.');
+          },
+        });
+        return;
+      }
       const newProvider = this.buildProviderFromDraft(result);
       this.providers = [...this.providers, newProvider];
       this.accreditationService.setProviders(this.providers);

@@ -35,12 +35,14 @@ export class LoginComponent implements OnInit {
     }
     const email = this.loginForm.value.email || '';
     const password = this.loginForm.value.password || '';
-    const result = this.authService.login(email, password);
-    if (!result.ok) {
-      this.errorMessage = result.message || 'Login failed.';
-      return;
-    }
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-    this.router.navigateByUrl(returnUrl);
+    this.errorMessage = '';
+    this.authService.login(email, password).subscribe(result => {
+      if (!result.ok) {
+        this.errorMessage = result.message || 'Login failed.';
+        return;
+      }
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+      this.router.navigateByUrl(returnUrl);
+    });
   }
 }
