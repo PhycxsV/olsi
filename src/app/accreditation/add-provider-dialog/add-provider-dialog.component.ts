@@ -27,6 +27,16 @@ export interface AddProviderDialogData {
   providerId?: string;
 }
 
+type AddProviderField =
+  | 'name'
+  | 'registrationId'
+  | 'contactPerson'
+  | 'phone'
+  | 'email'
+  | 'bankName'
+  | 'bankAccountName'
+  | 'bankAccountNumber';
+
 @Component({
   selector: 'app-add-provider-dialog',
   templateUrl: './add-provider-dialog.component.html',
@@ -35,6 +45,7 @@ export interface AddProviderDialogData {
 export class AddProviderDialogComponent {
   draft: AddProviderDraft;
   showBank = false;
+  validationErrors: Partial<Record<AddProviderField, string>> = {};
   readonly isEditMode: boolean;
   readonly aggregatorAppUsageValue = 'Uses Aggregator Rider App';
 
@@ -83,6 +94,9 @@ export class AddProviderDialogComponent {
   removeBank(): void {
     this.showBank = false;
     this.draft.bank = undefined;
+    delete this.validationErrors.bankName;
+    delete this.validationErrors.bankAccountName;
+    delete this.validationErrors.bankAccountNumber;
   }
 
   get isAggregatorMode(): boolean {
@@ -95,37 +109,90 @@ export class AddProviderDialogComponent {
     this.draft.apiToken = '';
   }
 
+  onFieldChange(field: AddProviderField): void {
+    const message = this.validateField(field);
+    if (message) {
+      this.validationErrors[field] = message;
+      return;
+    }
+    delete this.validationErrors[field];
+  }
+
+  getError(field: AddProviderField): string {
+    return this.validationErrors[field] || '';
+  }
+
+  hasError(field: AddProviderField): boolean {
+    return !!this.validationErrors[field];
+  }
+
   save(): void {
-    if (!this.draft.name.trim()) {
-      window.alert('Company name is required.');
-      return;
-    }
-    if (!this.draft.registrationId.trim()) {
-      window.alert('Registration number is required.');
-      return;
-    }
-    if (!this.draft.contactPerson.trim()) {
-      window.alert('Contact person is required.');
-      return;
-    }
-    if (!this.draft.phone.trim()) {
-      window.alert('Phone is required.');
-      return;
-    }
-    if (!this.draft.email.trim()) {
-      window.alert('Email is required.');
-      return;
-    }
-    if (this.showBank && this.draft.bank) {
-      if (!this.draft.bank.bankName?.trim() || !this.draft.bank.accountName?.trim() || !this.draft.bank.accountNumber?.trim()) {
-        window.alert('Please complete bank name, account name, and account number, or remove bank details.');
-        return;
-      }
-    }
+    if (!this.validateForm()) return;
     if (this.isAggregatorMode) {
       this.draft.apiUrl = '';
       this.draft.apiToken = '';
     }
     this.dialogRef.close(this.draft);
+  }
+
+  private validateForm(): boolean {
+    const fields: AddProviderField[] = [
+      'name',
+      'registrationId',
+      'contactPerson',
+      'phone',
+      'email',
+    ];
+    if (this.showBank && this.draft.bank) {
+      fields.push('bankName', 'bankAccountName', 'bankAccountNumber');
+    }
+
+    const nextErrors: Partial<Record<AddProviderField, string>> = {};
+    for (const field of fields) {
+      const message = this.validateField(field);
+      if (message) {
+        nextErrors[field] = message;
+      }
+    }
+    this.validationErrors = nextErrors;
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  private validateField(field: AddProviderField): string {
+    switch (field) {
+      case 'name':
+        return this.draft.name.trim() ? '' : 'Company name is required.';
+      case 'registrationId':
+        return this.draft.registrationId.trim() ? '' : 'Registration number is required.';
+      case 'contactPerson':
+        return this.draft.contactPerson.trim() ? '' : 'Contact person is required.';
+      case 'phone':
+        if (!this.draft.phone.trim()) return 'Phone is required.';
+        return this.isValidPhilippinePhone(this.draft.phone)
+          ? ''
+          : 'Enter a valid PH mobile number, like 09123456789 or +639123456789.';
+      case 'email':
+        if (!this.draft.email.trim()) return 'Email is required.';
+        return this.isValidEmail(this.draft.email)
+          ? ''
+          : 'Enter a valid email address.';
+      case 'bankName':
+        return this.draft.bank?.bankName?.trim() ? '' : 'Bank name is required.';
+      case 'bankAccountName':
+        return this.draft.bank?.accountName?.trim() ? '' : 'Account name is required.';
+      case 'bankAccountNumber':
+        return this.draft.bank?.accountNumber?.trim() ? '' : 'Account number is required.';
+      default:
+        return '';
+    }
+  }
+
+  private isValidPhilippinePhone(value: string): boolean {
+    const digits = value.replace(/\D/g, '');
+    return /^(09\d{9}|639\d{9})$/.test(digits);
+  }
+
+  private isValidEmail(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   }
 }
