@@ -79,17 +79,20 @@ export class ProvidersComponent implements OnInit {
 
   toggleActive(provider: ProviderCard): void {
     const nextActive = provider.status !== 'Active';
-    if (this.keriApi.isConfigured() && provider.apiResourceId) {
+    if (this.keriApi.isConfigured()) {
+      if (!provider.apiResourceId) {
+        window.alert('This provider is missing its server id, so the status cannot be saved yet. Please reload and try again.');
+        return;
+      }
       this.keriApi.toggleProviderActive(provider.apiResourceId, nextActive).subscribe({
         next: () => {
-          provider.status = nextActive ? 'Active' : 'Paused';
-          if (provider.status === 'Paused') {
-            provider.activeRiders = 0;
-            provider.deliveriesToday = 0;
-          } else {
-            provider.activeRiders = Math.max(1, Math.floor(provider.totalRiders * 0.8));
-            provider.deliveriesToday = 80 + Math.floor(Math.random() * 80);
-          }
+          this.applyLocalProviderStatus(provider, nextActive);
+          this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+            error: err => {
+              const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to refresh providers.';
+              window.alert(typeof msg === 'string' ? msg : 'Failed to refresh providers.');
+            },
+          });
         },
         error: err => {
           const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Update failed.';
@@ -98,6 +101,11 @@ export class ProvidersComponent implements OnInit {
       });
       return;
     }
+
+    this.applyLocalProviderStatus(provider, nextActive);
+  }
+
+  private applyLocalProviderStatus(provider: ProviderCard, nextActive: boolean): void {
     provider.status = nextActive ? 'Active' : 'Paused';
     if (provider.status === 'Paused') {
       provider.activeRiders = 0;
