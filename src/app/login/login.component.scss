@@ -50,6 +50,7 @@
   position: relative;
   z-index: 1;
   width: min(430px, 100%);
+  border-radius: 10px;
 }
 
 .login-card {
@@ -79,6 +80,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #334155;
+  padding-left: 85px;
 }
 
 .card-head {
@@ -90,12 +92,14 @@
     font-weight: 700;
     color: #0f172a;
     letter-spacing: -0.01em;
+    text-align: center;
   }
 
   p {
     margin: 6px 0 0;
     color: #475569;
     font-size: 0.84rem;
+    text-align: center;
   }
 }
 
@@ -122,25 +126,17 @@
   box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
 }
 
+.login-btn:hover{
+  text-decoration: none;
+  background-color: red;
+}
+
 .error {
   margin: 2px 0 12px;
   color: #b91c1c;
   font-size: 0.82rem;
 }
 
-.mock-accounts {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  font-size: 0.82rem;
-
-  p {
-    margin: 3px 0;
-  }
-}
 
 .accounts-title {
   margin-top: 0;

@@ -54,8 +54,8 @@ export class AccreditationComponent implements OnInit {
     return titles.map((title, i) => ({
       title,
       filename: filenames[i],
-      uploadedAt: 'Jan 10, 2024',
-      uploadedBy: 'Admin',
+      uploadedAt: '',
+      uploadedBy: '',
       status: 'Pending' as const,
       note: undefined,
       expiryDate: undefined,

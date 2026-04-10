@@ -57,8 +57,8 @@ function mapDocuments(raw: unknown): ProviderDocument[] {
     return DEFAULT_DOC_TITLES.map(title => ({
       title,
       filename: '',
-      uploadedAt: '—',
-      uploadedBy: '—',
+      uploadedAt: '',
+      uploadedBy: '',
       status: 'Pending' as const,
     }));
   }
@@ -68,8 +68,8 @@ function mapDocuments(raw: unknown): ProviderDocument[] {
     return {
       title,
       filename: pickString(d, ['filename', 'file_name', 'originalName']),
-      uploadedAt: pickString(d, ['uploadedAt', 'uploaded_at', 'createdAt']) || '—',
-      uploadedBy: pickString(d, ['uploadedBy', 'uploaded_by']) || '—',
+      uploadedAt: pickString(d, ['uploadedAt', 'uploaded_at', 'createdAt']) || '',
+      uploadedBy: pickString(d, ['uploadedBy', 'uploaded_by']) || '',
       status: mapDocumentStatusFromApi(pickString(d, ['status', 'verification_status'])),
       note: pickString(d, ['note', 'notes']) || undefined,
       expiryDate: pickString(d, ['expiryDate', 'expiry_date', 'expiry']) || undefined,
