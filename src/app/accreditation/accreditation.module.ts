@@ -8,6 +8,7 @@ import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider
 import { ExpiryDateDialogComponent } from './provider-detail-dialog/expiry-date-dialog/expiry-date-dialog.component';
 import { DocumentViewDialogComponent } from './provider-detail-dialog/document-view-dialog/document-view-dialog.component';
 import { AddProviderDialogComponent } from './add-provider-dialog/add-provider-dialog.component';
+import { AddProviderErrorDialogComponent } from './add-provider-dialog/add-provider-error-dialog.component';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,7 +26,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
-  declarations: [AccreditationComponent, ProviderDetailDialogComponent, ExpiryDateDialogComponent, DocumentViewDialogComponent, AddProviderDialogComponent],
+  declarations: [
+    AccreditationComponent,
+    ProviderDetailDialogComponent,
+    ExpiryDateDialogComponent,
+    DocumentViewDialogComponent,
+    AddProviderDialogComponent,
+    AddProviderErrorDialogComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,

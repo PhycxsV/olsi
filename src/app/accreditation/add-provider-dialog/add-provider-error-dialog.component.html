@@ -1,0 +1,21 @@
+<div class="add-provider-error-dialog">
+  <div class="add-provider-error-dialog__header">
+    <div class="add-provider-error-dialog__icon-wrap" aria-hidden="true">
+      <mat-icon class="add-provider-error-dialog__icon">error_outline</mat-icon>
+    </div>
+    <div class="add-provider-error-dialog__heading">
+      <div mat-dialog-title class="add-provider-error-dialog__title">Unable to add provider</div>
+      <p class="add-provider-error-dialog__subtitle">The request was received, but the provider record was not saved.</p>
+    </div>
+  </div>
+
+  <div mat-dialog-content class="add-provider-error-dialog__content">
+    <div class="add-provider-error-dialog__message">
+      {{ data.message }}
+    </div>
+  </div>
+
+  <div mat-dialog-actions align="end" class="add-provider-error-dialog__actions">
+    <button mat-flat-button color="primary" type="button" (click)="close()">OK</button>
+  </div>
+</div>

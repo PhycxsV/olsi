@@ -2,6 +2,7 @@ import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
+import { AddProviderErrorDialogComponent } from './add-provider-dialog/add-provider-error-dialog.component';
 import { AccreditationService } from '../core/services/accreditation.service';
 import { VEHICLE_TYPES } from '../core/vehicle.model';
 import { CHARGING_TYPES } from '../core/charging.model';
@@ -373,7 +374,13 @@ export class AccreditationComponent implements OnInit {
           error: err => {
             const msg =
               err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to create provider.';
-            window.alert(typeof msg === 'string' ? msg : 'Failed to create provider.');
+            this.dialog.open(AddProviderErrorDialogComponent, {
+              width: '420px',
+              maxWidth: '92vw',
+              data: {
+                message: typeof msg === 'string' ? msg : 'Failed to create provider.',
+              },
+            });
           },
         });
         return;
