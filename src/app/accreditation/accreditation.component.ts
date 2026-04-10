@@ -371,17 +371,7 @@ export class AccreditationComponent implements OnInit {
       if (this.keriApi.isConfigured()) {
         this.keriApi.createProvider(result).subscribe({
           next: () => this.reloadProvidersFromApi(),
-          error: err => {
-            const msg =
-              err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to create provider.';
-            this.dialog.open(AddProviderErrorDialogComponent, {
-              width: '420px',
-              maxWidth: '92vw',
-              data: {
-                message: typeof msg === 'string' ? msg : 'Failed to create provider.',
-              },
-            });
-          },
+          error: err => this.openAddProviderError(err),
         });
         return;
       }
@@ -457,6 +447,49 @@ export class AccreditationComponent implements OnInit {
       apiUrl: '',
       apiToken: '',
     };
+  }
+
+  private openAddProviderError(err: unknown): void {
+    this.dialog.open(AddProviderErrorDialogComponent, {
+      width: '420px',
+      maxWidth: '92vw',
+      data: {
+        message: this.extractAccreditationValidatorMessage(err),
+      },
+    });
+  }
+
+  private extractAccreditationValidatorMessage(err: unknown): string {
+    const fallback = 'Failed to create provider.';
+    const errorBody = (err as { error?: any })?.error;
+    const detailErrors =
+      errorBody?.error?.details?.errors ??
+      errorBody?.details?.errors;
+
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      const messages = detailErrors
+        .map((item: any) => {
+          const path = Array.isArray(item?.path)
+            ? item.path.join('.')
+            : typeof item?.path === 'string'
+              ? item.path
+              : '';
+          const message = typeof item?.message === 'string' ? item.message.trim() : '';
+          if (path && message) return `${path}: ${message}`;
+          return message || path;
+        })
+        .filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    const msg =
+      errorBody?.error?.message ||
+      errorBody?.message ||
+      (err as { message?: string })?.message ||
+      fallback;
+    return typeof msg === 'string' ? msg : fallback;
   }
 
   private buildProviderFromDraft(draft: AddProviderDraft): AccreditationProvider {
