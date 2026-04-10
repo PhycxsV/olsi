@@ -89,14 +89,12 @@ export class ProvidersComponent implements OnInit {
           this.applyLocalProviderStatus(provider, nextActive);
           this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
             error: err => {
-              const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to refresh providers.';
-              window.alert(typeof msg === 'string' ? msg : 'Failed to refresh providers.');
+              window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.'));
             },
           });
         },
         error: err => {
-          const msg = err?.error?.error?.message || err?.error?.message || err?.message || 'Update failed.';
-          window.alert(typeof msg === 'string' ? msg : 'Update failed.');
+          window.alert(this.extractProviderApiErrorMessage(err, 'Update failed.'));
         },
       });
       return;
@@ -240,5 +238,37 @@ export class ProvidersComponent implements OnInit {
       acceptancePercent: 90,
       slaPercent: 94,
     };
+  }
+
+  private extractProviderApiErrorMessage(err: unknown, fallback: string): string {
+    const errorBody = (err as { error?: any })?.error;
+    const detailErrors =
+      errorBody?.error?.details?.errors ??
+      errorBody?.details?.errors;
+
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      const messages = detailErrors
+        .map((item: any) => {
+          const path = Array.isArray(item?.path)
+            ? item.path.join('.')
+            : typeof item?.path === 'string'
+              ? item.path
+              : '';
+          const message = typeof item?.message === 'string' ? item.message.trim() : '';
+          if (path && message) return `${path}: ${message}`;
+          return message || path;
+        })
+        .filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    const msg =
+      errorBody?.error?.message ||
+      errorBody?.message ||
+      (err as { message?: string })?.message ||
+      fallback;
+    return typeof msg === 'string' ? msg : fallback;
   }
 }
