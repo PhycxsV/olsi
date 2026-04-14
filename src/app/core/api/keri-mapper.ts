@@ -56,6 +56,21 @@ function parseServiceAreas(raw: unknown): string[] {
   return [];
 }
 
+function parseBooleanLike(raw: unknown): boolean | null {
+  if (typeof raw === 'boolean') return raw;
+  if (typeof raw === 'number') {
+    if (raw === 1) return true;
+    if (raw === 0) return false;
+    return null;
+  }
+  if (typeof raw === 'string') {
+    const normalized = raw.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y', 'active', 'enabled'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', 'paused', 'inactive', 'disabled'].includes(normalized)) return false;
+  }
+  return null;
+}
+
 function mapDocuments(raw: unknown): ProviderDocument[] {
   if (!Array.isArray(raw) || raw.length === 0) {
     return DEFAULT_DOC_TITLES.map(title => ({
@@ -92,7 +107,13 @@ export function mapAccreditationProvider(raw: unknown): AccreditationProvider | 
   const name = pickString(r, ['company_name', 'companyName', 'name', 'title']);
   if (!name && !apiResourceId) return null;
 
-  const statusRaw = pickString(r, ['status', 'accreditation_status', 'accreditationStatus']);
+  const statusRaw = pickString(r, [
+    'provider_status',
+    'providerStatus',
+    'status',
+    'accreditation_status',
+    'accreditationStatus',
+  ]);
   const status: AccreditationStatus = statusRaw ? mapUiStatusFromApi(statusRaw) : 'Pending';
 
   const documents = mapDocuments(r['documents'] ?? r['provider_documents'] ?? r['providerDocuments']);
@@ -210,7 +231,12 @@ export function mapAccreditedToProviderCard(raw: unknown): ProviderCard | null {
   const name = pickString(r, ['company_name', 'companyName', 'name']);
   const apiResourceId = pickString(r, ['documentId', 'id', 'provider_document_id']);
   if (!name) return null;
-  const isActive = r['is_active'] === true || r['isActive'] === true || String(r['status']).toLowerCase() === 'active';
+  const isActiveRaw =
+    parseBooleanLike(r['is_active']) ??
+    parseBooleanLike(r['isActive']) ??
+    parseBooleanLike(r['active']) ??
+    parseBooleanLike(r['enabled']);
+  const isActive = isActiveRaw ?? String(r['status']).trim().toLowerCase() === 'active';
   const location = pickString(r, ['address', 'service_areas']) || '—';
   return {
     id: apiResourceId || pickString(r, ['id']) || name,
