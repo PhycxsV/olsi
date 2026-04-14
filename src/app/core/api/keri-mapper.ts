@@ -1,4 +1,8 @@
-import type { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../models/accreditation.model';
+import type {
+  AccreditationProvider,
+  AccreditationStatus,
+  ProviderDocument,
+} from '../models/accreditation.model';
 import type { ProviderCard } from '../../providers/provider.service';
 import { pickNumber, pickString, unwrapEntity } from './keri-unwrap';
 import type { AddProviderDraft } from '../../accreditation/add-provider-dialog/add-provider-dialog.component';
@@ -144,7 +148,18 @@ export function toApiRateType(ui: string): string {
 }
 
 export function toApiAppUsage(ui: string): string {
-  return ui.includes('Aggregator') ? 'USES_AGGREGATOR_RIDER_APP' : 'USES_PROVIDER_RIDER_APP';
+  return ui.includes('Aggregator') ? 'USER_AGGREGATOR_RIDER_APP' : 'USES_PROVIDER_RIDER_APP';
+}
+
+/** Maps UI accreditation status to Strapi `provider_status` enum. */
+export function toApiProviderStatus(status: AccreditationStatus): string {
+  const m: Record<AccreditationStatus, string> = {
+    Accredited: 'ACCREDITED',
+    'In Review': 'IN_REVIEW',
+    Pending: 'PENDING',
+    Rejected: 'REJECTED',
+  };
+  return m[status] ?? 'PENDING';
 }
 
 /** Builds multipart body for POST /api/providers per Postman collection. */

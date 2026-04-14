@@ -390,6 +390,20 @@ export class AccreditationComponent implements OnInit {
       data: { draft, mode: 'edit', providerId: provider.id },
     }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
       if (!result) return;
+      if (this.keriApi.isConfigured()) {
+        const documentId = (provider.apiResourceId || provider.id || '').trim();
+        if (!documentId) {
+          this.openAddProviderError({
+            error: { error: { message: 'Missing provider document id for update.' } },
+          });
+          return;
+        }
+        this.keriApi.updateProvider(documentId, result.status).subscribe({
+          next: () => this.reloadProvidersFromApi(),
+          error: err => this.openAddProviderError(err),
+        });
+        return;
+      }
       const idx = this.providers.findIndex(p => p.id === provider.id);
       if (idx < 0) return;
       const existing = this.providers[idx];

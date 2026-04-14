@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import type { AccreditationProvider } from '../models/accreditation.model';
+import type { AccreditationProvider, AccreditationStatus } from '../models/accreditation.model';
 import {
   buildCreateProviderFormData,
   mapAccreditationProvider,
   mapAccreditedToProviderCard,
+  toApiProviderStatus,
 } from './keri-mapper';
 import { unwrapApiArray } from './keri-unwrap';
 import type { AddProviderDraft } from '../../accreditation/add-provider-dialog/add-provider-dialog.component';
@@ -47,6 +48,24 @@ export class KeriProvidersApiService {
   createProvider(draft: AddProviderDraft): Observable<unknown> {
     const body = buildCreateProviderFormData(draft);
     return this.http.post(`${this.apiRoot()}/api/providers`, body);
+  }
+
+  /**
+   * Accreditation edit: PUT only `provider_status` (other form fields are not persisted on update).
+   */
+  updateProvider(documentId: string, status: AccreditationStatus): Observable<unknown> {
+    return this.http.put(`${this.apiRoot()}/api/providers/${encodeURIComponent(documentId)}`, {
+      data: { provider_status: toApiProviderStatus(status) },
+    });
+  }
+
+  /**
+   * Providers (operations) edit: PUT only `is_active` (Active/Paused — other form fields are not persisted on update).
+   */
+  updateProviderOperational(documentId: string, isActive: boolean): Observable<unknown> {
+    return this.http.put(`${this.apiRoot()}/api/providers/${encodeURIComponent(documentId)}`, {
+      data: { is_active: isActive },
+    });
   }
 
   getAccreditedProviders(): Observable<ProviderCard[]> {

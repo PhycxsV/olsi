@@ -212,6 +212,26 @@ export class ProvidersComponent implements OnInit {
       if (!targetId) return;
       const existing = this.providerService.getProviderById(targetId);
       if (!existing) return;
+      if (this.keriApi.isConfigured()) {
+        const documentId = (existing.apiResourceId || existing.id || '').trim();
+        if (!documentId) {
+          window.alert(
+            'This provider is missing its server id, so changes cannot be saved. Please reload and try again.',
+          );
+          return;
+        }
+        this.keriApi.updateProviderOperational(documentId, result.status === 'Active').subscribe({
+          next: () => {
+            this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+              error: err =>
+                window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.')),
+            });
+          },
+          error: err =>
+            window.alert(this.extractProviderApiErrorMessage(err, 'Failed to save provider.')),
+        });
+        return;
+      }
       this.providerService.updateProvider(targetId, {
         name: result.name.trim(),
         location: result.location.trim(),
