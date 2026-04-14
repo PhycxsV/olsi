@@ -115,7 +115,7 @@ export function mapAccreditationProvider(raw: unknown): AccreditationProvider | 
     'accreditationStatus',
   ]);
   const status: AccreditationStatus = statusRaw ? mapUiStatusFromApi(statusRaw) : 'Pending';
-
+  const documentId = pickString(r, ['documentId', 'id'])
   const documents = mapDocuments(r['documents'] ?? r['provider_documents'] ?? r['providerDocuments']);
   const verified = documents.filter(d => d.status === 'Verified').length;
 
@@ -137,6 +137,7 @@ export function mapAccreditationProvider(raw: unknown): AccreditationProvider | 
   return {
     id: apiResourceId || pickString(r, ['slug']) || String(pickNumber(r, ['id'], Date.now())),
     name: name || '—',
+    documentId,
     status,
     registrationId: pickString(r, ['registration_number', 'registrationNumber', 'registrationId']) || '—',
     address: pickString(r, ['address', 'office_address']) || '—',

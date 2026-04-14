@@ -53,9 +53,9 @@ export class KeriProvidersApiService {
   /**
    * Accreditation edit: PUT only `provider_status` (other form fields are not persisted on update).
    */
-  updateProvider(documentId: string, status: AccreditationStatus): Observable<unknown> {
+  updateProvider(documentId: string, status: any): Observable<unknown> {
     return this.http.put(`${this.apiRoot()}/api/providers/${encodeURIComponent(documentId)}`, {
-      data: { provider_status: toApiProviderStatus(status) },
+      data: { provider_status: status },
     });
   }
 
@@ -110,5 +110,9 @@ export class KeriProvidersApiService {
     fd.append('provider_document_id', providerDocumentId);
     fd.append('expiry_date', expiryDate);
     return this.http.put(`${this.apiRoot()}/api/provider-documents/expiry-date-update`, fd);
+  }
+
+  updateProviderDetails(documentId: any, payload: any){
+    return this.http.put(`${this.apiRoot()}/api/providers/${documentId}`, payload);
   }
 }

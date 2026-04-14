@@ -24,6 +24,7 @@ export interface BankInfo {
 
 export interface AccreditationProvider {
   id: string;
+  documentId: string,
   name: string;
   status: AccreditationStatus;
   registrationId: string;
