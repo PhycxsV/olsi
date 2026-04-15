@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService, ClientSupplierRider } from '../clients/client.service';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
@@ -24,6 +25,7 @@ export class ProvidersComponent implements OnInit {
     private clientService: ClientService,
     private providerService: ProviderService,
     private keriApi: KeriProvidersApiService,
+    private snackBar: MatSnackBar,
   ) {}
 
   get providers(): ProviderCard[] {
@@ -87,6 +89,7 @@ export class ProvidersComponent implements OnInit {
       this.keriApi.toggleProviderActive(provider.apiResourceId, nextActive).subscribe({
         next: () => {
           this.applyLocalProviderStatus(provider, nextActive);
+          this.showSuccessToast(`Provider ${nextActive ? 'activated' : 'paused'} successfully.`);
           this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
             error: err => {
               window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.'));
@@ -104,6 +107,7 @@ export class ProvidersComponent implements OnInit {
   }
 
   private applyLocalProviderStatus(provider: ProviderCard, nextActive: boolean): void {
+    provider.is_active = nextActive;
     provider.status = nextActive ? 'Active' : 'Paused';
     if (provider.status === 'Paused') {
       provider.activeRiders = 0;
@@ -198,21 +202,23 @@ export class ProvidersComponent implements OnInit {
     }).afterClosed().subscribe((result: ProviderFormDraft | undefined) => {
       if (!result) return;
       if (mode === 'create') {
+        const isActive = result.status === 'Active';
         this.providerService.addProvider({
           id: Date.now().toString(),
           documentId: '',
-          deliveriesToday: result.status === 'Active' ? 80 + Math.floor(Math.random() * 80) : 0,
+          deliveriesToday: isActive ? 80 + Math.floor(Math.random() * 80) : 0,
           name: result.name.trim(),
           location: result.location.trim(),
-          status: result.status,
+          status: isActive ? 'Active' : 'Paused',
           integrationType: result.integrationType,
-          activeRiders: result.activeRiders,
+          activeRiders: isActive ? result.activeRiders : 0,
           totalRiders: result.totalRiders,
           avgTimeMin: result.avgTimeMin,
           acceptancePercent: result.acceptancePercent,
           slaPercent: result.slaPercent,
-          is_active: result.is_active
+          is_active: isActive
         });
+        this.showSuccessToast('Provider added successfully.');
         return;
       }
       if (!targetId) return;
@@ -226,8 +232,9 @@ export class ProvidersComponent implements OnInit {
           );
           return;
         }
-        this.keriApi.updateProviderOperational(documentId, result.status === 'Active').subscribe({
+        this.keriApi.updateProviderOperational(documentId, result.is_active).subscribe({
           next: () => {
+            this.showSuccessToast('Provider updated successfully.');
             this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
               error: err =>
                 window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.')),
@@ -238,17 +245,20 @@ export class ProvidersComponent implements OnInit {
         });
         return;
       }
+      const isActive = result.status === 'Active';
       this.providerService.updateProvider(targetId, {
         name: result.name.trim(),
         location: result.location.trim(),
-        status: result.status,
+        status: isActive ? 'Active' : 'Paused',
         integrationType: result.integrationType,
-        activeRiders: result.activeRiders,
+        activeRiders: isActive ? result.activeRiders : 0,
         totalRiders: result.totalRiders,
         avgTimeMin: result.avgTimeMin,
         acceptancePercent: result.acceptancePercent,
         slaPercent: result.slaPercent,
+        is_active: isActive,
       });
+      this.showSuccessToast('Provider updated successfully.');
     });
   }
 
@@ -298,5 +308,13 @@ export class ProvidersComponent implements OnInit {
       (err as { message?: string })?.message ||
       fallback;
     return typeof msg === 'string' ? msg : fallback;
+  }
+
+  private showSuccessToast(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 2500,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
   }
 }

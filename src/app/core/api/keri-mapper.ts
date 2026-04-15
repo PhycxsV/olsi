@@ -255,6 +255,6 @@ export function mapAccreditedToProviderCard(raw: unknown): ProviderCard | null {
     slaPercent: 94,
     deliveriesToday: 0,
     apiResourceId: apiResourceId || undefined,
-    is_active: true
+    is_active: isActive,
   };
 }

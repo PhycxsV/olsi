@@ -24,7 +24,7 @@ const INITIAL_PROVIDERS: ProviderCard[] = [
   { id: '1', documentId: '', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', integrationType: 'USES_PROVIDER_RIDER_APP', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156, is_active: true },
   { id: '2', documentId: '', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', integrationType: 'USER_AGGREGATOR_RIDER_APP', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98, is_active: true },
   { id: '3', documentId: '', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', integrationType: 'USES_PROVIDER_RIDER_APP', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142, is_active: true },
-  { id: '4', documentId: '', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'THIRD_PARTY_APP', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0, is_active: true },
+  { id: '4', documentId: '', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'THIRD_PARTY_APP', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0, is_active: false },
   { id: '5', documentId: '', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', integrationType: 'USER_AGGREGATOR_RIDER_APP', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120, is_active: true },
 ];
 

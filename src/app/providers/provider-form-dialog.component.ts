@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 export interface ProviderFormDraft {
   name: string;
@@ -37,9 +36,12 @@ export class ProviderFormDialogComponent {
   constructor(
     private dialogRef: MatDialogRef<ProviderFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ProviderFormDialogData,
-    private providerApi: KeriProvidersApiService
   ) {
-    this.draft = { ...data.draft };
+    this.draft = {
+      ...data.draft,
+      status: data.draft.is_active ? 'Active' : 'Paused',
+      is_active: !!data.draft.is_active,
+    };
   }
 
   close(): void {
@@ -56,14 +58,7 @@ export class ProviderFormDialogComponent {
       return;
     }
 
-    let payload = {company_name: this.draft.name, service_areas: this.draft.location, is_active: this.draft.status,
-      app_usage: this.draft.integrationType, sla_percent: this.draft.slaPercent, total_riders: this.draft.totalRiders
-    }
-
-    this.providerApi.updateProviderDetails(this.draft.documentId, {data: payload})
-    .subscribe((res: any)=>{
-       debugger
-    })
+    this.draft.is_active = this.draft.status === 'Active';
 
     this.dialogRef.close(this.draft);
   }
