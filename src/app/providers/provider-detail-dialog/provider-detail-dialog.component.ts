@@ -81,16 +81,16 @@ export class ProviderDetailDialogComponent implements OnInit, OnDestroy {
   }
 
   get canShowRiderList(): boolean {
-    return this.data.provider.integrationType !== 'third_party_app';
+    return this.data.provider.integrationType !== 'THIRD_PARTY_APP';
   }
 
   get integrationTypeLabel(): string {
     const labels: Record<ProviderCard['integrationType'], string> = {
-      provider_app: 'Provider Rider App',
-      aggregator_app: 'Aggregator Rider App',
-      third_party_app: '3rd Party App',
+      USES_PROVIDER_RIDER_APP: 'USES_PROVIDER_RIDER_APP',
+      USER_AGGREGATOR_RIDER_APP: 'USER_AGGREGATOR_RIDER_APP',
+      THIRD_PARTY_APP: 'THIRD_PARTY_APP',
     };
-    return labels[this.data.provider.integrationType] ?? 'Provider Rider App';
+    return labels[this.data.provider.integrationType] ?? 'USES_PROVIDER_RIDER_APP';
   }
 
   get computedDeliveryTotal(): number {

@@ -242,11 +242,12 @@ export function mapAccreditedToProviderCard(raw: unknown): ProviderCard | null {
   return {
     id: apiResourceId || pickString(r, ['id']) || name,
     name,
+    documentId: apiResourceId || pickString(r, ['id']),
     location: typeof r['service_areas'] === 'string' ? String(r['service_areas']).split(',')[0]?.trim() || location : location,
     status: isActive ? 'Active' : 'Paused',
-    integrationType: pickString(r, ['app_usage', 'appUsage']).toUpperCase().includes('AGGREGATOR')
-      ? 'aggregator_app'
-      : 'provider_app',
+    integrationType: pickString(r, ['app_usage', 'appUsage'])
+      ? 'USES_PROVIDER_RIDER_APP'
+      : 'USER_AGGREGATOR_RIDER_APP',
     activeRiders: pickNumber(r, ['active_riders', 'activeRiders'], 0),
     totalRiders: pickNumber(r, ['capacity'], 25),
     avgTimeMin: 30,
@@ -254,5 +255,6 @@ export function mapAccreditedToProviderCard(raw: unknown): ProviderCard | null {
     slaPercent: 94,
     deliveriesToday: 0,
     apiResourceId: apiResourceId || undefined,
+    is_active: true
   };
 }

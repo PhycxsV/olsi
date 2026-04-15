@@ -15,7 +15,7 @@ import { KeriProvidersApiService } from '../core/api/keri-providers-api.service'
 export class ProvidersComponent implements OnInit {
   searchText = '';
   /** '' = all, 'Active' | 'Paused' */
-  statusFilter: 'Active' | 'Paused' | '' = '';
+   statusFilter: 'Active' | 'Paused' | '' = '';
 
   constructor(
     private dialog: MatDialog,
@@ -51,7 +51,7 @@ export class ProvidersComponent implements OnInit {
     return list;
   }
 
-  setStatusFilter(value: 'Active' | 'Paused' | ''): void {
+  setStatusFilter(value: "Active" | "Paused" | ''): void {
     this.statusFilter = value;
   }
 
@@ -126,6 +126,7 @@ export class ProvidersComponent implements OnInit {
     if (action === 'Edit') {
       this.openProviderFormDialog('edit', {
         name: provider.name,
+        documentId: provider.documentId,
         location: provider.location,
         status: provider.status,
         integrationType: provider.integrationType,
@@ -134,12 +135,13 @@ export class ProvidersComponent implements OnInit {
         avgTimeMin: provider.avgTimeMin,
         acceptancePercent: provider.acceptancePercent,
         slaPercent: provider.slaPercent,
+        is_active: provider.is_active,
       }, provider.id);
     }
   }
 
   private openProviderDetail(provider: ProviderCard): void {
-    const riders = provider.integrationType === 'third_party_app'
+    const riders = provider.integrationType === 'THIRD_PARTY_APP'
       ? []
       : this.clientService.getRidersByProviderName(provider.name);
     this.dialog.open(ProviderDetailDialogComponent, {
@@ -156,6 +158,7 @@ export class ProvidersComponent implements OnInit {
       if (result?.action !== 'edit') return;
       this.openProviderFormDialog('edit', {
         name: provider.name,
+        documentId: provider.documentId,
         location: provider.location,
         status: provider.status,
         integrationType: provider.integrationType,
@@ -164,6 +167,7 @@ export class ProvidersComponent implements OnInit {
         avgTimeMin: provider.avgTimeMin,
         acceptancePercent: provider.acceptancePercent,
         slaPercent: provider.slaPercent,
+        is_active: provider.is_active
       }, provider.id);
     });
   }
@@ -196,6 +200,7 @@ export class ProvidersComponent implements OnInit {
       if (mode === 'create') {
         this.providerService.addProvider({
           id: Date.now().toString(),
+          documentId: '',
           deliveriesToday: result.status === 'Active' ? 80 + Math.floor(Math.random() * 80) : 0,
           name: result.name.trim(),
           location: result.location.trim(),
@@ -206,6 +211,7 @@ export class ProvidersComponent implements OnInit {
           avgTimeMin: result.avgTimeMin,
           acceptancePercent: result.acceptancePercent,
           slaPercent: result.slaPercent,
+          is_active: result.is_active
         });
         return;
       }
@@ -249,14 +255,16 @@ export class ProvidersComponent implements OnInit {
   private createEmptyDraft(): ProviderFormDraft {
     return {
       name: '',
+      documentId: '',
       location: '',
       status: 'Active',
-      integrationType: 'provider_app',
+      integrationType: 'USES_PROVIDER_RIDER_APP',
       activeRiders: 20,
       totalRiders: 25,
       avgTimeMin: 30,
       acceptancePercent: 90,
       slaPercent: 94,
+      is_active: true
     };
   }
 
