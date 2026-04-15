@@ -1,5 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
 import { AddProviderErrorDialogComponent } from './add-provider-dialog/add-provider-error-dialog.component';
@@ -10,6 +11,7 @@ import { ProviderRateService } from '../core/services/provider-rate.service';
 import type { ProviderRateCsvError, ProviderRateRow } from '../core/models/provider-rate.model';
 import type { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../core/models/accreditation.model';
 import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
+import { toApiAppUsage, toApiProviderStatus, toApiRateType } from '../core/api/keri-mapper';
 
 export interface StatusCardItem {
   label: string;
@@ -85,6 +87,7 @@ export class AccreditationComponent implements OnInit {
     private accreditationService: AccreditationService,
     private providerRateService: ProviderRateService,
     private keriApi: KeriProvidersApiService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -370,7 +373,10 @@ export class AccreditationComponent implements OnInit {
       if (!result) return;
       if (this.keriApi.isConfigured()) {
         this.keriApi.createProvider(result).subscribe({
-          next: () => this.reloadProvidersFromApi(),
+          next: () => {
+            this.reloadProvidersFromApi();
+            this.showSuccessToast('Provider added successfully.');
+          },
           error: err => this.openAddProviderError(err),
         });
         return;
@@ -378,6 +384,7 @@ export class AccreditationComponent implements OnInit {
       const newProvider = this.buildProviderFromDraft(result);
       this.providers = [...this.providers, newProvider];
       this.accreditationService.setProviders(this.providers);
+      this.showSuccessToast('Provider added successfully.');
     });
   }
 
@@ -398,8 +405,27 @@ export class AccreditationComponent implements OnInit {
           });
           return;
         }
-        this.keriApi.updateProvider(documentId, result.status).subscribe({
-          next: () => this.reloadProvidersFromApi(),
+        const payload = {
+          company_name: result.name.trim(),
+          capacity: result.capacity ?? 0,
+          registration_number: result.registrationId.trim(),
+          address: result.officeAddress.trim(),
+          garage_address: result.garageAddress.trim(),
+          rate_type: toApiRateType(result.rateType),
+          app_usage: toApiAppUsage(result.appUsage),
+          service_areas: (result.serviceAreas || []).join(','),
+          contact_person: result.contactPerson.trim(),
+          contact_phone: result.phone.trim(),
+          contact_email: result.email.trim(),
+          provider_status: toApiProviderStatus(result.status),
+          ...(result.apiUrl?.trim() ? { api: result.apiUrl.trim() } : {}),
+          ...(result.apiToken?.trim() ? { api_token: result.apiToken.trim() } : {}),
+        };
+        this.keriApi.updateProviderDetails(documentId, { data: payload }).subscribe({
+          next: () => {
+            this.reloadProvidersFromApi();
+            this.showSuccessToast('Provider updated successfully.');
+          },
           error: err => this.openAddProviderError(err),
         });
         return;
@@ -421,6 +447,15 @@ export class AccreditationComponent implements OnInit {
       };
       this.providers = [...this.providers];
       this.accreditationService.setProviders(this.providers);
+      this.showSuccessToast('Provider updated successfully.');
+    });
+  }
+
+  private showSuccessToast(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 2500,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
     });
   }
 

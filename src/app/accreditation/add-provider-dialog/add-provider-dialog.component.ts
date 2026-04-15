@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import type { AccreditationStatus, BankInfo } from '../../core/models/accreditation.model';
-import { KeriProvidersApiService } from 'src/app/core/api/keri-providers-api.service';
 
 export interface AddProviderDraft {
   name: string;
@@ -52,18 +51,17 @@ export class AddProviderDialogComponent {
   readonly aggregatorAppUsageValue = 'Uses Aggregator Rider App';
 
   readonly rateTypeOptions = [
-    { value: 'FIXED_RATE', label: 'Fixed Rate' },
-    { value: 'CALCULATED_PER_DISTANCE', label: 'Calculated Per Distance' },
+    { value: 'Fixed Rate', label: 'Fixed Rate' },
+    { value: 'Calculated Per Distance', label: 'Calculated Per Distance' },
   ];
   readonly appUsageOptions = [
-    { value: 'USES_PROVIDER_RIDER_APP', label: 'Uses Provider Rider App' },
-    { value: 'USER_AGGREGATOR_RIDER_APP', label: 'Uses Aggregator Rider App' },
+    { value: 'Uses Provider Rider App', label: 'Uses Provider Rider App' },
+    { value: 'Uses Aggregator Rider App', label: 'Uses Aggregator Rider App' },
   ];
 
   constructor(
     private dialogRef: MatDialogRef<AddProviderDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AddProviderDialogData,
-    private providerApi: KeriProvidersApiService
   ) {
     this.isEditMode = data.mode === 'edit';
     this.draft = {
@@ -136,23 +134,6 @@ export class AddProviderDialogComponent {
       this.draft.apiToken = '';
     }
     this.dialogRef.close(this.draft);
-
-    if (this.isEditMode == true) {
-
-       let paylod = {company_name: this.draft.name, capacity: this.draft.capacity, registration_number: this.draft.registrationId,
-        address: this.draft.officeAddress, garage_address: this.draft.garageAddress, rate_type: this.draft.rateType, app_usage: this.draft.appUsage,
-        service_areas: this.draft.serviceAreas.toString(), contact_person: this.draft.contactPerson, contact_phone: this.draft.phone,
-        contact_email: this.draft.email, api: this.draft.apiUrl, api_token: this.draft.apiToken, provider_status: this.draft.status
-       }
-      
-      this.providerApi.updateProviderDetails(this.draft.documentId, {data: paylod})
-      .subscribe((res: any)=>{
-      })
-
-    } else {
-      
-    }
-
   }
 
   private validateForm(): boolean {
