@@ -7,34 +7,6 @@
   margin: 0 auto;
 }
 
-.page-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 24px;
-
-  .page-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: #6b7280;
-  }
-
-  .page-title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1f2937;
-  }
-
-  .page-subtitle {
-    margin: 4px 0 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-  }
-}
-
 .section-card {
   margin-bottom: 24px;
   border-radius: 12px;
