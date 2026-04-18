@@ -206,7 +206,19 @@ html, body {
   --olsi-header-icon-shadow: 0 10px 20px rgba(153, 27, 27, 0.25);
 }
 
-[class$='-container'] {
+/* Page layout width — list explicit wrappers only. A suffix selector like [class$='-container']
+   incorrectly matches .cdk-overlay-container and .mat-mdc-dialog-container, which caps overlays
+   and modal backdrops to 1400px instead of the full viewport. */
+:is(
+  .clients-container,
+  .providers-container,
+  .accreditation-container,
+  .bookings-container,
+  .history-container,
+  .users-container,
+  .settings-container,
+  .dashboard-container
+) {
   max-width: 1400px;
   margin: 0 auto;
 }
