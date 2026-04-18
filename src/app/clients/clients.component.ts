@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ChargingTypeId, CHARGING_TYPES } from '../core/charging.model';
@@ -49,7 +51,14 @@ export interface StatusCard {
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
 })
-export class ClientsComponent {
+export class ClientsComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) {
+      this.clientsDataSource.paginator = p;
+    }
+  }
+
   searchText = '';
   statusFilter: ClientStatus | '' = '';
 
@@ -65,17 +74,23 @@ export class ClientsComponent {
 
   displayedColumns = ['name', 'status', 'vehicle', 'charging', 'paymentTerms', 'totalBookings', 'apiKey', 'actions'];
 
+  clientsDataSource = new MatTableDataSource<ClientRow>([]);
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
     private clientService: ClientService,
   ) {}
 
+  ngOnInit(): void {
+    this.refreshClientRows();
+  }
+
   get clients(): ClientRow[] {
     return this.clientService.getClients();
   }
 
-  get filteredClients(): ClientRow[] {
+  refreshClientRows(): void {
     let list = [...this.clients];
     if (this.statusFilter) {
       list = list.filter(c => c.status === this.statusFilter);
@@ -87,7 +102,8 @@ export class ClientsComponent {
         c.clientId.toLowerCase().includes(q)
       );
     }
-    return list;
+    this.clientsDataSource.data = list;
+    this.clientsDataSource.paginator?.firstPage();
   }
 
   get summaryText(): string {
@@ -160,6 +176,7 @@ export class ClientsComponent {
     }
     if (action === 'Suspend' && client.status === 'Active') {
       client.status = 'Suspended';
+      this.refreshClientRows();
     }
   }
 
@@ -211,6 +228,7 @@ export class ClientsComponent {
             registeredOn: result.registeredOn.trim() || '—',
             preferredProviders: [],
           });
+          this.refreshClientRows();
           return;
         }
         if (!targetClientId) return;
@@ -225,6 +243,7 @@ export class ClientsComponent {
           webhookUrl: result.webhookUrl.trim(),
           registeredOn: result.registeredOn.trim(),
         });
+        this.refreshClientRows();
       } catch (err) {
         this.openClientError(err);
       }

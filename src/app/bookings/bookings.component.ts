@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateBookingDialogComponent } from './create-booking-dialog/create-booking-dialog.component';
 import {
@@ -31,7 +33,12 @@ export interface BookingListRow {
   templateUrl: './bookings.component.html',
   styleUrls: ['./bookings.component.scss'],
 })
-export class BookingsComponent {
+export class BookingsComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) this.bookingsDataSource.paginator = p;
+  }
+
   searchText = '';
   statusFilter = '';
   paymentFilter = '';
@@ -49,6 +56,8 @@ export class BookingsComponent {
   ];
 
   filteredList: BookingListRow[] = [];
+
+  bookingsDataSource = new MatTableDataSource<BookingListRow>([]);
   statusOptions = ['', 'Pending', 'Active', 'Assigned', 'Completed', 'Cancelled', 'Returned'];
   branches = [{ value: 'all', label: 'All Branches' }, { value: 'b1', label: 'Branch 1' }];
 
@@ -57,8 +66,21 @@ export class BookingsComponent {
   /** Row for which the 3-dot menu is open (card view) */
   menuRow: BookingListRow | null = null;
 
-  constructor(private dialog: MatDialog) {
+  constructor(private dialog: MatDialog) {}
+
+  ngOnInit(): void {
     this.applyListFilters();
+  }
+
+  /** Card view shares the table paginator; slice manually while in cards mode. */
+  get pagedBookingCards(): BookingListRow[] {
+    const list = this.filteredList;
+    const p = this.bookingsDataSource.paginator;
+    if (!p || this.viewMode !== 'cards') {
+      return list;
+    }
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
   }
 
   onAddBooking(): void {
@@ -98,6 +120,8 @@ export class BookingsComponent {
       );
     }
     this.filteredList = list;
+    this.bookingsDataSource.data = list;
+    this.bookingsDataSource.paginator?.firstPage();
   }
 
   exportCsv(): void {

@@ -648,6 +648,20 @@
   }
 }
 
+.empty-state--inline {
+  padding: 24px 16px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+}
+
 @media (max-width: 1200px) {
   .status-cards {
     grid-template-columns: repeat(3, 1fr);

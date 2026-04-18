@@ -1,4 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
@@ -26,6 +28,12 @@ export interface StatusCardItem {
 })
 export class AccreditationComponent implements OnInit {
   @ViewChild('rateCsvImportDialog') rateCsvImportDialogTemplate!: TemplateRef<unknown>;
+
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) this.providerTableData.paginator = p;
+  }
+
   searchText = '';
   statusFilter: AccreditationStatus | '' = '';
   viewMode: 'cards' | 'table' = 'cards';
@@ -38,6 +46,11 @@ export class AccreditationComponent implements OnInit {
   providerRates: ProviderRateRow[] = [];
   providersLoading = false;
   providersError = '';
+
+  /** Rows after search/status filter (cards + table + paginator length). */
+  filteredProvidersList: AccreditationProvider[] = [];
+
+  providerTableData = new MatTableDataSource<AccreditationProvider>([]);
 
   get statusCards(): StatusCardItem[] {
     const list = this.providers;
@@ -101,6 +114,7 @@ export class AccreditationComponent implements OnInit {
     } else {
       this.providers = [...this.accreditationService.getProviders()];
     }
+    this.applyProviderFilters();
   }
 
   private reloadProvidersFromApi(): void {
@@ -111,6 +125,7 @@ export class AccreditationComponent implements OnInit {
         this.providers = list;
         this.accreditationService.setProviders(this.providers);
         this.providersLoading = false;
+        this.applyProviderFilters();
       },
       error: err => {
         this.providersError =
@@ -120,7 +135,7 @@ export class AccreditationComponent implements OnInit {
     });
   }
 
-  get filteredProviders(): AccreditationProvider[] {
+  applyProviderFilters(): void {
     let list = [...this.providers];
     if (this.statusFilter) {
       list = list.filter(p => p.status === this.statusFilter);
@@ -133,7 +148,20 @@ export class AccreditationComponent implements OnInit {
         p.address.toLowerCase().includes(q)
       );
     }
-    return list;
+    this.filteredProvidersList = list;
+    this.providerTableData.data = list;
+    this.providerTableData.paginator?.firstPage();
+  }
+
+  /** Card grid shares the table paginator (same pattern as bookings). */
+  get pagedAccreditationCards(): AccreditationProvider[] {
+    const list = this.filteredProvidersList;
+    const p = this.providerTableData.paginator;
+    if (!p || this.viewMode !== 'cards') {
+      return list;
+    }
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
   }
 
   setViewMode(mode: 'cards' | 'table'): void {
@@ -384,6 +412,7 @@ export class AccreditationComponent implements OnInit {
       const newProvider = this.buildProviderFromDraft(result);
       this.providers = [...this.providers, newProvider];
       this.accreditationService.setProviders(this.providers);
+      this.applyProviderFilters();
       this.showSuccessToast('Provider added successfully.');
     });
   }
@@ -447,6 +476,7 @@ export class AccreditationComponent implements OnInit {
       };
       this.providers = [...this.providers];
       this.accreditationService.setProviders(this.providers);
+      this.applyProviderFilters();
       this.showSuccessToast('Provider updated successfully.');
     });
   }

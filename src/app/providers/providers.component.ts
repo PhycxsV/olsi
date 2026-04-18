@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -14,6 +15,13 @@ import { KeriProvidersApiService } from '../core/api/keri-providers-api.service'
   styleUrls: ['./providers.component.scss'],
 })
 export class ProvidersComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    this.providersPaginator = p;
+  }
+
+  private providersPaginator?: MatPaginator;
+
   searchText = '';
   /** '' = all, 'Active' | 'Paused' */
    statusFilter: 'Active' | 'Paused' | '' = '';
@@ -53,8 +61,23 @@ export class ProvidersComponent implements OnInit {
     return list;
   }
 
+  get pagedProviders(): ProviderCard[] {
+    const list = this.filteredProviders;
+    const p = this.providersPaginator;
+    if (!p) {
+      return list;
+    }
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
+  }
+
+  onProviderFilterChange(): void {
+    this.providersPaginator?.firstPage();
+  }
+
   setStatusFilter(value: "Active" | "Paused" | ''): void {
     this.statusFilter = value;
+    this.providersPaginator?.firstPage();
   }
 
   get summaryText(): string {

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 
 export type UserRole = 'ADMIN' | 'USER';
 export type UserStatus = 'Active' | 'Inactive' | 'Suspended';
@@ -24,7 +26,12 @@ export interface UserStatusCard {
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
 })
-export class UsersComponent {
+export class UsersComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) this.usersDataSource.paginator = p;
+  }
+
   searchText = '';
   roleFilter: UserRole | '' = '';
 
@@ -55,7 +62,13 @@ export class UsersComponent {
 
   displayedColumns = ['name', 'email', 'team', 'role', 'status', 'lastActive'];
 
-  get filteredUsers(): UserRow[] {
+  usersDataSource = new MatTableDataSource<UserRow>([]);
+
+  ngOnInit(): void {
+    this.refreshUserRows();
+  }
+
+  refreshUserRows(): void {
     let list = [...this.mockUsers];
     if (this.roleFilter) {
       list = list.filter(u => u.role === this.roleFilter);
@@ -69,7 +82,8 @@ export class UsersComponent {
           u.team.toLowerCase().includes(q),
       );
     }
-    return list;
+    this.usersDataSource.data = list;
+    this.usersDataSource.paginator?.firstPage();
   }
 
   get summaryText(): string {

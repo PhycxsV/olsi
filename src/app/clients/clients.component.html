@@ -30,19 +30,19 @@
     <div class="toolbar">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search</mat-label>
-        <input matInput [(ngModel)]="searchText" placeholder="Search clients..." />
+        <input matInput [(ngModel)]="searchText" (ngModelChange)="refreshClientRows()" placeholder="Search clients..." />
         <mat-icon matPrefix>search</mat-icon>
       </mat-form-field>
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="statusFilter">
+        <mat-select [(ngModel)]="statusFilter" (ngModelChange)="refreshClientRows()">
           <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
     <mat-card class="table-card">
-      <table mat-table [dataSource]="filteredClients" class="clients-table">
+      <table mat-table [dataSource]="clientsDataSource" class="clients-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Client Name</th>
           <td mat-cell *matCellDef="let row">
@@ -128,6 +128,12 @@
           </td>
         </tr>
       </table>
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        [pageSize]="10"
+        showFirstLastButtons
+        aria-label="Select page of clients"
+      ></mat-paginator>
     </mat-card>
   </div>
 </div>
