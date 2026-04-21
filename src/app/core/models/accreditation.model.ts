@@ -11,6 +11,8 @@ export interface ProviderDocument {
   note?: string;
   /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
   expiryDate?: string;
+  /** KERI API document id for upload / verify / expiry endpoints */
+  providerDocumentId?: string;
 }
 
 export interface BankInfo {
@@ -22,6 +24,7 @@ export interface BankInfo {
 
 export interface AccreditationProvider {
   id: string;
+  documentId: string,
   name: string;
   status: AccreditationStatus;
   registrationId: string;
@@ -45,6 +48,10 @@ export interface AccreditationProvider {
   apiUrl?: string;
   apiTokenMasked?: string;
   vehicleTypeIds?: string[];
+  /** Backend provider id for multipart `provider_id` (when returned by API) */
+  apiProviderId?: string;
+  /** Cuid used in GET /api/providers/:id and toggle-active */
+  apiResourceId?: string;
 }
 
 export interface DocumentExpiringSoon {

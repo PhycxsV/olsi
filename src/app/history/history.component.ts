@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { DeliveryHistoryService, HistoryRow } from '../core/services/delivery-history.service';
@@ -10,6 +12,11 @@ import { HistoryDetailDialogComponent } from './history-detail-dialog/history-de
   styleUrls: ['./history.component.scss'],
 })
 export class HistoryComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) this.historyDataSource.paginator = p;
+  }
+
   searchText = '';
   dateFilter = '';
   clientFilter = '';
@@ -21,6 +28,7 @@ export class HistoryComponent implements OnInit {
   providerOptions = [{ value: '', label: 'All Providers' }];
 
   filteredRecords: HistoryRow[] = [];
+  historyDataSource = new MatTableDataSource<HistoryRow>([]);
   displayedColumns = ['bookingId', 'client', 'provider', 'pickup', 'dropoff', 'status', 'amount'];
 
   constructor(
@@ -105,6 +113,17 @@ export class HistoryComponent implements OnInit {
       );
     }
     this.filteredRecords = list;
+    this.historyDataSource.data = list;
+    this.historyDataSource.paginator?.firstPage();
+  }
+
+  /** Mobile card strip uses the same paginator as the desktop table. */
+  get pagedHistoryMobile(): HistoryRow[] {
+    const list = this.filteredRecords;
+    const p = this.historyDataSource.paginator;
+    if (!p) return list;
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
   }
 
   exportCsv(): void {

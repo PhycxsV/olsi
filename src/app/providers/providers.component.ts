@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClientService, ClientSupplierRider } from '../clients/client.service';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { ProviderFormDialogComponent, ProviderFormDraft } from './provider-form-dialog.component';
 import { ProviderCard, ProviderService } from './provider.service';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 @Component({
   selector: 'app-providers',
@@ -12,9 +15,16 @@ import { ProviderCard, ProviderService } from './provider.service';
   styleUrls: ['./providers.component.scss'],
 })
 export class ProvidersComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    this.providersPaginator = p;
+  }
+
+  private providersPaginator?: MatPaginator;
+
   searchText = '';
   /** '' = all, 'Active' | 'Paused' */
-  statusFilter: 'Active' | 'Paused' | '' = '';
+   statusFilter: 'Active' | 'Paused' | '' = '';
 
   constructor(
     private dialog: MatDialog,
@@ -22,6 +32,8 @@ export class ProvidersComponent implements OnInit {
     private router: Router,
     private clientService: ClientService,
     private providerService: ProviderService,
+    private keriApi: KeriProvidersApiService,
+    private snackBar: MatSnackBar,
   ) {}
 
   get providers(): ProviderCard[] {
@@ -29,7 +41,10 @@ export class ProvidersComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.openProviderFromQueryParam();
+    this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+      next: () => this.openProviderFromQueryParam(),
+      error: () => this.openProviderFromQueryParam(),
+    });
   }
 
   get filteredProviders(): ProviderCard[] {
@@ -46,8 +61,23 @@ export class ProvidersComponent implements OnInit {
     return list;
   }
 
-  setStatusFilter(value: 'Active' | 'Paused' | ''): void {
+  get pagedProviders(): ProviderCard[] {
+    const list = this.filteredProviders;
+    const p = this.providersPaginator;
+    if (!p) {
+      return list;
+    }
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
+  }
+
+  onProviderFilterChange(): void {
+    this.providersPaginator?.firstPage();
+  }
+
+  setStatusFilter(value: "Active" | "Paused" | ''): void {
     this.statusFilter = value;
+    this.providersPaginator?.firstPage();
   }
 
   get summaryText(): string {
@@ -74,6 +104,33 @@ export class ProvidersComponent implements OnInit {
 
   toggleActive(provider: ProviderCard): void {
     const nextActive = provider.status !== 'Active';
+    if (this.keriApi.isConfigured()) {
+      if (!provider.apiResourceId) {
+        window.alert('This provider is missing its server id, so the status cannot be saved yet. Please reload and try again.');
+        return;
+      }
+      this.keriApi.toggleProviderActive(provider.apiResourceId, nextActive).subscribe({
+        next: () => {
+          this.applyLocalProviderStatus(provider, nextActive);
+          this.showSuccessToast(`Provider ${nextActive ? 'activated' : 'paused'} successfully.`);
+          this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+            error: err => {
+              window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.'));
+            },
+          });
+        },
+        error: err => {
+          window.alert(this.extractProviderApiErrorMessage(err, 'Update failed.'));
+        },
+      });
+      return;
+    }
+
+    this.applyLocalProviderStatus(provider, nextActive);
+  }
+
+  private applyLocalProviderStatus(provider: ProviderCard, nextActive: boolean): void {
+    provider.is_active = nextActive;
     provider.status = nextActive ? 'Active' : 'Paused';
     if (provider.status === 'Paused') {
       provider.activeRiders = 0;
@@ -96,6 +153,7 @@ export class ProvidersComponent implements OnInit {
     if (action === 'Edit') {
       this.openProviderFormDialog('edit', {
         name: provider.name,
+        documentId: provider.documentId,
         location: provider.location,
         status: provider.status,
         integrationType: provider.integrationType,
@@ -104,12 +162,13 @@ export class ProvidersComponent implements OnInit {
         avgTimeMin: provider.avgTimeMin,
         acceptancePercent: provider.acceptancePercent,
         slaPercent: provider.slaPercent,
+        is_active: provider.is_active,
       }, provider.id);
     }
   }
 
   private openProviderDetail(provider: ProviderCard): void {
-    const riders = provider.integrationType === 'third_party_app'
+    const riders = provider.integrationType === 'THIRD_PARTY_APP'
       ? []
       : this.clientService.getRidersByProviderName(provider.name);
     this.dialog.open(ProviderDetailDialogComponent, {
@@ -126,6 +185,7 @@ export class ProvidersComponent implements OnInit {
       if (result?.action !== 'edit') return;
       this.openProviderFormDialog('edit', {
         name: provider.name,
+        documentId: provider.documentId,
         location: provider.location,
         status: provider.status,
         integrationType: provider.integrationType,
@@ -134,6 +194,7 @@ export class ProvidersComponent implements OnInit {
         avgTimeMin: provider.avgTimeMin,
         acceptancePercent: provider.acceptancePercent,
         slaPercent: provider.slaPercent,
+        is_active: provider.is_active
       }, provider.id);
     });
   }
@@ -164,49 +225,119 @@ export class ProvidersComponent implements OnInit {
     }).afterClosed().subscribe((result: ProviderFormDraft | undefined) => {
       if (!result) return;
       if (mode === 'create') {
+        const isActive = result.status === 'Active';
         this.providerService.addProvider({
           id: Date.now().toString(),
-          deliveriesToday: result.status === 'Active' ? 80 + Math.floor(Math.random() * 80) : 0,
+          documentId: '',
+          deliveriesToday: isActive ? 80 + Math.floor(Math.random() * 80) : 0,
           name: result.name.trim(),
           location: result.location.trim(),
-          status: result.status,
+          status: isActive ? 'Active' : 'Paused',
           integrationType: result.integrationType,
-          activeRiders: result.activeRiders,
+          activeRiders: isActive ? result.activeRiders : 0,
           totalRiders: result.totalRiders,
           avgTimeMin: result.avgTimeMin,
           acceptancePercent: result.acceptancePercent,
           slaPercent: result.slaPercent,
+          is_active: isActive
         });
+        this.showSuccessToast('Provider added successfully.');
         return;
       }
       if (!targetId) return;
       const existing = this.providerService.getProviderById(targetId);
       if (!existing) return;
+      if (this.keriApi.isConfigured()) {
+        const documentId = (existing.apiResourceId || existing.id || '').trim();
+        if (!documentId) {
+          window.alert(
+            'This provider is missing its server id, so changes cannot be saved. Please reload and try again.',
+          );
+          return;
+        }
+        this.keriApi.updateProviderOperational(documentId, result.is_active).subscribe({
+          next: () => {
+            this.showSuccessToast('Provider updated successfully.');
+            this.providerService.loadAccreditedFromApiIfConfigured().subscribe({
+              error: err =>
+                window.alert(this.extractProviderApiErrorMessage(err, 'Failed to refresh providers.')),
+            });
+          },
+          error: err =>
+            window.alert(this.extractProviderApiErrorMessage(err, 'Failed to save provider.')),
+        });
+        return;
+      }
+      const isActive = result.status === 'Active';
       this.providerService.updateProvider(targetId, {
         name: result.name.trim(),
         location: result.location.trim(),
-        status: result.status,
+        status: isActive ? 'Active' : 'Paused',
         integrationType: result.integrationType,
-        activeRiders: result.activeRiders,
+        activeRiders: isActive ? result.activeRiders : 0,
         totalRiders: result.totalRiders,
         avgTimeMin: result.avgTimeMin,
         acceptancePercent: result.acceptancePercent,
         slaPercent: result.slaPercent,
+        is_active: isActive,
       });
+      this.showSuccessToast('Provider updated successfully.');
     });
   }
 
   private createEmptyDraft(): ProviderFormDraft {
     return {
       name: '',
+      documentId: '',
       location: '',
       status: 'Active',
-      integrationType: 'provider_app',
+      integrationType: 'USES_PROVIDER_RIDER_APP',
       activeRiders: 20,
       totalRiders: 25,
       avgTimeMin: 30,
       acceptancePercent: 90,
       slaPercent: 94,
+      is_active: true
     };
+  }
+
+  private extractProviderApiErrorMessage(err: unknown, fallback: string): string {
+    const errorBody = (err as { error?: any })?.error;
+    const detailErrors =
+      errorBody?.error?.details?.errors ??
+      errorBody?.details?.errors;
+
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      const messages = detailErrors
+        .map((item: any) => {
+          const path = Array.isArray(item?.path)
+            ? item.path.join('.')
+            : typeof item?.path === 'string'
+              ? item.path
+              : '';
+          const message = typeof item?.message === 'string' ? item.message.trim() : '';
+          if (path && message) return `${path}: ${message}`;
+          return message || path;
+        })
+        .filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    const msg =
+      errorBody?.error?.message ||
+      errorBody?.message ||
+      (err as { message?: string })?.message ||
+      fallback;
+    return typeof msg === 'string' ? msg : fallback;
+  }
+
+  private showSuccessToast(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 2500,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
   }
 }

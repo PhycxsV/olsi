@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ClientsRoutingModule } from './clients-routing.module';
 import { ClientsComponent } from './clients.component';
 import { ClientFormDialogComponent } from './client-form-dialog.component';
+import { ClientFormErrorDialogComponent } from './client-form-error-dialog.component';
 import { ClientDetailComponent } from './client-detail/client-detail.component';
 import { PreferredProviderDialogComponent } from './preferred-provider-dialog.component';
 import { RouterModule } from '@angular/router';
@@ -15,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -22,7 +24,13 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
-  declarations: [ClientsComponent, ClientFormDialogComponent, ClientDetailComponent, PreferredProviderDialogComponent],
+  declarations: [
+    ClientsComponent,
+    ClientFormDialogComponent,
+    ClientFormErrorDialogComponent,
+    ClientDetailComponent,
+    PreferredProviderDialogComponent,
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -34,6 +42,7 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
+    MatPaginatorModule,
     MatSelectModule,
     MatMenuModule,
     MatTooltipModule,

@@ -19,6 +19,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   declarations: [ProvidersComponent, ProviderFormDialogComponent, ProviderDetailDialogComponent],
@@ -37,6 +39,8 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatTabsModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatSnackBarModule,
+    MatPaginatorModule,
     MatDialogModule,
   ],
 })

@@ -58,6 +58,25 @@
     width: 100%;
   }
 
+  .field-invalid {
+    --mdc-outlined-text-field-outline-color: #dc2626;
+    --mdc-outlined-text-field-hover-outline-color: #dc2626;
+    --mdc-outlined-text-field-focus-outline-color: #dc2626;
+    --mdc-theme-primary: #dc2626;
+  }
+
+  .field-error {
+    margin-top: -6px;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: #dc2626;
+  }
+
+  .field-error-row {
+    gap: 16px;
+    margin-top: -8px;
+  }
+
   .form-row {
     display: grid;
     gap: 16px;

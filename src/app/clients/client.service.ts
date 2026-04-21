@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
+import { Observable, map, of, tap } from 'rxjs';
 import { ChargingTypeId } from '../core/charging.model';
 import { ClientRow, ClientStatus, ClientVehicleCharging } from './clients.component';
+import { KeriClientsApiService } from '../core/api/keri-clients-api.service';
 
 export interface ClientSupplierRider {
   riderId: string;
@@ -140,6 +142,22 @@ export class ClientService {
       { riderId: 'R-062', riderName: 'Ivy Dizon', supplierName: 'Expressway', addedAt: 'Jun 20, 2024' },
     ],
   };
+
+  constructor(private keriClientsApi: KeriClientsApiService) {}
+
+  loadFromApiIfConfigured(): Observable<void> {
+    if (!this.keriClientsApi.isConfigured()) {
+      return of(undefined);
+    }
+    return this.keriClientsApi.getAllClients().pipe(
+      tap(rows => {
+        if (rows.length > 0) {
+          this.clients = rows;
+        }
+      }),
+      map(() => undefined),
+    );
+  }
 
   getClients(): ClientRow[] {
     return [...this.clients];

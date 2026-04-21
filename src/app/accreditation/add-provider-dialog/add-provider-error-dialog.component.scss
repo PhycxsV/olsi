@@ -1,0 +1,64 @@
+.add-provider-error-dialog {
+  min-width: min(440px, 100%);
+  padding: 4px 0 0;
+}
+
+.add-provider-error-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 4px 24px 0;
+}
+
+.add-provider-error-dialog__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(220, 38, 38, 0.1);
+  flex-shrink: 0;
+}
+
+.add-provider-error-dialog__icon {
+  color: #dc2626;
+}
+
+.add-provider-error-dialog__heading {
+  min-width: 0;
+}
+
+.add-provider-error-dialog__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.add-provider-error-dialog__subtitle {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.add-provider-error-dialog__content {
+  padding: 18px 24px 0;
+}
+
+.add-provider-error-dialog__message {
+  white-space: pre-wrap;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.add-provider-error-dialog__actions {
+  padding: 20px 24px 24px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: 20px;
+}

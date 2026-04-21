@@ -12,7 +12,7 @@
   <div class="toolbar">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search</mat-label>
-      <input matInput [(ngModel)]="searchText" placeholder="Search providers..." />
+      <input matInput [(ngModel)]="searchText" (ngModelChange)="onProviderFilterChange()" placeholder="Search providers..." />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
     <button mat-stroked-button [matMenuTriggerFor]="filtersMenu">
@@ -37,7 +37,7 @@
   </div>
 
   <div class="provider-cards">
-    <mat-card *ngFor="let p of filteredProviders" class="provider-card">
+    <mat-card *ngFor="let p of pagedProviders" class="provider-card">
       <mat-card-content>
         <div class="card-header">
           <div class="provider-info">
@@ -108,6 +108,15 @@
       </mat-card-content>
     </mat-card>
   </div>
+
+  <mat-paginator
+    *ngIf="filteredProviders.length > 0"
+    [length]="filteredProviders.length"
+    [pageSizeOptions]="[6, 12, 24, 48]"
+    [pageSize]="12"
+    showFirstLastButtons
+    aria-label="Select page of providers"
+  ></mat-paginator>
 
   <div class="empty-state" *ngIf="filteredProviders.length === 0">
     <mat-icon>search_off</mat-icon>

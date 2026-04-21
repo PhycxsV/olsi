@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ChargingTypeId, CHARGING_TYPES } from '../../core/charging.model';
@@ -22,10 +24,28 @@ export interface ClientBookingRow {
   styleUrls: ['./client-detail.component.scss'],
 })
 export class ClientDetailComponent implements OnInit {
+  @ViewChild('txnPaginator')
+  set txnPaginatorRef(p: MatPaginator | undefined) {
+    if (p) this.transactionsDataSource.paginator = p;
+  }
+
+  @ViewChild('bookingsPaginator')
+  set bookingsPaginatorRef(p: MatPaginator | undefined) {
+    if (p) this.bookingsDataSource.paginator = p;
+  }
+
   private readonly maxPreferredProviders = 2;
   client: ClientRow | null = null;
   private clientRouteId: string | null = null;
   activeTabIndex = 0;
+
+  readonly transactionColumns = ['id', 'date', 'type', 'amount'];
+
+  readonly bookingHistoryColumns = ['orderNo', 'date', 'status', 'destination', 'amount'];
+
+  bookingsDataSource = new MatTableDataSource<ClientBookingRow>([]);
+
+  transactionsDataSource = new MatTableDataSource<{ id: string; date: string; type: string; amount: string }>([]);
 
   /** Mock: client's bookings */
   clientBookings: ClientBookingRow[] = [
@@ -66,6 +86,8 @@ export class ClientDetailComponent implements OnInit {
     if (id) {
       this.client = this.clientService.getClientById(id) ?? null;
     }
+    this.bookingsDataSource.data = this.clientBookings;
+    this.transactionsDataSource.data = this.transactions;
   }
 
   openPreferredProviderDialog(): void {

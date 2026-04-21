@@ -1,60 +1,19 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProviderDetailDialogComponent } from './provider-detail-dialog/provider-detail-dialog.component';
 import { AddProviderDialogComponent, AddProviderDraft } from './add-provider-dialog/add-provider-dialog.component';
+import { AddProviderErrorDialogComponent } from './add-provider-dialog/add-provider-error-dialog.component';
 import { AccreditationService } from '../core/services/accreditation.service';
 import { VEHICLE_TYPES } from '../core/vehicle.model';
 import { CHARGING_TYPES } from '../core/charging.model';
 import { ProviderRateService } from '../core/services/provider-rate.service';
 import type { ProviderRateCsvError, ProviderRateRow } from '../core/models/provider-rate.model';
-
-export type AccreditationStatus = 'Accredited' | 'In Review' | 'Pending' | 'Rejected';
-
-export interface ProviderDocument {
-  title: string;
-  filename: string;
-  uploadedAt: string;
-  uploadedBy: string;
-  status: 'Verified' | 'Pending' | 'Rejected' | 'Under Review';
-  note?: string;
-  /** Expiry date for alerts (ISO datetime-local format: yyyy-MM-ddTHH:mm) */
-  expiryDate?: string;
-}
-
-export interface BankInfo {
-  bankName: string;
-  accountName: string;
-  accountNumber: string;
-  bankBranch?: string;
-}
-
-export interface AccreditationProvider {
-  id: string;
-  name: string;
-  status: AccreditationStatus;
-  registrationId: string;
-  address: string;
-  capacity: number;
-  rateType: string;
-  serviceAreas: string[];
-  documentsVerified: number;
-  documentsTotal: number;
-  appUsage: string;
-  officeAddress: string;
-  garageAddress: string;
-  contactPerson: string;
-  phone: string;
-  email: string;
-  bank?: BankInfo;
-  documents: ProviderDocument[];
-  activeRiders?: number;
-  accreditedOn?: string;
-  registeredOn?: string;
-  apiUrl?: string;
-  apiTokenMasked?: string;
-  /** Vehicle types this provider can cater (filters bookings) */
-  vehicleTypeIds?: string[];
-}
+import type { AccreditationProvider, AccreditationStatus, ProviderDocument } from '../core/models/accreditation.model';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
+import { toApiAppUsage, toApiProviderStatus, toApiRateType } from '../core/api/keri-mapper';
 
 export interface StatusCardItem {
   label: string;
@@ -69,6 +28,12 @@ export interface StatusCardItem {
 })
 export class AccreditationComponent implements OnInit {
   @ViewChild('rateCsvImportDialog') rateCsvImportDialogTemplate!: TemplateRef<unknown>;
+
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) this.providerTableData.paginator = p;
+  }
+
   searchText = '';
   statusFilter: AccreditationStatus | '' = '';
   viewMode: 'cards' | 'table' = 'cards';
@@ -79,14 +44,24 @@ export class AccreditationComponent implements OnInit {
   rateCsvImportSuccess = '';
   rateCsvPreviewRows: ProviderRateRow[] = [];
   providerRates: ProviderRateRow[] = [];
+  providersLoading = false;
+  providersError = '';
 
-  statusCards: StatusCardItem[] = [
-    { label: 'Total', value: 6, type: 'total' },
-    { label: 'Accredited', value: 3, type: 'accredited' },
-    { label: 'In Review', value: 1, type: 'in_review' },
-    { label: 'Pending', value: 1, type: 'pending' },
-    { label: 'Rejected', value: 1, type: 'rejected' },
-  ];
+  /** Rows after search/status filter (cards + table + paginator length). */
+  filteredProvidersList: AccreditationProvider[] = [];
+
+  providerTableData = new MatTableDataSource<AccreditationProvider>([]);
+
+  get statusCards(): StatusCardItem[] {
+    const list = this.providers;
+    return [
+      { label: 'Total', value: list.length, type: 'total' },
+      { label: 'Accredited', value: list.filter(p => p.status === 'Accredited').length, type: 'accredited' },
+      { label: 'In Review', value: list.filter(p => p.status === 'In Review').length, type: 'in_review' },
+      { label: 'Pending', value: list.filter(p => p.status === 'Pending').length, type: 'pending' },
+      { label: 'Rejected', value: list.filter(p => p.status === 'Rejected').length, type: 'rejected' },
+    ];
+  }
 
   /** Returns all documents in Pending state (verification done via View modal). */
   private static defaultDocuments(): ProviderDocument[] {
@@ -95,8 +70,8 @@ export class AccreditationComponent implements OnInit {
     return titles.map((title, i) => ({
       title,
       filename: filenames[i],
-      uploadedAt: 'Jan 10, 2024',
-      uploadedBy: 'Admin',
+      uploadedAt: '',
+      uploadedBy: '',
       status: 'Pending' as const,
       note: undefined,
       expiryDate: undefined,
@@ -104,12 +79,12 @@ export class AccreditationComponent implements OnInit {
   }
 
   providers: AccreditationProvider[] = [
-    { id: '1', name: 'SpeedRiders Logistics Inc.', status: 'Accredited', registrationId: 'SEC-2020-00123456', address: '123 Logistics Hub, Makati City', capacity: 50, rateType: 'Calculated Per Distance', serviceAreas: ['Metro Manila', 'Cavite', 'Laguna'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '123 Logistics Hub, Makati City', garageAddress: '123 Logistics Hub, Makati City', contactPerson: 'Juan Dela Cruz', phone: '+63 912 345 6789', email: 'juan@speedriders.ph', bank: { bankName: 'BDO', accountName: 'SpeedRiders Logistics Inc.', accountNumber: '**** 1234', bankBranch: 'Makati Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 42, accreditedOn: 'April 10, 2023', registeredOn: 'March 15, 2023', apiUrl: 'https://speedriders.ph/api', apiTokenMasked: 'sr_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
-    { id: '2', name: 'MetroFleet Delivery Services', status: 'Accredited', registrationId: 'DTI-2019-00789012', address: '789 Commerce Road, Pasig City', capacity: 35, rateType: 'Fixed Rate', serviceAreas: ['Metro Manila', 'Rizal'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Aggregator Rider App', officeAddress: '789 Commerce Road, Pasig City', garageAddress: '789 Commerce Road, Pasig City', contactPerson: 'Maria Santos', phone: '+63 917 876 5432', email: 'maria@metrofleet.ph', bank: { bankName: 'BPI', accountName: 'MetroFleet Delivery Services', accountNumber: '**** 5678', bankBranch: 'Pasig Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 30, accreditedOn: 'April 15, 2023', registeredOn: 'March 20, 2023', apiUrl: 'https://metrofleet.ph/api', apiTokenMasked: 'mf_live_toke........', vehicleTypeIds: ['van'] },
-    { id: '3', name: 'SwiftDeliver Corp.', status: 'Accredited', registrationId: 'SEC-2021-00345678', address: '555 Business Park, BGC Taguig', capacity: 25, rateType: 'Calculated Per Distance', serviceAreas: ['Makati', 'BGC', 'Pasig', 'Taguig'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '555 Business Park, BGC Taguig', garageAddress: '777 Depot Lane, Taguig City', contactPerson: 'Pedro Reyes', phone: '+63 919 345 6789', email: 'pedro@swiftdeliver.ph', bank: { bankName: 'UnionBank', accountName: 'SwiftDeliver Corp.', accountNumber: '**** 9012', bankBranch: 'BGC Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 22, accreditedOn: 'May 1, 2023', registeredOn: 'April 5, 2023', apiUrl: 'https://swiftdeliver.ph/api', apiTokenMasked: 'sd_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
-    { id: '4', name: 'QuickHaul Transport', status: 'In Review', registrationId: 'DTI-2022-00456789', address: '456 Transport Ave, Quezon City', capacity: 40, rateType: 'Fixed Rate', serviceAreas: ['Quezon City', 'Caloocan', 'Valenzuela'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '456 Transport Ave, Quezon City', garageAddress: '456 Transport Ave, Quezon City', contactPerson: 'Ana Lopez', phone: '+63 918 111 2233', email: 'ana@quickhaul.ph', bank: { bankName: 'Landbank', accountName: 'QuickHaul Transport', accountNumber: '**** 3456', bankBranch: 'Quezon City Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 28, registeredOn: 'June 12, 2023', apiUrl: 'https://quickhaul.ph/api', apiTokenMasked: 'qh_live_toke........', vehicleTypeIds: ['motorcycle'] },
-    { id: '5', name: 'ExpressWay Couriers', status: 'Pending', registrationId: 'SEC-2023-00567890', address: '321 Express Blvd, Mandaluyong', capacity: 30, rateType: 'Calculated Per Distance', serviceAreas: ['Metro Manila'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Aggregator Rider App', officeAddress: '321 Express Blvd, Mandaluyong', garageAddress: '321 Express Blvd, Mandaluyong', contactPerson: 'Carlos Gomez', phone: '+63 919 444 5566', email: 'carlos@expressway.ph', bank: { bankName: 'MetroBank', accountName: 'ExpressWay Couriers', accountNumber: '**** 7890', bankBranch: 'Mandaluyong Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 0, registeredOn: 'Aug 1, 2023', apiUrl: 'https://expressway.ph/api', apiTokenMasked: 'ew_live_toke........', vehicleTypeIds: ['van', '6-wheeler'] },
-    { id: '6', name: 'CityLogix Inc.', status: 'Rejected', registrationId: 'DTI-2021-00234567', address: '888 Industrial Zone, Paranaque', capacity: 20, rateType: 'Fixed Rate', serviceAreas: ['Paranaque', 'Las Pinas'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '888 Industrial Zone, Paranaque', garageAddress: '888 Industrial Zone, Paranaque', contactPerson: 'Elena Torres', phone: '+63 920 777 8899', email: 'elena@citylogix.ph', bank: { bankName: 'Security Bank', accountName: 'CityLogix Inc.', accountNumber: '**** 2468', bankBranch: 'Paranaque Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 0, registeredOn: 'Feb 10, 2023', apiUrl: 'https://citylogix.ph/api', apiTokenMasked: 'cl_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
+    { id: '1', documentId: '', name: 'SpeedRiders Logistics Inc.', status: 'Accredited', registrationId: 'SEC-2020-00123456', address: '123 Logistics Hub, Makati City', capacity: 50, rateType: 'Calculated Per Distance', serviceAreas: ['Metro Manila', 'Cavite', 'Laguna'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '123 Logistics Hub, Makati City', garageAddress: '123 Logistics Hub, Makati City', contactPerson: 'Juan Dela Cruz', phone: '+63 912 345 6789', email: 'juan@speedriders.ph', bank: { bankName: 'BDO', accountName: 'SpeedRiders Logistics Inc.', accountNumber: '**** 1234', bankBranch: 'Makati Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 42, accreditedOn: 'April 10, 2023', registeredOn: 'March 15, 2023', apiUrl: 'https://speedriders.ph/api', apiTokenMasked: 'sr_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
+    { id: '2', documentId: '', name: 'MetroFleet Delivery Services', status: 'Accredited', registrationId: 'DTI-2019-00789012', address: '789 Commerce Road, Pasig City', capacity: 35, rateType: 'Fixed Rate', serviceAreas: ['Metro Manila', 'Rizal'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Aggregator Rider App', officeAddress: '789 Commerce Road, Pasig City', garageAddress: '789 Commerce Road, Pasig City', contactPerson: 'Maria Santos', phone: '+63 917 876 5432', email: 'maria@metrofleet.ph', bank: { bankName: 'BPI', accountName: 'MetroFleet Delivery Services', accountNumber: '**** 5678', bankBranch: 'Pasig Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 30, accreditedOn: 'April 15, 2023', registeredOn: 'March 20, 2023', apiUrl: 'https://metrofleet.ph/api', apiTokenMasked: 'mf_live_toke........', vehicleTypeIds: ['van'] },
+    { id: '3', documentId: '', name: 'SwiftDeliver Corp.', status: 'Accredited', registrationId: 'SEC-2021-00345678', address: '555 Business Park, BGC Taguig', capacity: 25, rateType: 'Calculated Per Distance', serviceAreas: ['Makati', 'BGC', 'Pasig', 'Taguig'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '555 Business Park, BGC Taguig', garageAddress: '777 Depot Lane, Taguig City', contactPerson: 'Pedro Reyes', phone: '+63 919 345 6789', email: 'pedro@swiftdeliver.ph', bank: { bankName: 'UnionBank', accountName: 'SwiftDeliver Corp.', accountNumber: '**** 9012', bankBranch: 'BGC Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 22, accreditedOn: 'May 1, 2023', registeredOn: 'April 5, 2023', apiUrl: 'https://swiftdeliver.ph/api', apiTokenMasked: 'sd_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
+    { id: '4', documentId: '', name: 'QuickHaul Transport', status: 'In Review', registrationId: 'DTI-2022-00456789', address: '456 Transport Ave, Quezon City', capacity: 40, rateType: 'Fixed Rate', serviceAreas: ['Quezon City', 'Caloocan', 'Valenzuela'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '456 Transport Ave, Quezon City', garageAddress: '456 Transport Ave, Quezon City', contactPerson: 'Ana Lopez', phone: '+63 918 111 2233', email: 'ana@quickhaul.ph', bank: { bankName: 'Landbank', accountName: 'QuickHaul Transport', accountNumber: '**** 3456', bankBranch: 'Quezon City Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 28, registeredOn: 'June 12, 2023', apiUrl: 'https://quickhaul.ph/api', apiTokenMasked: 'qh_live_toke........', vehicleTypeIds: ['motorcycle'] },
+    { id: '5', documentId: '', name: 'ExpressWay Couriers', status: 'Pending', registrationId: 'SEC-2023-00567890', address: '321 Express Blvd, Mandaluyong', capacity: 30, rateType: 'Calculated Per Distance', serviceAreas: ['Metro Manila'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Aggregator Rider App', officeAddress: '321 Express Blvd, Mandaluyong', garageAddress: '321 Express Blvd, Mandaluyong', contactPerson: 'Carlos Gomez', phone: '+63 919 444 5566', email: 'carlos@expressway.ph', bank: { bankName: 'MetroBank', accountName: 'ExpressWay Couriers', accountNumber: '**** 7890', bankBranch: 'Mandaluyong Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 0, registeredOn: 'Aug 1, 2023', apiUrl: 'https://expressway.ph/api', apiTokenMasked: 'ew_live_toke........', vehicleTypeIds: ['van', '6-wheeler'] },
+    { id: '6', documentId: '', name: 'CityLogix Inc.', status: 'Rejected', registrationId: 'DTI-2021-00234567', address: '888 Industrial Zone, Paranaque', capacity: 20, rateType: 'Fixed Rate', serviceAreas: ['Paranaque', 'Las Pinas'], documentsVerified: 0, documentsTotal: 7, appUsage: 'Uses Provider Rider App', officeAddress: '888 Industrial Zone, Paranaque', garageAddress: '888 Industrial Zone, Paranaque', contactPerson: 'Elena Torres', phone: '+63 920 777 8899', email: 'elena@citylogix.ph', bank: { bankName: 'Security Bank', accountName: 'CityLogix Inc.', accountNumber: '**** 2468', bankBranch: 'Paranaque Branch' }, documents: AccreditationComponent.defaultDocuments(), activeRiders: 0, registeredOn: 'Feb 10, 2023', apiUrl: 'https://citylogix.ph/api', apiTokenMasked: 'cl_live_toke........', vehicleTypeIds: ['motorcycle', 'van'] },
   ];
 
   statusFilterOptions: { value: '' | AccreditationStatus; label: string }[] = [
@@ -124,16 +99,43 @@ export class AccreditationComponent implements OnInit {
     private dialog: MatDialog,
     private accreditationService: AccreditationService,
     private providerRateService: ProviderRateService,
+    private keriApi: KeriProvidersApiService,
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
+    this.providerRates = this.providerRateService.getRates();
+    if (this.keriApi.isConfigured()) {
+      this.reloadProvidersFromApi();
+      return;
+    }
     if (this.accreditationService.getProviders().length === 0) {
       this.accreditationService.setProviders(this.providers);
+    } else {
+      this.providers = [...this.accreditationService.getProviders()];
     }
-    this.providerRates = this.providerRateService.getRates();
+    this.applyProviderFilters();
   }
 
-  get filteredProviders(): AccreditationProvider[] {
+  private reloadProvidersFromApi(): void {
+    this.providersLoading = true;
+    this.providersError = '';
+    this.keriApi.getAllProviders().subscribe({
+      next: list => {
+        this.providers = list;
+        this.accreditationService.setProviders(this.providers);
+        this.providersLoading = false;
+        this.applyProviderFilters();
+      },
+      error: err => {
+        this.providersError =
+          err?.error?.error?.message || err?.error?.message || err?.message || 'Failed to load providers.';
+        this.providersLoading = false;
+      },
+    });
+  }
+
+  applyProviderFilters(): void {
     let list = [...this.providers];
     if (this.statusFilter) {
       list = list.filter(p => p.status === this.statusFilter);
@@ -146,7 +148,20 @@ export class AccreditationComponent implements OnInit {
         p.address.toLowerCase().includes(q)
       );
     }
-    return list;
+    this.filteredProvidersList = list;
+    this.providerTableData.data = list;
+    this.providerTableData.paginator?.firstPage();
+  }
+
+  /** Card grid shares the table paginator (same pattern as bookings). */
+  get pagedAccreditationCards(): AccreditationProvider[] {
+    const list = this.filteredProvidersList;
+    const p = this.providerTableData.paginator;
+    if (!p || this.viewMode !== 'cards') {
+      return list;
+    }
+    const start = p.pageIndex * p.pageSize;
+    return list.slice(start, start + p.pageSize);
   }
 
   setViewMode(mode: 'cards' | 'table'): void {
@@ -384,9 +399,21 @@ export class AccreditationComponent implements OnInit {
       data: { draft },
     }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
       if (!result) return;
+      if (this.keriApi.isConfigured()) {
+        this.keriApi.createProvider(result).subscribe({
+          next: () => {
+            this.reloadProvidersFromApi();
+            this.showSuccessToast('Provider added successfully.');
+          },
+          error: err => this.openAddProviderError(err),
+        });
+        return;
+      }
       const newProvider = this.buildProviderFromDraft(result);
       this.providers = [...this.providers, newProvider];
       this.accreditationService.setProviders(this.providers);
+      this.applyProviderFilters();
+      this.showSuccessToast('Provider added successfully.');
     });
   }
 
@@ -399,6 +426,39 @@ export class AccreditationComponent implements OnInit {
       data: { draft, mode: 'edit', providerId: provider.id },
     }).afterClosed().subscribe((result: AddProviderDraft | undefined) => {
       if (!result) return;
+      if (this.keriApi.isConfigured()) {
+        const documentId = (provider.apiResourceId || provider.id || '').trim();
+        if (!documentId) {
+          this.openAddProviderError({
+            error: { error: { message: 'Missing provider document id for update.' } },
+          });
+          return;
+        }
+        const payload = {
+          company_name: result.name.trim(),
+          capacity: result.capacity ?? 0,
+          registration_number: result.registrationId.trim(),
+          address: result.officeAddress.trim(),
+          garage_address: result.garageAddress.trim(),
+          rate_type: toApiRateType(result.rateType),
+          app_usage: toApiAppUsage(result.appUsage),
+          service_areas: (result.serviceAreas || []).join(','),
+          contact_person: result.contactPerson.trim(),
+          contact_phone: result.phone.trim(),
+          contact_email: result.email.trim(),
+          provider_status: toApiProviderStatus(result.status),
+          ...(result.apiUrl?.trim() ? { api: result.apiUrl.trim() } : {}),
+          ...(result.apiToken?.trim() ? { api_token: result.apiToken.trim() } : {}),
+        };
+        this.keriApi.updateProviderDetails(documentId, { data: payload }).subscribe({
+          next: () => {
+            this.reloadProvidersFromApi();
+            this.showSuccessToast('Provider updated successfully.');
+          },
+          error: err => this.openAddProviderError(err),
+        });
+        return;
+      }
       const idx = this.providers.findIndex(p => p.id === provider.id);
       if (idx < 0) return;
       const existing = this.providers[idx];
@@ -416,12 +476,23 @@ export class AccreditationComponent implements OnInit {
       };
       this.providers = [...this.providers];
       this.accreditationService.setProviders(this.providers);
+      this.applyProviderFilters();
+      this.showSuccessToast('Provider updated successfully.');
+    });
+  }
+
+  private showSuccessToast(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 2500,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
     });
   }
 
   private providerToDraft(provider: AccreditationProvider): AddProviderDraft {
     return {
       name: provider.name,
+      documentId: provider.documentId,
       registrationId: provider.registrationId,
       status: provider.status,
       capacity: provider.capacity,
@@ -442,6 +513,7 @@ export class AccreditationComponent implements OnInit {
   private createEmptyAddProviderDraft(): AddProviderDraft {
     return {
       name: '',
+      documentId: '',
       registrationId: '',
       status: 'Pending',
       capacity: 0,
@@ -458,6 +530,49 @@ export class AccreditationComponent implements OnInit {
     };
   }
 
+  private openAddProviderError(err: unknown): void {
+    this.dialog.open(AddProviderErrorDialogComponent, {
+      width: '420px',
+      maxWidth: '92vw',
+      data: {
+        message: this.extractAccreditationValidatorMessage(err),
+      },
+    });
+  }
+
+  private extractAccreditationValidatorMessage(err: unknown): string {
+    const fallback = 'Failed to create provider.';
+    const errorBody = (err as { error?: any })?.error;
+    const detailErrors =
+      errorBody?.error?.details?.errors ??
+      errorBody?.details?.errors;
+
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      const messages = detailErrors
+        .map((item: any) => {
+          const path = Array.isArray(item?.path)
+            ? item.path.join('.')
+            : typeof item?.path === 'string'
+              ? item.path
+              : '';
+          const message = typeof item?.message === 'string' ? item.message.trim() : '';
+          if (path && message) return `${path}: ${message}`;
+          return message || path;
+        })
+        .filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    const msg =
+      errorBody?.error?.message ||
+      errorBody?.message ||
+      (err as { message?: string })?.message ||
+      fallback;
+    return typeof msg === 'string' ? msg : fallback;
+  }
+
   private buildProviderFromDraft(draft: AddProviderDraft): AccreditationProvider {
     const address = draft.officeAddress?.trim() || draft.garageAddress?.trim() || '—';
     const id = String(Date.now());
@@ -465,6 +580,7 @@ export class AccreditationComponent implements OnInit {
     const apiTokenMasked = token ? (token.slice(0, 8) + '........') : undefined;
     return {
       id,
+      documentId: draft.documentId,
       name: draft.name.trim(),
       status: draft.status,
       registrationId: draft.registrationId.trim(),

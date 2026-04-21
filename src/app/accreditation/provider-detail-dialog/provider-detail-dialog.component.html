@@ -152,11 +152,11 @@
                 </section>
                 <section class="document-meta-item">
                   <span class="document-meta-item-label">Uploaded by</span>
-                  <span class="document-meta-item-value">{{ doc.uploadedBy }}</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedBy || 'Not uploaded' }}</span>
                 </section>
                 <section class="document-meta-item">
                   <span class="document-meta-item-label">Uploaded date</span>
-                  <span class="document-meta-item-value">{{ doc.uploadedAt }}</span>
+                  <span class="document-meta-item-value">{{ doc.uploadedAt || 'Not uploaded' }}</span>
                 </section>
                 <section class="document-meta-item">
                   <span class="document-meta-item-label">Expiry date</span>

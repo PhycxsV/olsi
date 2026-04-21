@@ -3,14 +3,16 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface ProviderFormDraft {
   name: string;
+  documentId: string,
   location: string;
   status: 'Active' | 'Paused';
-  integrationType: 'provider_app' | 'aggregator_app' | 'third_party_app';
+  integrationType: 'USES_PROVIDER_RIDER_APP' | 'USER_AGGREGATOR_RIDER_APP' | 'THIRD_PARTY_APP';
   activeRiders: number;
   totalRiders: number;
   avgTimeMin: number;
   acceptancePercent: number;
   slaPercent: number;
+  is_active: boolean
 }
 
 export interface ProviderFormDialogData {
@@ -26,16 +28,20 @@ export interface ProviderFormDialogData {
 export class ProviderFormDialogComponent {
   draft: ProviderFormDraft;
   readonly integrationTypeOptions: Array<{ value: ProviderFormDraft['integrationType']; label: string }> = [
-    { value: 'provider_app', label: 'Provider Rider App' },
-    { value: 'aggregator_app', label: 'Aggregator Rider App' },
-    { value: 'third_party_app', label: '3rd Party App' },
+    { value: 'USES_PROVIDER_RIDER_APP', label: 'Provider Rider App' },
+    { value: 'USER_AGGREGATOR_RIDER_APP', label: 'Aggregator Rider App' },
+    { value: 'THIRD_PARTY_APP', label: '3rd Party App' },
   ];
 
   constructor(
     private dialogRef: MatDialogRef<ProviderFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ProviderFormDialogData,
   ) {
-    this.draft = { ...data.draft };
+    this.draft = {
+      ...data.draft,
+      status: data.draft.is_active ? 'Active' : 'Paused',
+      is_active: !!data.draft.is_active,
+    };
   }
 
   close(): void {
@@ -51,6 +57,9 @@ export class ProviderFormDialogComponent {
       window.alert('Service location is required.');
       return;
     }
+
+    this.draft.is_active = this.draft.status === 'Active';
+
     this.dialogRef.close(this.draft);
   }
 }

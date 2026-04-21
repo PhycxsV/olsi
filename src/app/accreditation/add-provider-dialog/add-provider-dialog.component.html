@@ -4,10 +4,11 @@
   <mat-dialog-content>
     <section class="form-section">
       <h3 class="form-section-title">Company</h3>
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" [class.field-invalid]="hasError('name')">
         <mat-label>Company Name</mat-label>
-        <input matInput [(ngModel)]="draft.name" placeholder="Enter company name" />
+        <input matInput [(ngModel)]="draft.name" (ngModelChange)="onFieldChange('name')" placeholder="Enter company name" />
       </mat-form-field>
+      <div class="field-error" *ngIf="hasError('name')">{{ getError('name') }}</div>
       <div class="form-row two-col">
         <mat-form-field appearance="outline">
           <mat-label>Status</mat-label>
@@ -23,10 +24,11 @@
           <input matInput type="number" min="0" [(ngModel)]="draft.capacity" placeholder="0" />
         </mat-form-field>
       </div>
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" [class.field-invalid]="hasError('registrationId')">
         <mat-label>Registration Number</mat-label>
-        <input matInput [(ngModel)]="draft.registrationId" placeholder="e.g. SEC-2024-00123456" />
+        <input matInput [(ngModel)]="draft.registrationId" (ngModelChange)="onFieldChange('registrationId')" placeholder="e.g. SEC-2024-00123456" />
       </mat-form-field>
+      <div class="field-error" *ngIf="hasError('registrationId')">{{ getError('registrationId') }}</div>
     </section>
 
     <section class="form-section">
@@ -65,19 +67,24 @@
 
     <section class="form-section">
       <h3 class="form-section-title">Contact</h3>
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" [class.field-invalid]="hasError('contactPerson')">
         <mat-label>Contact Person</mat-label>
-        <input matInput [(ngModel)]="draft.contactPerson" placeholder="Full name" />
+        <input matInput [(ngModel)]="draft.contactPerson" (ngModelChange)="onFieldChange('contactPerson')" placeholder="Full name" />
       </mat-form-field>
+      <div class="field-error" *ngIf="hasError('contactPerson')">{{ getError('contactPerson') }}</div>
       <div class="form-row two-col">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" [class.field-invalid]="hasError('phone')">
           <mat-label>Phone</mat-label>
-          <input matInput [(ngModel)]="draft.phone" placeholder="+63 912 345 6789" />
+          <input matInput [(ngModel)]="draft.phone" (ngModelChange)="onFieldChange('phone')" placeholder="+63 912 345 6789" />
         </mat-form-field>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" [class.field-invalid]="hasError('email')">
           <mat-label>Email</mat-label>
-          <input matInput type="email" [(ngModel)]="draft.email" placeholder="email@company.ph" />
+          <input matInput type="email" [(ngModel)]="draft.email" (ngModelChange)="onFieldChange('email')" placeholder="email@company.ph" />
         </mat-form-field>
+      </div>
+      <div class="form-row two-col field-error-row">
+        <div class="field-error" *ngIf="hasError('phone')">{{ getError('phone') }}</div>
+        <div class="field-error" *ngIf="hasError('email')">{{ getError('email') }}</div>
       </div>
     </section>
 
@@ -99,23 +106,29 @@
         <h3 class="form-section-title">Bank Information</h3>
         <button mat-button type="button" color="warn" (click)="removeBank()">Remove</button>
       </div>
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="full-width" [class.field-invalid]="hasError('bankName')">
         <mat-label>Bank Name</mat-label>
-        <input matInput [(ngModel)]="draft.bank!.bankName" placeholder="e.g. BDO" />
+        <input matInput [(ngModel)]="draft.bank!.bankName" (ngModelChange)="onFieldChange('bankName')" placeholder="e.g. BDO" />
       </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
+      <div class="field-error" *ngIf="hasError('bankName')">{{ getError('bankName') }}</div>
+      <mat-form-field appearance="outline" class="full-width" [class.field-invalid]="hasError('bankAccountName')">
         <mat-label>Account Name</mat-label>
-        <input matInput [(ngModel)]="draft.bank!.accountName" placeholder="Account name" />
+        <input matInput [(ngModel)]="draft.bank!.accountName" (ngModelChange)="onFieldChange('bankAccountName')" placeholder="Account name" />
       </mat-form-field>
+      <div class="field-error" *ngIf="hasError('bankAccountName')">{{ getError('bankAccountName') }}</div>
       <div class="form-row two-col">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" [class.field-invalid]="hasError('bankAccountNumber')">
           <mat-label>Account Number</mat-label>
-          <input matInput [(ngModel)]="draft.bank!.accountNumber" placeholder="Account number" />
+          <input matInput [(ngModel)]="draft.bank!.accountNumber" (ngModelChange)="onFieldChange('bankAccountNumber')" placeholder="Account number" />
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Branch (optional)</mat-label>
           <input matInput [(ngModel)]="draft.bank!.bankBranch" placeholder="Branch" />
         </mat-form-field>
+      </div>
+      <div class="form-row two-col field-error-row">
+        <div class="field-error" *ngIf="hasError('bankAccountNumber')">{{ getError('bankAccountNumber') }}</div>
+        <div></div>
       </div>
     </section>
 

@@ -1,10 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ChargingTypeId, CHARGING_TYPES } from '../core/charging.model';
 import { VEHICLE_TYPES } from '../core/vehicle.model';
 import { ClientDraft as ClientFormDraft, ClientFormDialogComponent } from './client-form-dialog.component';
 import { ClientService } from './client.service';
+import { ClientFormErrorDialogComponent } from './client-form-error-dialog.component';
+import { EMPTY } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export type ClientStatus = 'Active' | 'Inactive' | 'Suspended';
 
@@ -48,7 +53,14 @@ export interface StatusCard {
   templateUrl: './clients.component.html',
   styleUrls: ['./clients.component.scss'],
 })
-export class ClientsComponent {
+export class ClientsComponent implements OnInit {
+  @ViewChild(MatPaginator)
+  set paginatorRef(p: MatPaginator | undefined) {
+    if (p) {
+      this.clientsDataSource.paginator = p;
+    }
+  }
+
   searchText = '';
   statusFilter: ClientStatus | '' = '';
 
@@ -64,17 +76,30 @@ export class ClientsComponent {
 
   displayedColumns = ['name', 'status', 'vehicle', 'charging', 'paymentTerms', 'totalBookings', 'apiKey', 'actions'];
 
+  clientsDataSource = new MatTableDataSource<ClientRow>([]);
+
   constructor(
     private dialog: MatDialog,
     private router: Router,
     private clientService: ClientService,
   ) {}
 
+  ngOnInit(): void {
+    this.clientService
+      .loadFromApiIfConfigured()
+      .pipe(
+        catchError(() => EMPTY),
+      )
+      .subscribe(() => {
+        this.refreshClientRows();
+      });
+  }
+
   get clients(): ClientRow[] {
     return this.clientService.getClients();
   }
 
-  get filteredClients(): ClientRow[] {
+  refreshClientRows(): void {
     let list = [...this.clients];
     if (this.statusFilter) {
       list = list.filter(c => c.status === this.statusFilter);
@@ -86,7 +111,8 @@ export class ClientsComponent {
         c.clientId.toLowerCase().includes(q)
       );
     }
-    return list;
+    this.clientsDataSource.data = list;
+    this.clientsDataSource.paginator?.firstPage();
   }
 
   get summaryText(): string {
@@ -159,6 +185,7 @@ export class ClientsComponent {
     }
     if (action === 'Suspend' && client.status === 'Active') {
       client.status = 'Suspended';
+      this.refreshClientRows();
     }
   }
 
@@ -192,37 +219,110 @@ export class ClientsComponent {
       },
     }).afterClosed().subscribe((result: ClientFormDraft | undefined) => {
       if (!result) return;
-      if (mode === 'create') {
-        this.clientService.addClient({
-          id: Date.now().toString(),
+      try {
+        this.validateClientDraft(result, mode, targetClientId);
+        if (mode === 'create') {
+          this.clientService.addClient({
+            id: Date.now().toString(),
+            clientId: result.clientId,
+            name: result.name.trim(),
+            status: result.status,
+            businessAddress: result.businessAddress.trim() || '—',
+            vehicleCharging: result.vehicleCharging.map(v => ({ ...v })),
+            paymentTermsDays: result.paymentTermsDays,
+            totalBookings: 0,
+            lastBookingAt: '—',
+            apiKeyMasked: result.apiKeyMasked.trim() || 'sk_live_********',
+            webhookUrl: result.webhookUrl.trim() || '—',
+            registeredOn: result.registeredOn.trim() || '—',
+            preferredProviders: [],
+          });
+          this.refreshClientRows();
+          return;
+        }
+        if (!targetClientId) return;
+        this.clientService.updateClient(targetClientId, {
           clientId: result.clientId,
           name: result.name.trim(),
           status: result.status,
-          businessAddress: result.businessAddress.trim() || '—',
+          businessAddress: result.businessAddress.trim(),
           vehicleCharging: result.vehicleCharging.map(v => ({ ...v })),
           paymentTermsDays: result.paymentTermsDays,
-          totalBookings: 0,
-          lastBookingAt: '—',
-          apiKeyMasked: result.apiKeyMasked.trim() || 'sk_live_********',
-          webhookUrl: result.webhookUrl.trim() || '—',
-          registeredOn: result.registeredOn.trim() || '—',
-          preferredProviders: [],
+          apiKeyMasked: result.apiKeyMasked.trim(),
+          webhookUrl: result.webhookUrl.trim(),
+          registeredOn: result.registeredOn.trim(),
         });
-        return;
+        this.refreshClientRows();
+      } catch (err) {
+        this.openClientError(err);
       }
-      if (!targetClientId) return;
-      this.clientService.updateClient(targetClientId, {
-        clientId: result.clientId,
-        name: result.name.trim(),
-        status: result.status,
-        businessAddress: result.businessAddress.trim(),
-        vehicleCharging: result.vehicleCharging.map(v => ({ ...v })),
-        paymentTermsDays: result.paymentTermsDays,
-        apiKeyMasked: result.apiKeyMasked.trim(),
-        webhookUrl: result.webhookUrl.trim(),
-        registeredOn: result.registeredOn.trim(),
-      });
     });
+  }
+
+  private validateClientDraft(draft: ClientFormDraft, mode: 'create' | 'edit', targetClientId?: string): void {
+    const normalizedClientId = draft.clientId.trim().toLowerCase();
+    if (!normalizedClientId) return;
+
+    const duplicate = this.clients.find(client => {
+      if (mode === 'edit' && targetClientId && client.id === targetClientId) return false;
+      return client.clientId.trim().toLowerCase() === normalizedClientId;
+    });
+
+    if (duplicate) {
+      throw {
+        error: {
+          details: {
+            errors: [
+              {
+                path: ['clientId'],
+                message: `Client ID "${draft.clientId.trim()}" already exists.`,
+              },
+            ],
+          },
+        },
+      };
+    }
+  }
+
+  private openClientError(err: unknown): void {
+    this.dialog.open(ClientFormErrorDialogComponent, {
+      width: '420px',
+      maxWidth: '92vw',
+      data: { message: this.extractClientValidatorMessage(err) },
+    });
+  }
+
+  private extractClientValidatorMessage(err: unknown): string {
+    const fallback = 'Failed to save client.';
+    const errorBody = (err as { error?: any })?.error;
+    const detailErrors =
+      errorBody?.error?.details?.errors ??
+      errorBody?.details?.errors;
+
+    if (Array.isArray(detailErrors) && detailErrors.length > 0) {
+      const messages = detailErrors
+        .map((item: any) => {
+          const path = Array.isArray(item?.path)
+            ? item.path.join('.')
+            : typeof item?.path === 'string'
+              ? item.path
+              : '';
+          const message = typeof item?.message === 'string' ? item.message.trim() : '';
+          if (path && message) return `${path}: ${message}`;
+          return message || path;
+        })
+        .filter(Boolean);
+      if (messages.length > 0) {
+        return messages.join('\n');
+      }
+    }
+
+    const msg =
+      errorBody?.error?.message ||
+      errorBody?.message ||
+      (err as { message?: string })?.message ||
+      fallback;
+    return typeof msg === 'string' ? msg : fallback;
   }
 
   private createDraftFromClient(client: ClientRow): ClientFormDraft {

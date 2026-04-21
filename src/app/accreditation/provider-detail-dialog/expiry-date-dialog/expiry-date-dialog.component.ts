@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ProviderDocument } from '../../accreditation.component';
+import type { ProviderDocument } from '../../../core/models/accreditation.model';
 
 export interface ExpiryDateDialogData {
   document: ProviderDocument;

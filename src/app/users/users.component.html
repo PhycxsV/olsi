@@ -30,19 +30,19 @@
     <div class="toolbar">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search</mat-label>
-        <input matInput [(ngModel)]="searchText" placeholder="Search by name, email, or team..." />
+        <input matInput [(ngModel)]="searchText" (ngModelChange)="refreshUserRows()" placeholder="Search by name, email, or team..." />
         <mat-icon matPrefix>search</mat-icon>
       </mat-form-field>
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Role</mat-label>
-        <mat-select [(ngModel)]="roleFilter">
+        <mat-select [(ngModel)]="roleFilter" (ngModelChange)="refreshUserRows()">
           <mat-option *ngFor="let opt of roleFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
 
     <mat-card class="table-card">
-      <table mat-table [dataSource]="filteredUsers" class="users-table">
+      <table mat-table [dataSource]="usersDataSource" class="users-table">
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let row">
@@ -99,6 +99,12 @@
           </td>
         </tr>
       </table>
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 25, 100]"
+        [pageSize]="10"
+        showFirstLastButtons
+        aria-label="Select page of users"
+      ></mat-paginator>
     </mat-card>
   </div>
 </div>

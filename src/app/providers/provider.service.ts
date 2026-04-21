@@ -1,30 +1,51 @@
 import { Injectable } from '@angular/core';
+import { Observable, map, of, tap } from 'rxjs';
+import { KeriProvidersApiService } from '../core/api/keri-providers-api.service';
 
 export interface ProviderCard {
   id: string;
+  documentId: string,
   name: string;
   location: string;
   status: 'Active' | 'Paused';
-  integrationType: 'provider_app' | 'aggregator_app' | 'third_party_app';
+  integrationType: 'USES_PROVIDER_RIDER_APP' | 'USER_AGGREGATOR_RIDER_APP' | 'THIRD_PARTY_APP';
   activeRiders: number;
   totalRiders: number;
   avgTimeMin: number;
   acceptancePercent: number;
   slaPercent: number;
   deliveriesToday: number;
+  /** KERI: `provider_document_id` for PUT /api/provider/toggle-active */
+  apiResourceId?: string;
+  is_active: boolean
 }
 
 const INITIAL_PROVIDERS: ProviderCard[] = [
-  { id: '1', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', integrationType: 'provider_app', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156 },
-  { id: '2', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', integrationType: 'aggregator_app', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98 },
-  { id: '3', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', integrationType: 'provider_app', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142 },
-  { id: '4', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'third_party_app', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0 },
-  { id: '5', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', integrationType: 'aggregator_app', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120 },
+  { id: '1', documentId: '', name: 'SpeedRiders', location: 'Metro Manila, Cavite', status: 'Active', integrationType: 'USES_PROVIDER_RIDER_APP', activeRiders: 42, totalRiders: 50, avgTimeMin: 28, acceptancePercent: 94, slaPercent: 97, deliveriesToday: 156, is_active: true },
+  { id: '2', documentId: '', name: 'MetroFleet', location: 'Makati, BGC', status: 'Active', integrationType: 'USER_AGGREGATOR_RIDER_APP', activeRiders: 30, totalRiders: 35, avgTimeMin: 35, acceptancePercent: 88, slaPercent: 92, deliveriesToday: 98, is_active: true },
+  { id: '3', documentId: '', name: 'SwiftDeliver', location: 'Quezon City, Caloocan', status: 'Active', integrationType: 'USES_PROVIDER_RIDER_APP', activeRiders: 38, totalRiders: 45, avgTimeMin: 32, acceptancePercent: 96, slaPercent: 99, deliveriesToday: 142, is_active: true },
+  { id: '4', documentId: '', name: 'QuickHaul', location: 'Pasig, Mandaluyong', status: 'Paused', integrationType: 'THIRD_PARTY_APP', activeRiders: 0, totalRiders: 40, avgTimeMin: 40, acceptancePercent: 85, slaPercent: 88, deliveriesToday: 0, is_active: false },
+  { id: '5', documentId: '', name: 'ExpressWay', location: 'Taguig, Muntinlupa', status: 'Active', integrationType: 'USER_AGGREGATOR_RIDER_APP', activeRiders: 39, totalRiders: 44, avgTimeMin: 30, acceptancePercent: 91, slaPercent: 94, deliveriesToday: 120, is_active: true },
 ];
 
 @Injectable({ providedIn: 'root' })
 export class ProviderService {
   private providers: ProviderCard[] = INITIAL_PROVIDERS.map(p => ({ ...p }));
+
+  constructor(private keriApi: KeriProvidersApiService) {}
+
+  /** Replaces the in-memory list when `environment.apiUrl` is set. */
+  loadAccreditedFromApiIfConfigured(): Observable<void> {
+    if (!this.keriApi.isConfigured()) {
+      return of(undefined);
+    }
+    return this.keriApi.getAccreditedProviders().pipe(
+      tap(cards => {
+        this.providers = cards;
+      }),
+      map(() => undefined),
+    );
+  }
 
   getProviders(): ProviderCard[] {
     return this.providers;

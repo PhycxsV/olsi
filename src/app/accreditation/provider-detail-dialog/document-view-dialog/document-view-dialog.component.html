@@ -30,11 +30,11 @@
     <div class="doc-view-meta">
       <div class="doc-view-meta-row">
         <span class="doc-view-meta-label">Uploaded by</span>
-        <span class="doc-view-meta-value">{{ document.uploadedBy }}</span>
+        <span class="doc-view-meta-value">{{ document.uploadedBy || 'Not uploaded' }}</span>
       </div>
       <div class="doc-view-meta-row">
         <span class="doc-view-meta-label">Uploaded date</span>
-        <span class="doc-view-meta-value">{{ document.uploadedAt }}</span>
+        <span class="doc-view-meta-value">{{ document.uploadedAt || 'Not uploaded' }}</span>
       </div>
       <div class="doc-view-meta-row">
         <span class="doc-view-meta-label">Status</span>

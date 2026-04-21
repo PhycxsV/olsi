@@ -13,15 +13,18 @@
     </button>
   </div>
 
+  <p class="accreditation-api-banner accreditation-api-banner--error" *ngIf="providersError">{{ providersError }}</p>
+  <p class="accreditation-api-banner" *ngIf="providersLoading">Loading providers…</p>
+
   <div class="toolbar">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Search</mat-label>
-      <input matInput [(ngModel)]="searchText" placeholder="Search providers..." />
+      <input matInput [(ngModel)]="searchText" (ngModelChange)="applyProviderFilters()" placeholder="Search providers..." />
       <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
     <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Status</mat-label>
-      <mat-select [(ngModel)]="statusFilter">
+      <mat-select [(ngModel)]="statusFilter" (ngModelChange)="applyProviderFilters()">
         <mat-option *ngFor="let opt of statusFilterOptions" [value]="opt.value">{{ opt.label }}</mat-option>
       </mat-select>
     </mat-form-field>
@@ -125,7 +128,7 @@
   </div>
 
   <div class="provider-cards" *ngIf="viewMode === 'cards'">
-    <mat-card *ngFor="let p of filteredProviders" class="provider-card">
+    <mat-card *ngFor="let p of pagedAccreditationCards" class="provider-card">
       <mat-card-content>
         <div class="card-top">
           <h3 class="provider-name">{{ p.name }}</h3>
@@ -167,8 +170,8 @@
     </mat-card>
   </div>
 
-  <div class="table-view-wrapper" *ngIf="viewMode === 'table' && filteredProviders.length > 0">
-    <table mat-table [dataSource]="filteredProviders" class="accreditation-table">
+  <div class="table-view-wrapper" *ngIf="viewMode === 'table'">
+    <table mat-table [dataSource]="providerTableData" class="accreditation-table">
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Provider</th>
         <td mat-cell *matCellDef="let p">
@@ -237,10 +240,26 @@
 
       <tr mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: tableColumns;"></tr>
+      <tr class="mat-row empty-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="tableColumns.length">
+          <div class="empty-state empty-state--inline">
+            <mat-icon>search_off</mat-icon>
+            <p>No providers match your search.</p>
+          </div>
+        </td>
+      </tr>
     </table>
   </div>
 
-  <div class="empty-state" *ngIf="filteredProviders.length === 0">
+  <mat-paginator
+    *ngIf="filteredProvidersList.length > 0"
+    [pageSizeOptions]="[6, 12, 24, 48]"
+    [pageSize]="12"
+    showFirstLastButtons
+    aria-label="Select page of providers"
+  ></mat-paginator>
+
+  <div class="empty-state" *ngIf="filteredProvidersList.length === 0 && !providersLoading && viewMode === 'cards'">
     <mat-icon>search_off</mat-icon>
     <p>No providers match your search.</p>
   </div>
