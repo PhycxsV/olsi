@@ -6,6 +6,8 @@ import type {
 import type { ProviderCard } from '../../providers/provider.service';
 import { pickNumber, pickString, unwrapEntity } from './keri-unwrap';
 import type { AddProviderDraft } from '../../accreditation/add-provider-dialog/add-provider-dialog.component';
+import type { ChargingTypeId } from '../charging.model';
+import type { ClientRow, ClientStatus, ClientVehicleCharging } from '../../clients/clients.component';
 
 const DEFAULT_DOC_TITLES = [
   'SEC / DTI Registration',
@@ -44,6 +46,28 @@ function mapUiAppUsage(api: string): string {
   const u = api.toUpperCase();
   if (u.includes('AGGREGATOR')) return 'Uses Aggregator Rider App';
   return 'Uses Provider Rider App';
+}
+
+function mapClientStatus(statusRaw: string): ClientStatus {
+  const normalized = statusRaw.trim().toLowerCase();
+  if (normalized === 'active') return 'Active';
+  if (normalized === 'suspended') return 'Suspended';
+  return 'Inactive';
+}
+
+function toVehicleTypeId(raw: string): string {
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) return 'motorcycle';
+  if (normalized.includes('motor')) return 'motorcycle';
+  if (normalized.includes('6') && normalized.includes('wheel')) return '6-wheeler';
+  if (normalized.includes('van')) return 'van';
+  return normalized;
+}
+
+function toChargingTypeId(raw: string): ChargingTypeId {
+  const normalized = raw.trim().toLowerCase();
+  if (normalized.includes('ad')) return 'ad_valorem';
+  return 'per_distance';
 }
 
 function parseServiceAreas(raw: unknown): string[] {
@@ -256,5 +280,47 @@ export function mapAccreditedToProviderCard(raw: unknown): ProviderCard | null {
     deliveriesToday: 0,
     apiResourceId: apiResourceId || undefined,
     is_active: isActive,
+  };
+}
+
+/** Maps a single client payload from GET /api/clients to client-list row shape. */
+export function mapClientRow(raw: unknown): ClientRow | null {
+  const r = unwrapEntity(raw);
+  const documentId = pickString(r, ['documentId', 'id']);
+  const name = pickString(r, ['client_name', 'clientName', 'name']);
+  const clientId = pickString(r, ['client_id', 'clientId']);
+  if (!documentId && !name && !clientId) return null;
+
+  const status = mapClientStatus(pickString(r, ['client_status', 'clientStatus', 'status']) || 'Inactive');
+  const vehiclesRaw = Array.isArray(r['vehicles']) ? r['vehicles'] : [];
+  const chargingRaw = unwrapEntity(r['charging_types']);
+  const chargingTypeName = pickString(chargingRaw, ['name', 'charging_type', 'chargingType']);
+  const chargingTypeId = toChargingTypeId(chargingTypeName);
+  const vehicleCharging: ClientVehicleCharging[] =
+    vehiclesRaw.length > 0
+      ? vehiclesRaw.map(v => {
+          const vehicle = unwrapEntity(v);
+          const vehicleName = pickString(vehicle, ['vehicle_name', 'vehicleName', 'name']);
+          return {
+            vehicleTypeId: toVehicleTypeId(vehicleName),
+            chargingTypeId,
+          };
+        })
+      : [{ vehicleTypeId: 'motorcycle', chargingTypeId }];
+
+  return {
+    id: documentId || String(pickNumber(r, ['id'], Date.now())),
+    clientId: clientId || '—',
+    name: name || '—',
+    status,
+    vehicleCharging,
+    paymentTermsDays: pickNumber(r, ['payment_terms_days', 'paymentTermsDays'], 0),
+    totalBookings: pickNumber(r, ['total_bookings', 'totalBookings'], 0),
+    lastBookingAt: pickString(r, ['updatedAt', 'updated_at']) || '—',
+    apiKeyMasked: pickString(r, ['api_key_masked', 'apiKeyMasked']) || '—',
+    businessAddress: pickString(r, ['business_address', 'businessAddress']) || '—',
+    webhookUrl: pickString(r, ['webhook_url', 'webhookUrl']) || '—',
+    registeredOn: pickString(r, ['registered_on', 'registeredOn', 'createdAt']) || '—',
+    preferredProviders: [],
   };
 }

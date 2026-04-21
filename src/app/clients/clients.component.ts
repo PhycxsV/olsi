@@ -8,6 +8,8 @@ import { VEHICLE_TYPES } from '../core/vehicle.model';
 import { ClientDraft as ClientFormDraft, ClientFormDialogComponent } from './client-form-dialog.component';
 import { ClientService } from './client.service';
 import { ClientFormErrorDialogComponent } from './client-form-error-dialog.component';
+import { EMPTY } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export type ClientStatus = 'Active' | 'Inactive' | 'Suspended';
 
@@ -83,7 +85,14 @@ export class ClientsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.refreshClientRows();
+    this.clientService
+      .loadFromApiIfConfigured()
+      .pipe(
+        catchError(() => EMPTY),
+      )
+      .subscribe(() => {
+        this.refreshClientRows();
+      });
   }
 
   get clients(): ClientRow[] {
